@@ -29,14 +29,14 @@ A Next.js application built from scratch inside the `src` directory to prototype
 Install the project dependencies:
 
 ```bash
-npm install
+npm install 
+```
 
 ### 2. Local Development
 Start the local server:
-
 ```bash
 npm run dev
-
+```
 Open http://localhost:3000 to view the application.
 
 ## 🧪 How to Test with Mock Data
@@ -72,6 +72,7 @@ export default async function AccountPage() {
   
   // ... rest of the component remains unchanged
 }
+```
 
 ### 2. Article & Engagement Page (`src/app/article/page.tsx`)
 
@@ -117,6 +118,7 @@ export default async function ArticlePage() {
     </main>
   );
 }
+```
 
 ### 3. Translation Dashboard (`src/app/translation/page.tsx`)
 
