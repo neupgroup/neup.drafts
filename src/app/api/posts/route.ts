@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, AuthContext } from '../../../lib/auth-guard';
 
-const blogPosts = [
+export const blogPosts = [
   { id: 1, title: 'My First Post', content: 'Hello World', author: 'intern_blogger' }
 ];
 
