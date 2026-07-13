@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server';
 
+// 1. ADD THIS INTERFACE HERE SO TYPESCRIPT KNOWS WHAT IT IS
+export interface VendorTranslationResponse {
+  translatedText?: string;
+  translated_text?: string;
+  translations?: Array<{
+    text: string;
+    detected_source?: string;
+  }>;
+}
+
 // Local database fallback for when you don't have corporate API keys
 const MOCK_DICTIONARY: Record<string, string> = {
   "Welcome to our core platform interface.": "Bienvenido a la interfaz de nuestra plataforma principal.",
@@ -8,7 +18,14 @@ const MOCK_DICTIONARY: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    const { text, targetLanguage } = await request.json();
+    // ADD VALIDATION HERE (Safely parse body and validate fields)
+    const body = await request.json().catch(() => ({}));
+    const { text, targetLanguage } = body;
+
+    if (!text || !text.trim()) {
+      return NextResponse.json({ error: 'Text field is required' }, { status: 400 });
+    }
+
     const apiKey = process.env.TRANSLATION_API_KEY;
 
     // --- BRANCH A: ENVIRONMENT WITHOUT API KEY (Your current setup) ---
@@ -36,12 +53,30 @@ export async function POST(request: Request) {
 
     if (!response.ok) throw new Error('External translation vendor failed.');
     
-    const data = await response.json();
-    return NextResponse.json({ translatedText: data.translatedText });
+    // Cast the response to our explicit, flexible type
+    const data = (await response.json()) as VendorTranslationResponse;
+
+    // Defensively map the response using type-safe fallback properties
+    const extractedTranslation = 
+      data.translatedText || 
+      data.translated_text || 
+      data.translations?.[0]?.text || 
+      null;
+
+    // Handle structural format mismatch cleanly
+    if (!extractedTranslation) {
+      console.error("❌ Vendor response format mismatch. Received payload:", JSON.stringify(data));
+      return NextResponse.json(
+        { error: 'External service returned an invalid data format.' }, 
+        { status: 502 }
+      );
+    }
+
+    // Safely deliver the verified contract format to the client widget
+    return NextResponse.json({ translatedText: extractedTranslation });
 
   } catch (error) {
     console.error("API Error:", error);
-    
     return NextResponse.json(
       { error: 'Translation processing failed' }, 
       { status: 500 }
