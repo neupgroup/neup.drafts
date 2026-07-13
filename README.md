@@ -1,158 +1,85 @@
-# Multi-Feature Content & Translation Portal
+# 🚀 Next.js TypeScript Blog Engine & Translation Portal
 
-A Next.js application built from scratch inside the `src` directory to prototype a content ecosystem featuring server-side protected user accounts, article viewing, interactive engagement tools, and dynamic language translation.
+A dynamic, fully featured blog application built inside the `src` directory as a core internship project. The application features dynamic routing, an optimized local data persistence layer, interactive engagement widgets, translations via multi-vendor API fallbacks, and server-side authenticated route controls.
 
-## 📁 Project Structure & Features
+---
 
-### 🌐 Pages & API Routes
-* `src/app/account/page.tsx` - User profile dashboard with server-side authentication.
-* `src/app/article/page.tsx` - Article viewing page integrated with engagement components.
-* `src/app/translation/page.tsx` - Dedicated translation utility dashboard.
-* `src/app/api/auth/callback/route.ts` - OAuth/Auth bridge callback handler route.
-* `src/app/api/posts/route.ts` - API backend for fetching and updating article data.
-* `src/app/api/translate/route.ts` - API route handling translation requests.
+## 🛠️ Tech Stack & Architecture
+
+* **Framework:** Next.js (App Router Architecture)
+* **Language:** TypeScript (Strict Type Compliance)
+* **State & Auth:** Custom Mock Authentication Service (`bridge-auth.service.ts`)
+* **Data Layer:** In-memory decoupled mock database (`mock-db.ts`)
+
+---
+
+## 📁 Application Architecture & Routes
+
+The project has transitioned from static prototypes to a dynamic, backend-driven data model.
+
+### 🌐 Pages & Active Routes
+
+| Route | File Path | Description |
+| :--- | :--- | :--- |
+| **User Dashboard** | `src/app/account/page.tsx` | Displays server-side authenticated profile info and user-specific publications. |
+| **Dynamic Article** | `src/app/article/[id]/page.tsx` | Server-rendered views for reading individual blog posts by ID. |
+| **Author Portal** | `src/app/new-post/page.tsx` | Interactive interface for publishing new articles. |
+| **Translation Tool** | `src/app/translation/page.tsx` | Dedicated localized translation utility dashboard. |
+
+### 🔌 Core API Infrastructure (`src/app/api/...`)
+
+* **Authentication:** `/api/auth/callback/route.ts` — OAuth/Auth bridge callback handler.
+* **Global Feed:** `/api/posts/route.ts` — Core handler to read global feeds (`GET`) and handle new submissions securely (`POST`).
+* **Post Lifecycle:** `/api/posts/[id]/route.ts` — Dynamic node for managing specific post payloads.
+* **Comments Thread:** `/api/posts/[id]/comments/route.ts` — Isolated interaction lifecycle handler managing post comments.
+* **Author Queries:** `/api/posts/author/[username]/route.ts` — Filtered query node to fetch posts by specific authors.
+* **Metrics:** `/api/posts/interact/route.ts` — High-performance atomic endpoint for processing like and bookmark metrics.
+* **Translation:** `/api/translate/route.ts` — Fault-tolerant translation service mapping external payload models.
 
 ### 🧩 Core UI Components
-* `CommentSection.tsx` - Interactive client-side component for posting and viewing user feedback.
-* `ReactionButton.tsx` - Engagement widget for liking/reacting to content.
-* `TranslationWidget.tsx` - Dropdown/input interface hook to change text languages dynamically.
 
-### 🛡️ Authentication & Utilities
-* `auth-guard.ts` - Helper utility/wrapper to protect private routes.
-* `bridge-auth.service.ts` - Service layer handling token validation against the auth bridge.
+* `CommentSection.tsx` — Safe client-side feed handling text submissions driven by strict `Comment` types and `SyntheticEvent` mapping.
+* `ReactionButton.tsx` — Predictive engagement widget that handles likes or locks UI interaction based on cookie auth contexts.
+* `NewPostForm.tsx` — Submission wrapper executing server-synchronized blog posts.
+
+---
+
+## 🔄 Core Architectural Upgrades (Recent Changes)
+
+### 1. Shifted to True Dynamic Routing
+> **Breaking Change:** Completely deleted the static placeholder route (`src/app/article/page.tsx`) and implemented dynamic paths (`src/app/article/[id]/`). 
+
+The system now reads contextual URL arguments natively without requiring manual code overrides to swap articles.
+
+### 2. Introduction of Unified Mock DB (`src/lib/mock-db.ts`)
+* **Decoupled Mock Layer:** Built an in-memory unified database array (`globalBlogPosts`) to orchestrate state centrally.
+* **Native Feeds Optimization:** Implemented `unshift()` arrays inside the post APIs to ensure that new articles immediately filter to the top of the timeline feed dynamically.
+
+### 3. Hardened Environment & Security Verification
+* **Auth Failure Protection (`src/lib/bridge-auth.service.ts`):** Upgraded token handlers to catch missing parameter contexts gracefully. Embedded strict warning boundaries to notify engineers instantly if an environment key (`AUTH_MOCK_TOKEN`) is absent at initialization.
+* **Robust Third-Party Mapping (`src/app/api/translate/route.ts`):** Constructed a unified `VendorTranslationResponse` contract interface. The API defenses smoothly resolve variable vendor return structures (`translatedText` vs `translated_text`), returning clean fallback blocks or `502 Bad Gateway` flags upon unexpected structural damage.
 
 ---
 
 ## 🚀 Getting Started
 
 ### 1. Installation
-Install the project dependencies:
-
+Install project dependencies:
 ```bash
 npm install 
-```
+2. Local Development
+Run the local server with hot module reloading (HMR):
 
-### 2. Local Development
-Start the local server:
-```bash
+Bash
 npm run dev
-```
 Open http://localhost:3000 to view the application.
 
-## 🧪 How to Test with Mock Data
+3. Testing with Production Optimization
+To verify exact server-rendered behaviors, runtime performance optimizations, and compiled type security, execute the production sequence:
 
-To test the frontend layouts and interactive components locally without relying on live backend API databases or server sessions, follow these quick-injection steps:
+Bash
+# Compile and validate TypeScript interfaces
+npm run build
 
-### 1. Account Dashboard (`src/app/account/page.tsx`)
-
-**Goal:** Bypass the live Auth Bridge server check to instantly preview the user profile dashboard layout.
-
-To switch the page from **Production/Live Mode** into **UI Testing Mode**, modify the top of the file as follows:
-
-1. **Disable the live auth hooks:** Comment out the `cookies` and `verifyTokenWithBridge` imports at the top of the file, along with the token extraction variables inside the function component.
-2. **Enable the prototype user:** Uncomment the hardcoded `const user` object to override the live system.
-
-#### Code Configuration:
-```typescript
-// 1. Comment out live authentication infrastructure
-// import { cookies } from 'next/headers';
-// import { verifyTokenWithBridge } from '@/lib/bridge-auth.service';
-
-export default async function AccountPage() {
-  // const cookieStore = await cookies();
-  // const token = cookieStore.get('auth_token')?.value;
-  // const user = token ? await verifyTokenWithBridge(token) : null;
-
-  // 2. Uncomment this block to force-inject the prototype user session
-  const user = { 
-    username: "Prototype Tester", 
-    role: "clerk",
-    id: 123
-  };
-  
-  // ... rest of the component remains unchanged
-}
-```
-
-### 2. Article & Engagement Page (`src/app/article/page.tsx`)
-
-**Goal:** Bypass dynamic routing parameters (`params.id`) and database lookups to instantly render a sample article layout equipped with active reaction buttons and comment fields.
-
-To switch the article view into **UI Testing Mode**, modify the file setup to look like this:
-
-1. **Disable dynamic route lookups:** Comment out the `params` argument in the function signature and the `blogPosts.find()` lookup variable.
-2. **Inject a static fallback payload:** Assign a hardcoded `post` object directly so the page renders without requiring a specific URL ID string.
-
-#### Code Configuration:
-```typescript
-// 1. Clear the parameters argument for static testing
-export default async function ArticlePage() {
-  
-  // 2. Comment out the active file-tree lookup array
-  // const post = blogPosts.find((p) => p.id === Number(params.id)) as BlogPost | undefined;
-
-  // 3. Force-inject this mock post payload structure
-  const post = {
-    id: 1,
-    title: "Prototyping Next.js Ecosystems",
-    author: "Core Team Developer",
-    content: "This is a sample article body rendered locally to review UI typography, spacing, and element alignment structures.",
-    likes: 42,
-    comments: [
-      { id: 101, text: "This looks fantastic! The components load fast." },
-      { id: 102, text: "Testing the server-to-client component data bridge." }
-    ]
-  };
-
-  if (!post) { notFound(); } // Will be skipped securely
-
-  return (
-    <main className="max-w-2xl mx-auto p-6 mt-6">
-      <h1 className="text-3xl font-extrabold text-gray-900">{post.title}</h1>
-      <p className="text-xs text-gray-400 mt-1">Written by @{post.author}</p>
-      <div className="mt-4 text-gray-700 leading-relaxed text-base">{post.content}</div>
-
-      {/* Renders UI interactive blocks instantly with the dummy data */}
-      <ReactionButton postId={post.id} initialLikes={post.likes || 0} />
-      <CommentSection postId={post.id} comments={post.comments || []} />
-    </main>
-  );
-}
-```
-
-### 3. Translation Dashboard (`src/app/translation/page.tsx`)
-
-**Goal:** Bypass the session gatekeeper to test the interactive text translation client widgets without requiring an authenticated browser session.
-
-To switch the translation portal into **UI Testing Mode**, modify the top of the file as follows:
-
-1. **Disable the token verification:** Comment out the `cookies`, token string extractions, and live `verifyTokenWithBridge` handler variables.
-2. **Inject a mock session string:** Force-define a local static `user` object matching the `BridgeUser` interface layout definitions.
-
-#### Code Configuration:
-```typescript
-export default async function TranslationPage() {
-  // 1. Comment out the active cookie validation engine
-  // const cookieStore = await cookies();
-  // const token = cookieStore.get('auth_token')?.value;
-  // const user: BridgeUser | null = token ? await verifyTokenWithBridge(token) : null;
-
-  // 2. Force-inject an authenticated user session profile mock
-  const user = {
-    username: "Translation Tester",
-    id: "999",
-    email: "tester@portal.local"
-  };
-
-  // The 'if (!user)' security blocker will now be skipped automatically safely.
-
-  return (
-    <main className="max-w-4xl mx-auto p-8">
-      <h1 className="text-2xl font-bold text-gray-900 border-b pb-2 mb-4">Translation Tools</h1>
-      <p className="text-sm text-green-600 mb-6">✓ Authenticated as: {user.username}</p>
-      
-      {/* Renders the interactive layout panels immediately */}
-      <TranslationWidget />
-    </main>
-  );
-}
+# Boot local production environment
+npm run start
