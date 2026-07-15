@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifyTokenWithBridge } from '@/lib/bridge-auth.service';
+import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import NewPostForm from '@/components/NewPostForm';
 
 export default async function NewPostPage() {

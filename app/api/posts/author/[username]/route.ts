@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { globalBlogPosts } from '@/lib/mock-db';
+import { globalBlogPosts } from '@/inapp/lib/mock-db';
 
 // GET /api/posts/author/[username] -> Fetches all blogs by a specific author
 export async function GET(

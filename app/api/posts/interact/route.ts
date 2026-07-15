@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth, AuthContext } from '@/lib/auth-guard';
-import { globalBlogPosts } from '@/lib/mock-db';
+import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
+import { globalBlogPosts } from '@/inapp/lib/mock-db';
 
 // POST /api/posts/interact -> Handles liking a post
 export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {

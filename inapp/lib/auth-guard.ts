@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyTokenWithBridge, BridgeUser } from "./bridge-auth.service";
+import { verifyTokenWithBridge, BridgeUser } from "@/inapp/lib/bridge-auth.service";
 
 export interface AuthContext {
   user: BridgeUser;

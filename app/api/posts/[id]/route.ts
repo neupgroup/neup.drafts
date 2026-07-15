@@ -1,7 +1,7 @@
 // src/app/api/posts/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth, AuthContext } from '@/lib/auth-guard';
-import { globalBlogPosts } from '@/lib/mock-db';
+import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
+import { globalBlogPosts } from '@/inapp/lib/mock-db';
 
 // PUBLIC: Anyone can view a single post
 export async function GET(

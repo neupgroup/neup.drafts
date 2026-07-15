@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { verifyTokenWithBridge } from '@/lib/bridge-auth.service';
+import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import TranslationWidget from '@/components/TranslationWidget';
 
 // Define the shape of the user object returned by your mock auth
