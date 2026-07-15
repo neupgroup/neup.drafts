@@ -1,3 +1,14 @@
+# Getting Started
+
+Please install the following packages before working on this application.
+neup.core -> https://github.com/neupgroup/neup.core -> then rename "neup.core" to "core"
+neup.logica -> https://github.com/neupgroup/neup.logica -> then rename "neup.logica" to "logica"
+
+* Core is a system wide (non application specific code that contains helpers database functions, helper functions and abstraction layers to work on the database.)
+
+* Logica is a SDK to access the data from the account management system and other applications of the neup ecosystem. Logica will later contain API and GRPC abstractions to connection to this application as well.
+
+
 # 🚀 Next.js TypeScript Blog Engine & Translation Portal
 
 A dynamic, fully featured blog application built inside the `src` directory as a core internship project. The application features dynamic routing, an optimized local data persistence layer, interactive engagement widgets, translations via multi-vendor API fallbacks, and server-side authenticated route controls.
