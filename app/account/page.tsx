@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
-import { verifyTokenWithBridge } from '@/lib/bridge-auth.service';
+import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 // Import globalBlogPosts directly
-import { Post, globalBlogPosts } from '@/lib/mock-db'; 
+import { Post, globalBlogPosts } from '@/inapp/lib/mock-db'; 
 
 // 1. Query the data layer DIRECTLY (No localhost fetch!)
 async function getUserPosts(username: string): Promise<Post[]> {

@@ -34,8 +34,8 @@ export default function NewPostForm() {
       // Success! Send user straight to their newly created article page
       router.push(`/article/${data.post.id}`);
       router.refresh(); 
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err) {
+      setError((err as Error).message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

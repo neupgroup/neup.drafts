@@ -58,7 +58,7 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
       setAllComments(data.comments);
       setCommentText('');
     } catch (err) {
-      setError('Failed to submit comment.');
+      setError((err as Error).message ||'Failed to submit comment.');
     }
   };
 
@@ -92,8 +92,8 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
 
       {/* COMMENTS FEED LIST */}
       <div className="space-y-3">
-        {allComments.map((c) => (
-          <div key={c.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+        {allComments.map((c, index) => (
+          <div key={`${c.id}-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm">
             <p className="font-semibold text-gray-800">@{c.author}</p>
             <p className="text-gray-600 mt-0.5">{c.text}</p>
           </div>
