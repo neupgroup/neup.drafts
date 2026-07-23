@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
-import { Prisma } from '@/prisma/generated/client/client';
+import { Prisma } from '@/app/generated/prisma/client';
 
 // Extract the exact return type for Article + included relations
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -56,14 +56,26 @@ export default async function AccountPage() {
   return (
     <main className="p-8 max-w-2xl mx-auto space-y-6 mt-12">
       {/* USER PROFILE CARD */}
-      <div className="p-6 border rounded-xl shadow-sm bg-white">
-        <h1 className="text-2xl font-bold text-gray-900">User Profile</h1>
-        <div className="mt-4 space-y-2 text-sm text-gray-700">
-          <p><strong>Display Name:</strong> {user.username}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Role:</strong> <span className="capitalize">{user.role}</span></p>
-          <p className="text-xs text-gray-400"><strong>User ID:</strong> {user.id}</p>
+      <div className="p-6 border rounded-xl shadow-sm bg-white flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">User Profile</h1>
+          <div className="mt-4 space-y-2 text-sm text-gray-700">
+            <p><strong>Display Name:</strong> {user.username}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Role:</strong> <span className="capitalize">{user.role}</span></p>
+            <p className="text-xs text-gray-400"><strong>User ID:</strong> {user.id}</p>
+          </div>
         </div>
+
+        {/* SIGN OUT BUTTON */}
+        <form action="/api/auth/signout" method="POST">
+          <button 
+            type="submit" 
+            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors cursor-pointer"
+          >
+            Sign Out
+          </button>
+        </form>
       </div>
 
       {/* USER PUBLICATIONS SECTION */}
