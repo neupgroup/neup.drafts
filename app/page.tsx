@@ -42,7 +42,8 @@ export default async function HomePage() {
   const token = cookieStore.get('auth_token')?.value;
   const user = token ? await verifyTokenWithBridge(token) : null;
 
-  const posts = await getAllPosts();
+  // Only fetch articles if the user is authenticated
+  const posts = user ? await getAllPosts() : [];
 
   // User display name fallback (username or email prefix)
   const userDisplayName = user
@@ -58,7 +59,7 @@ export default async function HomePage() {
             HOME PAGE
           </Link>
           
-          <div className="flex items-center gap-6 text-sm font-medium">
+          <div className="flex items-center gap-4 text-sm font-medium">
             {user ? (
               <>
                 <Link href="/new-post" className="text-[#a2c7e5] hover:text-[#58fcec] transition-colors">
@@ -72,9 +73,20 @@ export default async function HomePage() {
                 </Link>
               </>
             ) : (
-              <Link href="/login" className="px-4 py-1.5 rounded-lg bg-[#58fcec] text-[#131710] font-bold hover:bg-opacity-90 transition-all shadow-sm">
-                Sign In
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link 
+                  href="/login" 
+                  className="px-4 py-1.5 rounded-lg bg-[#58fcec] text-[#131710] font-bold hover:bg-opacity-90 transition-all shadow-sm"
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  href="/signup" 
+                  className="px-4 py-1.5 rounded-lg border border-[#a2c7e5]/30 text-white font-medium hover:bg-[#a2c7e5]/10 transition-all"
+                >
+                  Sign Up
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -86,22 +98,46 @@ export default async function HomePage() {
         <section className="lg:col-span-2 space-y-10">
           <div className="border-b border-[#a2c7e5]/10 pb-4">
             <h2 className="text-xs uppercase font-bold tracking-widest text-[#58fcec]">
-              Recent Publications
+              {user ? 'Recent Publications' : 'Sign In'}
             </h2>
           </div>
 
-          {posts.length === 0 ? (
+          {!user ? (
+            /* Inline Direct Sign-In Card for Unauthenticated Visitors */
+            <div className="p-8 rounded-2xl border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 space-y-6 max-w-md">
+              <div>
+                <h3 className="text-2xl font-bold text-white">Welcome Back</h3>
+                <p className="text-sm text-[#c1bddb]/80 mt-1">
+                  Please log in to access publications and join discussions.
+                </p>
+              </div>
+
+              <div className="pt-2 space-y-3">
+                <Link
+                  href="/login"
+                  className="block w-full py-3 bg-[#58fcec] text-[#131710] font-bold text-center rounded-lg hover:bg-opacity-90 transition-all shadow-sm"
+                >
+                  Go to Login Page
+                </Link>
+                
+                <p className="text-center text-xs text-[#a2c7e5]/70 pt-2">
+                  {"Don't have an account yet?"}{' '}
+                  <Link href="/signup" className="text-[#58fcec] font-semibold hover:underline">
+                    Sign Up
+                  </Link>
+                </p>
+              </div>
+            </div>
+          ) : posts.length === 0 ? (
             <p className="text-[#a2c7e5]/60 italic py-8">No articles found in the database.</p>
           ) : (
             <div className="space-y-12">
               {posts.map((post) => {
-                // Determine author name safely whether post.author is an object or a string
                 const authorName =
                   typeof post.author === 'object' && post.author !== null
                     ? post.author.username || post.author.email?.split('@')[0]
                     : post.author || 'Anonymous';
 
-                // Calculate likes and comments across real DB and mock DB structures
                 const likesCount =
                   post.likes ??
                   post._count?.reactions ??
@@ -165,7 +201,7 @@ export default async function HomePage() {
             </h3>
             
             <p className="text-xs text-[#c1bddb]/70 leading-relaxed">
-              Core authentication hooks and secure JWT verification are executing natively via Next.js Server Components.
+              Core authentication hooks and session verification are executing natively via Next.js Server Components.
             </p>
 
             <div className="pt-2 flex flex-col gap-2">
