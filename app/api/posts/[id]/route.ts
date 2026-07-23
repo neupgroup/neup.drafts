@@ -1,7 +1,7 @@
 // src/app/api/posts/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
-import { globalBlogPosts } from '@/inapp/lib/mock-db';
+import { prisma } from '@/inapp/lib/prisma';
 
 // PUBLIC: Anyone can view a single post
 export async function GET(
@@ -9,11 +9,25 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id: articleId } = await params;
 
-    const postId = parseInt(id, 10);
-
-    const post = globalBlogPosts.find((p) => p.id === postId);
+    // Fetch article from Prisma by CUID String
+    const post = await prisma.article.findUnique({
+      where: { id: articleId },
+      include: {
+        author: {
+          select: { id: true, username: true, role: true }, // Include unique 'id' for profile links!
+        },
+        comments: {
+          include: {
+            author: {
+              select: { id: true, username: true },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
 
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -21,34 +35,45 @@ export async function GET(
 
     return NextResponse.json({ post });
   } catch (error) {
+    console.error("Fetch post failed:", error);
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }
 
-// PROTECTED: Only authenticated users can delete
-// We dropped the 3rd argument to make 'withAuth' happy!
+// PROTECTED: Only authenticated author (or admin) can delete
 export const DELETE = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
-    // Extract the ID straight from the URL path safely (e.g., /api/posts/1)
+    // Extract the article CUID directly from URL path
     const url = new URL(req.url);
     const pathSegments = url.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1]; 
-    
-    const postId = parseInt(id, 10);
+    const articleId = pathSegments[pathSegments.length - 1]; 
 
-    // Find the index of the post in your global mock array
-    const postIndex = globalBlogPosts.findIndex((p) => p.id === postId);
+    // 1. Find the target article first to check ownership
+    const post = await prisma.article.findUnique({
+      where: { id: articleId },
+      select: { authorId: true },
+    });
 
-    if (postIndex === -1) {
+    if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    // Remove it from the generic array
-    globalBlogPosts.splice(postIndex, 1);
+    // 2. Ownership check using unique user IDs (not display names)
+    const isOwner = post.authorId === context.user.id;
+    const isAdmin = context.user.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Forbidden: You cannot delete this post" }, { status: 403 });
+    }
+
+    // 3. Delete from database
+    await prisma.article.delete({
+      where: { id: articleId },
+    });
 
     return NextResponse.json({ 
       message: "Post deleted successfully",
-      deletedBy: context.user.username // Proving auth works!
+      deletedBy: context.user.username 
     }, { status: 200 });
 
   } catch (error) {

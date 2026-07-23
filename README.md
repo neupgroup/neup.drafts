@@ -24,6 +24,13 @@ A dynamic, fully featured blog application built inside the `src` directory as a
 
 ---
 
+## 🏠 Homepage Features
+
+* **Clean Developer Theme:** High-contrast dark mode optimized for readability.
+* **Server-Side Rendering:** Fetches posts dynamically on the server side using Next.js (`cache: 'no-store'`).
+* **JWT Auth Integration:** Checks for `auth_token` cookies server-side to automatically display user profiles in the navbar.
+* **Environment Monitor Sidebar:** A dedicated visual widget showing the current database state (Mock vs. Production) for easier local testing.
+
 ## 📁 Application Architecture & Routes
 
 The project has transitioned from static prototypes to a dynamic, backend-driven data model.

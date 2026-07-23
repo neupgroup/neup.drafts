@@ -1,15 +1,29 @@
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-// Import globalBlogPosts directly
-import { Post, globalBlogPosts } from '@/inapp/lib/mock-db'; 
+import { prisma } from '@/inapp/lib/prisma'; 
+import { Prisma } from '@/prisma/generated/client/client';
 
-// 1. Query the data layer DIRECTLY (No localhost fetch!)
-async function getUserPosts(username: string): Promise<Post[]> {
+// Extract the exact return type for Article + included relations
+type ArticleWithRelations = Prisma.ArticleGetPayload<{
+  include: { comments: true; reactions: true };
+}>;
+
+// 1. Fetch user articles directly from PostgreSQL via user ID (from verified Token)
+async function getUserPosts(userId: string): Promise<ArticleWithRelations[]> {
   try {
-    // Filter the array directly in memory
-    const userPosts = globalBlogPosts.filter((post: Post) => post.author === username);
-    
-    console.log(`➡️ Data Layer Connected! Found ${userPosts.length} posts for @${username}`);
+    const userPosts = await prisma.article.findMany({
+      where: {
+        authorId: userId, // Match using the ID extracted directly from the verified token
+      },
+      include: {
+        comments: true,
+        reactions: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
     return userPosts;
   } catch (error) {
     console.error("Failed loading user publications:", error);
@@ -20,21 +34,24 @@ async function getUserPosts(username: string): Promise<Post[]> {
 export default async function AccountPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
-  
-  // Native Server-side Auth verification
+
+  // 2. Decode & verify token to get logged-in user details
   const user = token ? await verifyTokenWithBridge(token) : null;
+  console.log("Decoded user object from token:", user);
 
   if (!user) {
     return (
-      <main className="p-8 max-w-md mx-auto text-center">
+      <main className="p-8 max-w-md mx-auto text-center mt-12">
         <p className="text-red-500 font-medium">Access Denied.</p>
-        <p className="text-sm text-gray-500 mt-1">Please visit your callback route with a token to log in.</p>
+        <p className="text-sm text-gray-500 mt-1">
+          Please log in to view your profile and publications.
+        </p>
       </main>
     );
   }
 
-  // 2. Fetch the user's posts securely on the server using verified credentials
-  const myPosts = await getUserPosts(user.username);
+  // 3. Fetch posts safely using the ID embedded in the decoded token
+  const myPosts = await getUserPosts(user.id);
 
   return (
     <main className="p-8 max-w-2xl mx-auto space-y-6 mt-12">
@@ -42,9 +59,10 @@ export default async function AccountPage() {
       <div className="p-6 border rounded-xl shadow-sm bg-white">
         <h1 className="text-2xl font-bold text-gray-900">User Profile</h1>
         <div className="mt-4 space-y-2 text-sm text-gray-700">
-          <p><strong>Username:</strong> @{user.username}</p>
-          <p><strong>Role:</strong> {user.role}</p>
-          <p><strong>ID:</strong> {user.id}</p>
+          <p><strong>Display Name:</strong> {user.username}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Role:</strong> <span className="capitalize">{user.role}</span></p>
+          <p className="text-xs text-gray-400"><strong>User ID:</strong> {user.id}</p>
         </div>
       </div>
 
@@ -55,16 +73,18 @@ export default async function AccountPage() {
         </h2>
 
         {myPosts.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">{"You haven't published any articles yet."}</p>
+          <p className="text-sm text-gray-500 italic">
+            {"You haven't published any articles yet."}
+          </p>
         ) : (
           <div className="divide-y divide-gray-100">
             {myPosts.map((post) => (
               <div key={post.id} className="py-3 first:pt-0 last:pb-0">
-                <h3 className="font-semibold text-gray-800 hover:text-blue-600 transition-colors cursor-pointer">
+                <h3 className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors cursor-pointer">
                   {post.title}
                 </h3>
                 <div className="flex gap-4 text-xs text-gray-400 mt-1">
-                  <span>👍 {post.likes} likes</span>
+                  <span>👍 {post.reactions.length} reactions</span>
                   <span>💬 {post.comments.length} comments</span>
                 </div>
               </div>

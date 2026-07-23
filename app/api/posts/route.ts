@@ -1,13 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
-import { globalBlogPosts } from '@/inapp/lib/mock-db';
+import { prisma } from '@/inapp/lib/prisma';
 
-// PUBLIC: Anyone can send a GET request here to read posts
+// Helper to create a URL-friendly slug from title
+function slugify(text: string): string {
+  const baseSlug = text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `${baseSlug}-${Date.now()}`;
+}
+
+// PUBLIC: Anyone can send a GET request here to read posts feed
 export async function GET() {
   try {
-    // Return the mock array directly. 
-    // We reverse it locally or just return it to match the newest-first feed look.
-    return NextResponse.json({ posts: globalBlogPosts });
+    const posts = await prisma.article.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: {
+          select: { id: true, username: true, email: true, role: true }, // Select 'id' for routing
+        },
+        _count: {
+          select: {
+            comments: true,
+            reactions: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ posts });
   } catch (error) {
     console.error("Failed to fetch posts:", error);
     return NextResponse.json({ error: 'Failed to read posts feed' }, { status: 500 });
@@ -18,27 +42,29 @@ export async function GET() {
 export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
     const { title, content } = await req.json();
-    
+
     if (!title || !content) {
       return NextResponse.json({ error: 'Missing title or content' }, { status: 400 });
     }
 
-    // Create a new mock post object that perfectly matches your Post interface
-    const newPost = {
-      id: Date.now(), // Safe numeric ID generator for mock purposes
-      title,
-      content,
-      author: context.user.username, // Pulled safely from your auth guard
-      likes: 0,
-      comments: []
-    };
-
-    // Push it to the front of the array so new posts show up at the top of the feed
-    globalBlogPosts.unshift(newPost);
+    // Create the article in PostgreSQL using authorId
+    const newPost = await prisma.article.create({
+      data: {
+        title,
+        content,
+        slug: slugify(title),
+        authorId: context.user.id, // Connects directly via unique CUID
+      },
+      include: {
+        author: {
+          select: { id: true, username: true, role: true },
+        },
+      },
+    });
 
     return NextResponse.json({ message: 'Post created!', post: newPost }, { status: 201 });
   } catch (error) {
-    console.error("Payload parsing failed:", error);
-    return NextResponse.json({ error: 'Invalid payload or server error' }, { status: 400 });
+    console.error("Post creation failed:", error);
+    return NextResponse.json({ error: 'Invalid payload or server error' }, { status: 500 });
   }
 });

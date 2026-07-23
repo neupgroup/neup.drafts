@@ -45,3 +45,5 @@ core
 neup.core
 logica
 neup.logica
+
+/app/generated/prisma
