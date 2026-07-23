@@ -71,6 +71,16 @@ export default async function HomePage() {
                 <Link href="/account" className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#a2c7e5]/25 text-white bg-[#a2c7e5]/5 hover:bg-[#a2c7e5]/15 transition-all">
                   <span>👤</span> @{userDisplayName}
                 </Link>
+
+                {/* SIGN OUT BUTTON */}
+                <form action="/api/auth/signout" method="POST">
+                  <button 
+                    type="submit" 
+                    className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer font-medium text-xs"
+                  >
+                    Sign Out
+                  </button>
+                </form>
               </>
             ) : (
               <div className="flex items-center gap-3">
