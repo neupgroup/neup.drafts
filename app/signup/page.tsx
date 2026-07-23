@@ -30,10 +30,10 @@ export default function SignUpPage() {
         throw new Error(data.error || 'Failed to create account.');
       }
 
-      // Refresh router so Server Components pick up the new auth cookie
+      // Refresh router so Server Components detect the new auth token
       router.refresh();
 
-      // Redirect directly to the account page
+      // Redirect straight to account page
       router.push('/account');
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -47,24 +47,24 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-sm border p-8 space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Create an Account</h1>
-          <p className="text-sm text-gray-500 mt-1">
+    <main className="min-h-screen flex items-center justify-center bg-[#131710] text-[#e2e8f0] p-6">
+      <div className="max-w-md w-full bg-[#a2c7e5]/5 border border-[#a2c7e5]/15 rounded-2xl p-8 space-y-6">
+        <div className="text-center space-y-1">
+          <h1 className="text-2xl font-bold text-white tracking-tight">Create an Account</h1>
+          <p className="text-sm text-[#c1bddb]/80">
             Join to manage your articles, comments, and profile
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center border border-red-100">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+            <label className="block text-xs font-semibold text-[#58fcec] uppercase mb-1 tracking-wider">
               Username
             </label>
             <input
@@ -73,12 +73,12 @@ export default function SignUpPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="johndoe"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#131710] border border-[#a2c7e5]/20 text-white rounded-lg text-sm focus:outline-none focus:border-[#58fcec] transition-colors placeholder:text-gray-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+            <label className="block text-xs font-semibold text-[#58fcec] uppercase mb-1 tracking-wider">
               Email Address
             </label>
             <input
@@ -87,12 +87,12 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#131710] border border-[#a2c7e5]/20 text-white rounded-lg text-sm focus:outline-none focus:border-[#58fcec] transition-colors placeholder:text-gray-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+            <label className="block text-xs font-semibold text-[#58fcec] uppercase mb-1 tracking-wider">
               Password
             </label>
             <input
@@ -101,22 +101,22 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#131710] border border-[#a2c7e5]/20 text-white rounded-lg text-sm focus:outline-none focus:border-[#58fcec] transition-colors placeholder:text-gray-600"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50"
+            className="w-full py-2.5 bg-[#58fcec] hover:bg-opacity-90 text-[#131710] font-bold rounded-lg text-sm transition-all disabled:opacity-50 mt-2"
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-xs text-[#a2c7e5]/70 pt-2">
           Already have an account?{' '}
-          <Link href="/login" className="text-indigo-600 font-semibold hover:underline">
+          <Link href="/login" className="text-[#58fcec] font-semibold hover:underline">
             Sign In
           </Link>
         </p>

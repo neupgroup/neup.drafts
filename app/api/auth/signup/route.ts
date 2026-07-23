@@ -5,10 +5,10 @@ import { createTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, password, username } = body;
+    const { username, email, password } = body;
 
-    // 1. Basic input validation
-    if (!email || !password || !username) {
+    // 1. Basic Validation
+    if (!username || !email || !password) {
       return NextResponse.json(
         { error: 'Username, email, and password are required.' },
         { status: 400 }
@@ -18,26 +18,28 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
 
-    // 2. Check if user already exists (by email)
-    const existingUser = await prisma.user.findUnique({
-      where: { email: cleanEmail },
+    // 2. Check if user already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: cleanEmail }, { username: cleanUsername }],
+      },
     });
 
     if (existingUser) {
+      const field = existingUser.email === cleanEmail ? 'Email' : 'Username';
       return NextResponse.json(
-        { error: 'An account with this email already exists.' },
-        { status: 409 }
+        { error: `${field} is already in use.` },
+        { status: 400 }
       );
     }
 
-    // 3. Create the new user in PostgreSQL
-    // Note: Hash password with bcrypt before pushing to production!
+    // 3. Create User in PostgreSQL
     const newUser = await prisma.user.create({
       data: {
-        email: cleanEmail,
         username: cleanUsername,
-        password, 
-        role: 'user', // Default role
+        email: cleanEmail,
+        password: password, // Note: Hash with bcrypt before production!
+        role: 'user',
       },
       select: {
         id: true,
@@ -47,22 +49,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 4. Generate auth token via Bridge Auth Service
+    // 4. Generate Auth Token via Bridge Auth Service
     const token = await createTokenWithBridge({
       id: newUser.id,
       email: newUser.email,
       username: newUser.username,
-      role: newUser.role,
+      role: newUser.role || 'user',
     });
 
-    // 5. Construct response and attach cookie
-    const response = NextResponse.json(
-      {
-        success: true,
-        user: newUser,
-      },
-      { status: 201 }
-    );
+    // 5. Prepare Response and Set Auth Cookie
+    const response = NextResponse.json({
+      success: true,
+      user: newUser,
+    });
 
     response.cookies.set('auth_token', token, {
       httpOnly: true,
@@ -83,7 +82,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { error: 'An unexpected server error occurred.' },
+      { error: 'An unexpected server error occurred during sign up.' },
       { status: 500 }
     );
   }
