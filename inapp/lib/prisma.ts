@@ -25,7 +25,7 @@ The delegate guard rebuilds the cached client when the generated Prisma client s
 
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@/prisma/generated/client/client'
+import { PrismaClient } from '@/app/generated/prisma/client' //modified
 
 const connectionString = process.env.DATABASE_URL
 
