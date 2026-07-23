@@ -19,7 +19,7 @@ A dynamic, fully featured blog application built inside the `src` directory as a
 
 * **Framework:** Next.js (App Router Architecture)
 * **Language:** TypeScript (Strict Type Compliance)
-* **Database & ORM:** Prisma ORM with SQLite / PostgreSQL (Replaced legacy mock DB)
+* **Database & ORM:** Prisma ORM with PostgreSQL (Replaced legacy mock DB)
 * **State & Auth:** Custom Authentication Service (`bridge-auth.service.ts`) using Email credentials
 * **Line Ending Normalization:** Enforced cross-platform consistency via `.gitattributes` (`eol=lf`)
 
@@ -28,9 +28,9 @@ A dynamic, fully featured blog application built inside the `src` directory as a
 ## 🏠 Homepage Features
 
 * **Clean Developer Theme:** High-contrast dark mode optimized for readability.
-* **Server-Side Rendering:** Fetches posts dynamically on the server side using Next.js (`cache: 'no-store'`).
-* **JWT & Cookie Auth Integration:** Checks for auth cookies server-side to automatically display user profiles in the navbar.
-* **Environment Monitor Sidebar:** A dedicated visual widget showing the current database state for easier local testing.
+* **Server-Side Auth & Access Control:** Checks for `auth_token` server-side via `verifyTokenWithBridge`. Authenticated users see their profile in the navbar and full access to articles, while unauthenticated visitors are presented with a streamlined **Sign In** view.
+* **Conditional Server-Side Rendering:** Fetches publications dynamically from the database (`cache: 'no-store'`) exclusively for logged-in users.
+* **Environment Monitor Sidebar:** A dedicated visual widget showing real-time gateway and database state for local testing.
 
 ---
 
