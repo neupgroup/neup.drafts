@@ -45,24 +45,24 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-sm border p-8 space-y-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#131710] p-6 text-[#e2e8f0]">
+      <div className="w-full max-w-md space-y-6 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-black tracking-tight text-white">Sign In</h1>
+          <p className="mt-1 text-sm text-[#c1bddb]/80">
             Enter your credentials to access your account
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center border border-red-100">
+          <div className="border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-300">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
               Email Address
             </label>
             <input
@@ -71,12 +71,12 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
               Password
             </label>
             <input
@@ -84,15 +84,15 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Password"
+              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50"
+            className="h-11 w-full bg-[#58fcec] text-sm font-black text-[#131710] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

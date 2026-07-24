@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface ReactionButtonProps {
-  postId: number;
+  postId: string;
   initialLikes: number;
   currentUser?: {
     id: string;
     username: string;
+    email: string;
     role: string;
   } | null;
 }
@@ -23,7 +24,7 @@ export function ReactionButton({ postId, initialLikes, currentUser }: ReactionBu
 
     // Client-side guard: Prevent hitting the API if the component knows there's no user
     if (!currentUser) {
-      setError('⚠️ You must be logged in to like!');
+      setError('You must be logged in to like this article.');
       return;
     }
 
@@ -38,23 +39,23 @@ export function ReactionButton({ postId, initialLikes, currentUser }: ReactionBu
       setLikes(data.likes);
       router.refresh(); // Tells Next.js to quietly re-sync data from the server
     } else {
-      setError('⚠️ You must be logged in to like!');
+      setError('Could not update your reaction.');
     }
   };
 
   return (
-    <div className="mt-4">
+    <div>
       <button 
         onClick={handleLike} 
-        className={`px-4 py-2 rounded font-medium transition ${
+        className={`inline-flex h-11 items-center justify-center border px-4 text-sm font-bold transition-colors ${
           currentUser 
-            ? 'bg-blue-100 hover:bg-blue-200 text-blue-800' 
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            ? 'border-[#ff99c9]/40 bg-[#ff99c9]/10 text-[#ff99c9] hover:bg-[#ff99c9] hover:text-[#131710]' 
+            : 'cursor-not-allowed border-[#a2c7e5]/10 bg-[#a2c7e5]/5 text-[#a2c7e5]/40'
         }`}
       >
-        👍 {likes} Likes
+        Like · {likes}
       </button>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && <p className="mt-2 text-xs font-medium text-[#ff99c9]">{error}</p>}
     </div>
   );
 }

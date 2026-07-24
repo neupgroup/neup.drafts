@@ -15,18 +15,22 @@ export default async function NewPostPage() {
   const displayName = user.username || user.email.split('@')[0];
 
   return (
-    <main className="max-w-xl mx-auto p-6 mt-12 bg-white border rounded-xl shadow-sm space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Create a New Article</h1>
-        <p className="text-xs text-gray-500 mt-1">
-          Publishing publicly as <span className="font-semibold text-gray-700">@{displayName}</span>
-        </p>
-      </div>
-      
-      <hr className="border-gray-100" />
-      
-      {/* Clean component call with no unused props */}
-      <NewPostForm />
+    <main className="min-h-screen bg-[#131710] px-6 py-10 text-[#e2e8f0]">
+      <section className="mx-auto max-w-2xl space-y-8">
+        <div className="border-b border-[#a2c7e5]/10 pb-6">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#58fcec]">
+            New Publication
+          </p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">Create an Article</h1>
+          <p className="mt-2 text-sm text-[#c1bddb]/80">
+            Publishing publicly as <span className="font-bold text-white">@{displayName}</span>
+          </p>
+        </div>
+
+        <div className="border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-6">
+          <NewPostForm />
+        </div>
+      </section>
     </main>
   );
 }

@@ -19,19 +19,29 @@ export default async function TranslationPage() {
   // Security Gatekeeper: Block users who aren't logged in
   if (!user) {
     return (
-      <main className="p-8 text-center text-red-500 font-medium">
-        Please login to access translation tools.
+      <main className="flex min-h-screen items-center justify-center bg-[#131710] p-6 text-center text-red-300">
+        <p className="border border-red-500/20 bg-red-500/10 p-4 text-sm font-bold">
+          Please login to access translation tools.
+        </p>
       </main>
     );
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-8">
-      <h1 className="text-2xl font-bold text-gray-900 border-b pb-2 mb-4">Translation Tools</h1>
-      <p className="text-sm text-green-600 mb-6">✓ Authenticated as: {user.username}</p>
-      
-      {/* Injecting our generic, interactive client widget */}
-      <TranslationWidget />
+    <main className="min-h-screen bg-[#131710] px-6 py-10 text-[#e2e8f0]">
+      <section className="mx-auto max-w-5xl space-y-8">
+        <div className="border-b border-[#a2c7e5]/10 pb-6">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#58fcec]">
+            Translation
+          </p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">Translation Tools</h1>
+          <p className="mt-2 text-sm text-[#c1bddb]/80">
+            Authenticated as <span className="font-bold text-white">@{user.username}</span>
+          </p>
+        </div>
+
+        <TranslationWidget />
+      </section>
     </main>
   );
 }

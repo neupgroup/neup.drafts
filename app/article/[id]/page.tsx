@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { ReactionButton } from '@/components/ReactionButton';
@@ -48,9 +49,24 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   // Fallback if article is not found
   if (!post) {
     return (
-      <main className="p-8 text-center mt-12">
-        <h1 className="text-2xl font-bold text-gray-800">404 - Article Not Found</h1>
-        <p className="text-gray-500 mt-2">The article you are looking for does not exist.</p>
+      <main className="min-h-screen bg-[#131710] text-[#e2e8f0] px-6 py-16">
+        <section className="mx-auto max-w-2xl border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#ff99c9]">
+            Missing Article
+          </p>
+          <h1 className="mt-4 text-3xl font-black tracking-tight text-white">
+            Article Not Found
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-[#c1bddb]/80">
+            The article you are looking for does not exist or is no longer available.
+          </p>
+          <Link
+            href="/"
+            className="mt-8 inline-flex h-10 items-center justify-center border border-[#58fcec]/40 px-4 text-sm font-bold text-[#58fcec] transition-colors hover:bg-[#58fcec] hover:text-[#131710]"
+          >
+            Back to publications
+          </Link>
+        </section>
       </main>
     );
   }
@@ -61,42 +77,71 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
       ? post.author.username || post.author.email?.split('@')[0]
       : post.author;
 
+  const commentsCount = post.comments?.length ?? 0;
+  const likesCount = post.likes ?? post.reactions?.length ?? 0;
+
   return (
-    <main className="p-8 max-w-2xl mx-auto space-y-6 mt-12 bg-white border rounded-xl shadow-sm">
-      {/* ARTICLE CONTENT */}
-      <article className="space-y-4">
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-          {post.title}
-        </h1>
-        
-        <p className="text-xs text-gray-500">
-          By <span className="font-semibold text-gray-700">@{authorDisplayName}</span>
-        </p>
-        
-        <hr className="border-gray-100" />
-        
-        <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-          {post.content}
-        </p>
-      </article>
+    <main className="min-h-screen bg-[#131710] text-[#e2e8f0] antialiased selection:bg-[#58fcec] selection:text-[#131710]">
+      <nav className="border-b border-[#a2c7e5]/10 bg-[#131710]/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
+          <Link
+            href="/"
+            className="text-sm font-bold uppercase tracking-[0.18em] text-[#58fcec] transition-colors hover:text-white"
+          >
+            Publications
+          </Link>
+          <Link
+            href="/account"
+            className="border border-[#a2c7e5]/20 px-3 py-1.5 text-xs font-bold text-[#a2c7e5] transition-colors hover:border-[#58fcec]/50 hover:text-[#58fcec]"
+          >
+            @{user.username || user.email.split('@')[0]}
+          </Link>
+        </div>
+      </nav>
 
-      <hr className="border-gray-100" />
+      <div className="mx-auto grid max-w-4xl gap-10 px-6 py-10 md:py-14">
+        <article className="space-y-8">
+          <header className="border-b border-[#a2c7e5]/10 pb-8">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-[#ff99c9]">
+              <span>@{authorDisplayName || 'Anonymous'}</span>
+              <span className="text-[#a2c7e5]/30">/</span>
+              <span className="text-[#a2c7e5]/70">ID #{post.id.slice(-6)}</span>
+            </div>
 
-      {/* INTERACTION ZONE */}
-      <div className="flex flex-col gap-6">
-        {/* 1. Like / Reaction Handler */}
-        <ReactionButton 
-          postId={post.id} 
-          initialLikes={post.likes ?? post.reactions?.length ?? 0} 
-          currentUser={user} 
-        />
+            <h1 className="mt-5 max-w-3xl text-4xl font-black leading-tight tracking-tight text-white md:text-6xl">
+              {post.title}
+            </h1>
 
-        {/* 2. Interactive Comment Section */}
-        <CommentSection 
-          postId={post.id} 
-          comments={post.comments || []} 
-          currentUser={user} 
-        />
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-mono text-[#a2c7e5]/80">
+              <span className="border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 px-2.5 py-1">
+                {likesCount} likes
+              </span>
+              <span className="border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 px-2.5 py-1">
+                {commentsCount} comments
+              </span>
+            </div>
+          </header>
+
+          <div className="max-w-3xl whitespace-pre-line text-base leading-8 text-[#d8d5e8] md:text-lg md:leading-9">
+            {post.content}
+          </div>
+        </article>
+
+        <section className="border-t border-[#a2c7e5]/10 pt-8">
+          <div className="flex flex-col gap-8">
+            <ReactionButton
+              postId={post.id}
+              initialLikes={likesCount}
+              currentUser={user}
+            />
+
+            <CommentSection
+              postId={post.id}
+              comments={post.comments || []}
+              currentUser={user}
+            />
+          </div>
+        </section>
       </div>
     </main>
   );

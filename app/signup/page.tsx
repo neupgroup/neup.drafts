@@ -47,24 +47,24 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#131710] text-[#e2e8f0] p-6">
-      <div className="max-w-md w-full bg-[#a2c7e5]/5 border border-[#a2c7e5]/15 rounded-2xl p-8 space-y-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#131710] p-6 text-[#e2e8f0]">
+      <div className="w-full max-w-md space-y-6 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8">
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create an Account</h1>
+          <h1 className="text-2xl font-black tracking-tight text-white">Create an Account</h1>
           <p className="text-sm text-[#c1bddb]/80">
             Join to manage your articles, comments, and profile
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
+          <div className="border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-300">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-[#58fcec] uppercase mb-1 tracking-wider">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
               Username
             </label>
             <input
@@ -73,12 +73,12 @@ export default function SignUpPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="johndoe"
-              className="w-full px-3 py-2 bg-[#131710] border border-[#a2c7e5]/20 text-white rounded-lg text-sm focus:outline-none focus:border-[#58fcec] transition-colors placeholder:text-gray-600"
+              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#58fcec] uppercase mb-1 tracking-wider">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
               Email Address
             </label>
             <input
@@ -87,12 +87,12 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3 py-2 bg-[#131710] border border-[#a2c7e5]/20 text-white rounded-lg text-sm focus:outline-none focus:border-[#58fcec] transition-colors placeholder:text-gray-600"
+              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#58fcec] uppercase mb-1 tracking-wider">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
               Password
             </label>
             <input
@@ -100,15 +100,15 @@ export default function SignUpPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-3 py-2 bg-[#131710] border border-[#a2c7e5]/20 text-white rounded-lg text-sm focus:outline-none focus:border-[#58fcec] transition-colors placeholder:text-gray-600"
+              placeholder="Password"
+              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-[#58fcec] hover:bg-opacity-90 text-[#131710] font-bold rounded-lg text-sm transition-all disabled:opacity-50 mt-2"
+            className="mt-2 h-11 w-full bg-[#58fcec] text-sm font-black text-[#131710] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>

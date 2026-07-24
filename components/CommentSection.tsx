@@ -2,21 +2,27 @@
 
 import { useState, SyntheticEvent } from 'react';
 
-// Created a clean interface for individual comments instead of using 'any'
+interface CommentAuthor {
+  id: string;
+  username?: string | null;
+  email?: string | null;
+  role?: string;
+}
+
 interface Comment {
-  id: number;
-  author: string;
-  text: string;
+  id: string;
+  content?: string;
+  text?: string;
+  author?: CommentAuthor | string | null;
 }
 
 interface CommentSectionProps {
-  postId: number;
+  postId: string;
   comments: Comment[];
-  // Made optional with "?" and allowed to be "null" 
-  // so existing code elsewhere doesn't break.
   currentUser?: {
     id: string;
     username: string;
+    email: string;
     role: string;
   } | null;
 }
@@ -58,46 +64,71 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
       setAllComments(data.comments);
       setCommentText('');
     } catch (err) {
-      setError((err as Error).message ||'Failed to submit comment.');
+      setError((err as Error).message || 'Failed to submit comment.');
     }
   };
 
+  const getAuthorName = (comment: Comment) => {
+    if (typeof comment.author === 'string') return comment.author;
+    return comment.author?.username || comment.author?.email?.split('@')[0] || 'Anonymous';
+  };
+
+  const getCommentBody = (comment: Comment) => {
+    return comment.content || comment.text || '';
+  };
+
   return (
-    <div className="mt-8 border-t pt-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-4">Comments ({allComments.length})</h3>
+    <div className="border-t border-[#a2c7e5]/10 pt-8">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h3 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+          Comments
+        </h3>
+        <span className="font-mono text-xs text-[#a2c7e5]/70">
+          {allComments.length}
+        </span>
+      </div>
       
-      {error && <p className="text-xs text-red-500 mb-2">{error}</p>}
+      {error && <p className="mb-3 text-xs font-medium text-[#ff99c9]">{error}</p>}
 
       {/* COMMENT SUBMISSION FORM */}
       {currentUser ? (
-        <form onSubmit={handlePostComment} className="flex gap-2 mb-6">
+        <form onSubmit={handlePostComment} className="mb-8 grid gap-3 sm:grid-cols-[1fr_auto]">
           <input
             type="text"
             placeholder={`Comment as @${currentUser.username}...`}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="h-11 min-w-0 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 px-3 text-sm text-white placeholder:text-[#a2c7e5]/45 outline-none transition-colors focus:border-[#58fcec]/60"
             required
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+            className="h-11 border border-[#58fcec]/40 px-5 text-sm font-bold text-[#58fcec] transition-colors hover:bg-[#58fcec] hover:text-[#131710]"
           >
             Post
           </button>
         </form>
       ) : (
-        <p className="text-sm text-gray-500 mb-6 italic">Please log in to leave a comment.</p>
+        <p className="mb-8 text-sm italic text-[#a2c7e5]/60">Please log in to leave a comment.</p>
       )}
 
       {/* COMMENTS FEED LIST */}
-      <div className="space-y-3">
-        {allComments.map((c, index) => (
-          <div key={`${c.id}-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm">
-            <p className="font-semibold text-gray-800">@{c.author}</p>
-            <p className="text-gray-600 mt-0.5">{c.text}</p>
-          </div>
-        ))}
+      <div className="space-y-4">
+        {allComments.length === 0 ? (
+          <p className="border border-dashed border-[#a2c7e5]/15 px-4 py-5 text-sm text-[#a2c7e5]/60">
+            No comments yet.
+          </p>
+        ) : (
+          allComments.map((comment, index) => (
+            <div
+              key={`${comment.id}-${index}`}
+              className="border border-[#a2c7e5]/10 bg-[#a2c7e5]/5 p-4 text-sm"
+            >
+              <p className="font-bold text-[#ff99c9]">@{getAuthorName(comment)}</p>
+              <p className="mt-2 leading-6 text-[#d8d5e8]">{getCommentBody(comment)}</p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

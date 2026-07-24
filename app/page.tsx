@@ -63,20 +63,20 @@ export default async function HomePage() {
             {user ? (
               <>
                 <Link href="/new-post" className="text-[#a2c7e5] hover:text-[#58fcec] transition-colors">
-                  ✏️ Create Post
+                  Create Post
                 </Link>
                 <Link href="/translation" className="text-[#a2c7e5] hover:text-[#58fcec] transition-colors">
-                  🌐 Translate
+                  Translate
                 </Link>
-                <Link href="/account" className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#a2c7e5]/25 text-white bg-[#a2c7e5]/5 hover:bg-[#a2c7e5]/15 transition-all">
-                  <span>👤</span> @{userDisplayName}
+                <Link href="/account" className="flex items-center gap-2 border border-[#a2c7e5]/25 bg-[#a2c7e5]/5 px-3 py-1.5 text-white transition-all hover:bg-[#a2c7e5]/15">
+                  @{userDisplayName}
                 </Link>
 
                 {/* SIGN OUT BUTTON */}
                 <form action="/api/auth/signout" method="POST">
                   <button 
                     type="submit" 
-                    className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer font-medium text-xs"
+                    className="cursor-pointer border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-all hover:bg-red-500/20 hover:text-red-300"
                   >
                     Sign Out
                   </button>
@@ -86,13 +86,13 @@ export default async function HomePage() {
               <div className="flex items-center gap-3">
                 <Link 
                   href="/login" 
-                  className="px-4 py-1.5 rounded-lg bg-[#58fcec] text-[#131710] font-bold hover:bg-opacity-90 transition-all shadow-sm"
+                  className="bg-[#58fcec] px-4 py-1.5 font-bold text-[#131710] transition-all hover:bg-opacity-90"
                 >
                   Sign In
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="px-4 py-1.5 rounded-lg border border-[#a2c7e5]/30 text-white font-medium hover:bg-[#a2c7e5]/10 transition-all"
+                  className="border border-[#a2c7e5]/30 px-4 py-1.5 font-medium text-white transition-all hover:bg-[#a2c7e5]/10"
                 >
                   Sign Up
                 </Link>
@@ -114,7 +114,7 @@ export default async function HomePage() {
 
           {!user ? (
             /* Inline Direct Sign-In Card for Unauthenticated Visitors */
-            <div className="p-8 rounded-2xl border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 space-y-6 max-w-md">
+            <div className="max-w-md space-y-6 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8">
               <div>
                 <h3 className="text-2xl font-bold text-white">Welcome Back</h3>
                 <p className="text-sm text-[#c1bddb]/80 mt-1">
@@ -125,7 +125,7 @@ export default async function HomePage() {
               <div className="pt-2 space-y-3">
                 <Link
                   href="/login"
-                  className="block w-full py-3 bg-[#58fcec] text-[#131710] font-bold text-center rounded-lg hover:bg-opacity-90 transition-all shadow-sm"
+                  className="block w-full bg-[#58fcec] py-3 text-center font-bold text-[#131710] transition-all hover:bg-opacity-90"
                 >
                   Go to Login Page
                 </Link>
@@ -180,10 +180,10 @@ export default async function HomePage() {
                     <div className="pt-2 flex items-center justify-between text-xs font-mono text-[#a2c7e5]/80">
                       <div className="flex items-center gap-4">
                         <span className="hover:text-[#ff99c9] transition-colors">
-                          ❤️ {likesCount} likes
+                          {likesCount} likes
                         </span>
                         <span>
-                          💬 {commentsCount} comments
+                          {commentsCount} comments
                         </span>
                       </div>
 
@@ -191,7 +191,7 @@ export default async function HomePage() {
                         href={`/article/${post.id}`} 
                         className="text-[#58fcec] opacity-0 group-hover:opacity-100 transition-opacity font-semibold"
                       >
-                        Read full story →
+                        Read full story
                       </Link>
                     </div>
 
@@ -205,7 +205,7 @@ export default async function HomePage() {
 
         {/* Sidebar */}
         <aside className="space-y-8">
-          <div className="sticky top-28 bg-[#a2c7e5]/5 border border-[#a2c7e5]/10 rounded-2xl p-6 space-y-4">
+          <div className="sticky top-28 space-y-4 border border-[#a2c7e5]/10 bg-[#a2c7e5]/5 p-6">
             <h3 className="font-extrabold text-white text-base tracking-tight">
               Environment Monitor
             </h3>
@@ -215,11 +215,11 @@ export default async function HomePage() {
             </p>
 
             <div className="pt-2 flex flex-col gap-2">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-[#58fcec]/10 text-[#58fcec] border border-[#58fcec]/20 w-fit">
+              <div className="inline-flex w-fit items-center gap-2 border border-[#58fcec]/20 bg-[#58fcec]/10 px-2.5 py-1 font-mono text-xs font-medium text-[#58fcec]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#58fcec] animate-pulse" />
                 Gateway: Active
               </div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-[#58fcec]/10 text-[#58fcec] border border-[#58fcec]/20 w-fit">
+              <div className="inline-flex w-fit items-center gap-2 border border-[#58fcec]/20 bg-[#58fcec]/10 px-2.5 py-1 font-mono text-xs font-medium text-[#58fcec]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#58fcec]" />
                 Database: PostgreSQL Active
               </div>
