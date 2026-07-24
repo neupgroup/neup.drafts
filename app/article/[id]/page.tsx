@@ -5,10 +5,13 @@ import { ReactionButton } from '@/components/ReactionButton';
 import { CommentSection } from '@/components/CommentSection';
 
 // 1. Fetch data from internal API route
-async function getPostFromApi(id: string) {
+async function getPostFromApi(id: string, token: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/posts/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       cache: 'no-store', // Always get fresh reactions & comments
     });
 
@@ -28,14 +31,19 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   // Native Server-side Auth verification via Cookie Token
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
-  const user = token ? await verifyTokenWithBridge(token) : null;
+
+  if (!token) {
+    redirect('/unauthorized'); // Kicks unauthenticated users out
+  }
+
+  const user = await verifyTokenWithBridge(token);
 
   if (!user) {
     redirect('/unauthorized'); // Kicks unauthenticated users out
   }
 
   // 2. Fetch post payload from API
-  const post = await getPostFromApi(id);
+  const post = await getPostFromApi(id, token);
 
   // Fallback if article is not found
   if (!post) {
