@@ -103,6 +103,7 @@ function sanitizeArticleHtml(content: string): string {
   const allowedTags = new Set([
     'br',
     'div',
+    'figcaption',
     'figure',
     'img',
     'p',

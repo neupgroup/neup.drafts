@@ -24,9 +24,12 @@ interface ImageBlockAltTextPosition {
 interface ImageBlockControl {
   block: HTMLElement;
   altText: string;
+  caption: string;
   altTextPosition: ImageBlockAltTextPosition | null;
   controlsPosition: ImageBlockControlsPosition;
 }
+
+type ImageTextEditMode = 'alt' | 'caption';
 
 interface ComposeImageBlockControlsProps {
   position: ImageBlockControlsPosition;
@@ -35,12 +38,13 @@ interface ComposeImageBlockControlsProps {
 }
 
 interface ComposeImageBlockAltTextProps {
-  isEditing: boolean;
+  editingMode: ImageTextEditMode | null;
   position: ImageBlockAltTextPosition;
+  caption: string;
   value: string;
-  onStartEditing: () => void;
+  onStartEditing: (mode: ImageTextEditMode) => void;
   onCancel: () => void;
-  onCommit: (value: string) => void;
+  onCommit: (mode: ImageTextEditMode, value: string) => void;
 }
 
 export function createImageBlock(src?: string): HTMLElement {
@@ -91,12 +95,13 @@ function getImageBlockAltTextPosition(
   block: HTMLElement,
   container: HTMLElement
 ): ImageBlockAltTextPosition | null {
-  const rect = block.getBoundingClientRect();
+  const image = block.querySelector('img');
+  const rect = image?.getBoundingClientRect() ?? block.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
 
   if (
     !block.isConnected ||
-    !block.querySelector('img') ||
+    !image ||
     rect.bottom <= 0 ||
     rect.top >= window.innerHeight
   ) {
@@ -173,8 +178,9 @@ function ComposeImageBlockControls({
 }
 
 function ComposeImageBlockAltText({
-  isEditing,
+  editingMode,
   position,
+  caption,
   value,
   onStartEditing,
   onCancel,
@@ -191,16 +197,16 @@ function ComposeImageBlockAltText({
       }}
       className="group absolute z-[9] flex items-end justify-center bg-gradient-to-t from-slate-950/65 to-transparent p-4 opacity-0 transition-opacity duration-300 hover:opacity-100 focus-within:opacity-100"
     >
-      {isEditing ? (
+      {editingMode ? (
         <input
           autoFocus
-          defaultValue={value}
-          placeholder="Add alt text for this Image"
-          onBlur={(event) => onCommit(event.currentTarget.value)}
+          defaultValue={editingMode === 'alt' ? value : caption}
+          placeholder={editingMode === 'alt' ? 'Add alt text' : 'Write caption'}
+          onBlur={(event) => onCommit(editingMode, event.currentTarget.value)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.preventDefault();
-              onCommit(event.currentTarget.value);
+              onCommit(editingMode, event.currentTarget.value);
             }
 
             if (event.key === 'Escape') {
@@ -211,17 +217,31 @@ function ComposeImageBlockAltText({
           className="h-9 w-full max-w-md rounded-full border border-white/20 bg-white/95 px-4 text-center font-serif text-sm font-medium text-slate-700 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300"
         />
       ) : (
-        <a
-          href="#"
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={(event) => {
-            event.preventDefault();
-            onStartEditing();
-          }}
-          className="translate-y-3 font-serif text-sm font-semibold text-white opacity-0 underline-offset-4 shadow-sm transition duration-300 hover:underline group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
-        >
-          {value || 'Add alt text for this Image'}
-        </a>
+        <div className="flex translate-y-3 items-center gap-5 font-serif text-sm font-semibold text-white opacity-0 shadow-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+          <a
+            href="#"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.preventDefault();
+              onStartEditing('alt');
+            }}
+            className="compose-image-action-link"
+          >
+            Add alt text
+          </a>
+
+          <a
+            href="#"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.preventDefault();
+              onStartEditing('caption');
+            }}
+            className="compose-image-action-link"
+          >
+            Write caption
+          </a>
+        </div>
       )}
     </div>
   );
@@ -236,7 +256,10 @@ export function ComposeImageBlocks({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUploadTargetRef = useRef<HTMLElement | null>(null);
   const [imageBlockControls, setImageBlockControls] = useState<ImageBlockControl[]>([]);
-  const [editingAltTextBlock, setEditingAltTextBlock] = useState<HTMLElement | null>(null);
+  const [editingImageText, setEditingImageText] = useState<{
+    block: HTMLElement;
+    mode: ImageTextEditMode;
+  } | null>(null);
 
   const syncContent = useCallback(() => {
     const contentEditor = contentRef.current;
@@ -269,6 +292,7 @@ export function ComposeImageBlocks({
         {
           block,
           altText: image?.alt ?? '',
+          caption: block.querySelector('figcaption')?.textContent ?? '',
           altTextPosition: getImageBlockAltTextPosition(block, editorFrame),
           controlsPosition,
         },
@@ -332,8 +356,8 @@ export function ComposeImageBlocks({
 
   const handleRemoveImageBlock = (imageBlock: HTMLElement) => {
     imageBlock.remove();
-    setEditingAltTextBlock((currentBlock) =>
-      currentBlock === imageBlock ? null : currentBlock
+    setEditingImageText((currentEdit) =>
+      currentEdit?.block === imageBlock ? null : currentEdit
     );
     updateImageBlockControls();
     syncContent();
@@ -344,14 +368,34 @@ export function ComposeImageBlocks({
     imageInputRef.current?.click();
   };
 
-  const handleCommitImageAltText = (imageBlock: HTMLElement, value: string) => {
+  const handleCommitImageText = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode,
+    value: string
+  ) => {
+    const trimmedValue = value.trim();
     const image = imageBlock.querySelector('img');
 
-    if (image) {
-      image.alt = value.trim();
+    if (mode === 'alt' && image) {
+      image.alt = trimmedValue;
     }
 
-    setEditingAltTextBlock(null);
+    if (mode === 'caption') {
+      let caption = imageBlock.querySelector('figcaption');
+
+      if (trimmedValue) {
+        if (!caption) {
+          caption = document.createElement('figcaption');
+          imageBlock.append(caption);
+        }
+
+        caption.textContent = trimmedValue;
+      } else {
+        caption?.remove();
+      }
+    }
+
+    setEditingImageText(null);
     updateImageBlockControls();
     syncContent();
   };
@@ -401,7 +445,7 @@ export function ComposeImageBlocks({
 
   return (
     <>
-      {imageBlockControls.map(({ altText, altTextPosition, block, controlsPosition }, index) => (
+      {imageBlockControls.map(({ altText, altTextPosition, block, caption, controlsPosition }, index) => (
         <div key={index}>
           <ComposeImageBlockControls
             position={controlsPosition}
@@ -411,12 +455,15 @@ export function ComposeImageBlocks({
 
           {altTextPosition && (
             <ComposeImageBlockAltText
-              isEditing={editingAltTextBlock === block}
+              editingMode={
+                editingImageText?.block === block ? editingImageText.mode : null
+              }
               position={altTextPosition}
+              caption={caption}
               value={altText}
-              onStartEditing={() => setEditingAltTextBlock(block)}
-              onCancel={() => setEditingAltTextBlock(null)}
-              onCommit={(value) => handleCommitImageAltText(block, value)}
+              onStartEditing={(mode) => setEditingImageText({ block, mode })}
+              onCancel={() => setEditingImageText(null)}
+              onCommit={(mode, value) => handleCommitImageText(block, mode, value)}
             />
           )}
         </div>
