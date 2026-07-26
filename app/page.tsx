@@ -13,6 +13,7 @@ interface Author {
 interface Post {
   id: string;
   title: string;
+  slug: string;
   content: string;
   author?: Author | string;
   likes?: number;
@@ -22,6 +23,14 @@ interface Post {
     comments?: number;
     reactions?: number;
   };
+}
+
+function getArticlePath(post: Post): string {
+  if (!post.slug) {
+    return `/article/${post.id}`;
+  }
+
+  return `/article/${post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`}`;
 }
 
 async function getAllPosts(): Promise<Post[]> {
@@ -62,7 +71,7 @@ export default async function HomePage() {
           <div className="flex items-center gap-4 text-sm font-medium">
             {user ? (
               <>
-                <Link href="/new-post" className="text-slate-600 hover:text-blue-600 transition-colors">
+                <Link href="/create" className="text-slate-600 hover:text-blue-600 transition-colors">
                   Create Post
                 </Link>
                 <Link href="/translation" className="text-slate-600 hover:text-blue-600 transition-colors">
@@ -161,13 +170,17 @@ export default async function HomePage() {
 
                 return (
                   <article key={post.id} className="group relative space-y-3">
+                    {/*
+                      Existing rows can have legacy slugs without the id suffix.
+                      Public article URLs always end with the id so lookup stays stable.
+                    */}
                     <div className="flex items-center gap-2 text-xs font-medium text-rose-600">
                       <span>@{authorName}</span>
                       <span className="text-slate-400">•</span>
                       <span className="text-slate-500">ID #{post.id.slice(-6)}</span>
                     </div>
 
-                    <Link href={`/article/${post.id}`} className="block group-hover:text-slate-700">
+                    <Link href={getArticlePath(post)} className="block group-hover:text-slate-700">
                       <h3 className="text-3xl font-medium tracking-tight text-slate-950 group-hover:text-blue-600 transition-colors duration-200">
                         {post.title}
                       </h3>
@@ -188,7 +201,7 @@ export default async function HomePage() {
                       </div>
 
                       <Link 
-                        href={`/article/${post.id}`} 
+                        href={getArticlePath(post)} 
                         className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium"
                       >
                         Read full story

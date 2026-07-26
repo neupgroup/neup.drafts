@@ -3,16 +3,37 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+function createDraftArticleId(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+  }
+
+  return Math.random().toString(36).slice(2, 14);
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export default function NewPostForm() {
   const router = useRouter();
+  const [articleId] = useState(createDraftArticleId);
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const slugBase = slugify(slug);
+  const finalSlug = slugBase ? `${slugBase}-${articleId}` : articleId;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !content) return;
+    if (!title || !slugBase || !content) return;
 
     setLoading(true);
     setError('');
@@ -22,7 +43,7 @@ export default function NewPostForm() {
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, slug: slugBase, content, articleId }),
       });
 
       const data = await res.json();
@@ -32,7 +53,7 @@ export default function NewPostForm() {
       }
 
       // Success! Send user straight to their newly created article page
-      router.push(`/article/${data.post.id}`);
+      router.push(`/article/${data.post.slug}`);
       router.refresh(); 
     } catch (err) {
       setError((err as Error).message || 'Something went wrong');
@@ -61,6 +82,23 @@ export default function NewPostForm() {
           onChange={(e) => setTitle(e.target.value)}
           className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
         />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
+          Slug
+        </label>
+        <input
+          type="text"
+          required
+          placeholder="hello-this-is-first-blog"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
+        />
+        <p className="mt-2 break-all font-mono text-xs text-slate-500">
+          /article/{finalSlug}
+        </p>
       </div>
 
       <div>

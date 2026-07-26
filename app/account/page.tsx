@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
 import { Prisma } from '@/app/generated/prisma/client';
@@ -7,6 +8,14 @@ import { Prisma } from '@/app/generated/prisma/client';
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
   include: { comments: true; reactions: true };
 }>;
+
+function getArticlePath(post: ArticleWithRelations): string {
+  if (!post.slug) {
+    return `/article/${post.id}`;
+  }
+
+  return `/article/${post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`}`;
+}
 
 // 1. Fetch user articles directly from PostgreSQL via user ID (from verified Token)
 async function getUserPosts(userId: string): Promise<ArticleWithRelations[]> {
@@ -98,9 +107,9 @@ export default async function AccountPage() {
           <div className="divide-y divide-slate-200">
             {myPosts.map((post) => (
               <div key={post.id} className="py-3 first:pt-0 last:pb-0">
-                <h3 className="cursor-pointer font-medium text-slate-950 transition-colors hover:text-blue-600">
+                <Link href={getArticlePath(post)} className="block font-medium text-slate-950 transition-colors hover:text-blue-600">
                   {post.title}
-                </h3>
+                </Link>
                 <div className="mt-2 flex gap-4 font-mono text-xs text-slate-500">
                   <span>{post.reactions.length} reactions</span>
                   <span>{post.comments.length} comments</span>

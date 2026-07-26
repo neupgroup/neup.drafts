@@ -5,6 +5,19 @@ import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { ReactionButton } from '@/components/ReactionButton';
 import { CommentSection } from '@/components/CommentSection';
 
+function getArticleIdFromSlug(slug: string): string {
+  const slugParts = slug.split('-');
+  return slugParts[slugParts.length - 1] || slug;
+}
+
+function getCanonicalArticleSlug(post: { id: string; slug?: string | null }): string {
+  if (!post.slug) {
+    return post.id;
+  }
+
+  return post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`;
+}
+
 // 1. Fetch data from internal API route
 async function getPostFromApi(id: string, token: string) {
   try {
@@ -27,7 +40,8 @@ async function getPostFromApi(id: string, token: string) {
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id: slug } = await params;
+  const articleId = getArticleIdFromSlug(slug);
 
   // Native Server-side Auth verification via Cookie Token
   const cookieStore = await cookies();
@@ -44,7 +58,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   }
 
   // 2. Fetch post payload from API
-  const post = await getPostFromApi(id, token);
+  const post = await getPostFromApi(articleId, token);
 
   // Fallback if article is not found
   if (!post) {
@@ -71,6 +85,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     );
   }
 
+  const canonicalSlug = getCanonicalArticleSlug(post);
+
+  if (canonicalSlug !== slug) {
+    redirect(`/article/${canonicalSlug}`);
+  }
+
   // Format author display name safely (handles strings, objects, and email fallbacks)
   const authorDisplayName =
     typeof post.author === 'object' && post.author !== null
@@ -83,12 +103,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
       <nav className="border-b border-slate-200 bg-white/90 shadow-md shadow-slate-200/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link
             href="/"
-            className="text-sm font-medium uppercase tracking-[0.18em] text-blue-600 transition-colors hover:text-slate-700"
+            className="text-[22px] font-bold tracking-tighter text-slate-950 transition-colors hover:text-blue-600"
           >
-            Publications
+            Neup.Drafts
           </Link>
           <Link
             href="/account"

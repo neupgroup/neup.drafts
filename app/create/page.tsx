@@ -1,9 +1,10 @@
 import { cookies } from 'next/headers';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import NewPostForm from '@/components/NewPostForm';
 
-export default async function NewPostPage() {
+export default async function CreatePage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
   const user = token ? await verifyTokenWithBridge(token) : null;
@@ -15,8 +16,25 @@ export default async function NewPostPage() {
   const displayName = user.username || user.email.split('@')[0];
 
   return (
-    <main className="min-h-screen bg-white px-6 py-10 text-slate-900">
-      <section className="mx-auto max-w-2xl space-y-8">
+    <main className="min-h-screen bg-white text-slate-900">
+      <nav className="border-b border-slate-200 bg-white/90 shadow-md shadow-slate-200/80 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-[22px] font-bold tracking-tighter text-slate-950 transition-colors hover:text-blue-600"
+          >
+            Neup.Drafts
+          </Link>
+          <Link
+            href="/account"
+            className="border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600"
+          >
+            @{displayName}
+          </Link>
+        </div>
+      </nav>
+
+      <section className="mx-auto max-w-2xl space-y-8 px-6 py-10">
         <div className="border-b border-slate-200 pb-6">
           <p className="text-xs font-medium uppercase tracking-[0.24em] text-blue-600">
             New Publication
