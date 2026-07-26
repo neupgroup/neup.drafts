@@ -47,24 +47,24 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#131710] p-6 text-[#e2e8f0]">
-      <div className="w-full max-w-md space-y-6 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8">
+    <main className="flex min-h-screen items-center justify-center bg-white p-6 text-slate-900">
+      <div className="w-full max-w-md space-y-6 border border-slate-200 bg-slate-50 p-8">
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-black tracking-tight text-white">Create an Account</h1>
-          <p className="text-sm text-[#c1bddb]/80">
+          <h1 className="text-2xl font-medium tracking-tight text-slate-950">Create an Account</h1>
+          <p className="text-sm text-slate-600">
             Join to manage your articles, comments, and profile
           </p>
         </div>
 
         {error && (
-          <div className="border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-300">
+          <div className="border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-600">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+            <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
               Username
             </label>
             <input
@@ -73,12 +73,12 @@ export default function SignUpPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="johndoe"
-              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
+              className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+            <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
               Email Address
             </label>
             <input
@@ -87,12 +87,12 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
+              className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+            <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
               Password
             </label>
             <input
@@ -101,22 +101,22 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
+              className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 h-11 w-full bg-[#58fcec] text-sm font-black text-[#131710] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="mt-2 h-11 w-full bg-blue-600 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
 
-        <p className="text-center text-xs text-[#a2c7e5]/70 pt-2">
+        <p className="text-center text-xs text-slate-500 pt-2">
           Already have an account?{' '}
-          <Link href="/login" className="text-[#58fcec] font-semibold hover:underline">
+          <Link href="/login" className="text-blue-600 font-medium hover:underline">
             Sign In
           </Link>
         </p>

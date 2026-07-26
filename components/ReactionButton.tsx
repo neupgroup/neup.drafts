@@ -47,15 +47,15 @@ export function ReactionButton({ postId, initialLikes, currentUser }: ReactionBu
     <div>
       <button 
         onClick={handleLike} 
-        className={`inline-flex h-11 items-center justify-center border px-4 text-sm font-bold transition-colors ${
+        className={`inline-flex h-11 items-center justify-center border px-4 text-sm font-medium transition-colors ${
           currentUser 
-            ? 'border-[#ff99c9]/40 bg-[#ff99c9]/10 text-[#ff99c9] hover:bg-[#ff99c9] hover:text-[#131710]' 
-            : 'cursor-not-allowed border-[#a2c7e5]/10 bg-[#a2c7e5]/5 text-[#a2c7e5]/40'
+            ? 'border-rose-300 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white' 
+            : 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400'
         }`}
       >
         Like · {likes}
       </button>
-      {error && <p className="mt-2 text-xs font-medium text-[#ff99c9]">{error}</p>}
+      {error && <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>}
     </div>
   );
 }

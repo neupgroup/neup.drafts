@@ -78,17 +78,17 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
   };
 
   return (
-    <div className="border-t border-[#a2c7e5]/10 pt-8">
+    <div className="border-t border-slate-200 pt-8">
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h3 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+        <h3 className="text-sm font-medium uppercase tracking-[0.18em] text-slate-950">
           Comments
         </h3>
-        <span className="font-mono text-xs text-[#a2c7e5]/70">
+        <span className="font-mono text-xs text-slate-500">
           {allComments.length}
         </span>
       </div>
       
-      {error && <p className="mb-3 text-xs font-medium text-[#ff99c9]">{error}</p>}
+      {error && <p className="mb-3 text-xs font-medium text-rose-600">{error}</p>}
 
       {/* COMMENT SUBMISSION FORM */}
       {currentUser ? (
@@ -98,34 +98,34 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
             placeholder={`Comment as @${currentUser.username}...`}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            className="h-11 min-w-0 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 px-3 text-sm text-white placeholder:text-[#a2c7e5]/45 outline-none transition-colors focus:border-[#58fcec]/60"
+            className="h-11 min-w-0 border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 placeholder:text-slate-400 outline-none transition-colors focus:border-blue-400"
             required
           />
           <button
             type="submit"
-            className="h-11 border border-[#58fcec]/40 px-5 text-sm font-bold text-[#58fcec] transition-colors hover:bg-[#58fcec] hover:text-[#131710]"
+            className="h-11 border border-blue-300 px-5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
           >
             Post
           </button>
         </form>
       ) : (
-        <p className="mb-8 text-sm italic text-[#a2c7e5]/60">Please log in to leave a comment.</p>
+        <p className="mb-8 text-sm italic text-slate-500">Please log in to leave a comment.</p>
       )}
 
       {/* COMMENTS FEED LIST */}
       <div className="space-y-4">
         {allComments.length === 0 ? (
-          <p className="border border-dashed border-[#a2c7e5]/15 px-4 py-5 text-sm text-[#a2c7e5]/60">
+          <p className="border border-dashed border-slate-200 px-4 py-5 text-sm text-slate-500">
             No comments yet.
           </p>
         ) : (
           allComments.map((comment, index) => (
             <div
               key={`${comment.id}-${index}`}
-              className="border border-[#a2c7e5]/10 bg-[#a2c7e5]/5 p-4 text-sm"
+              className="border border-slate-200 bg-slate-50 p-4 text-sm"
             >
-              <p className="font-bold text-[#ff99c9]">@{getAuthorName(comment)}</p>
-              <p className="mt-2 leading-6 text-[#d8d5e8]">{getCommentBody(comment)}</p>
+              <p className="font-medium text-rose-600">@{getAuthorName(comment)}</p>
+              <p className="mt-2 leading-6 text-slate-700">{getCommentBody(comment)}</p>
             </div>
           ))
         )}

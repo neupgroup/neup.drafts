@@ -44,13 +44,13 @@ export default function NewPostForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
+        <div className="border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-600">
           {error}
         </div>
       )}
 
       <div>
-        <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+        <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
           Title
         </label>
         <input
@@ -59,12 +59,12 @@ export default function NewPostForm() {
           placeholder="Give your article a catchy headline..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="h-11 w-full border border-[#a2c7e5]/20 bg-[#131710] px-3 text-sm text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
+          className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+        <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
           Body Content
         </label>
         <textarea
@@ -73,14 +73,14 @@ export default function NewPostForm() {
           placeholder="Write your brilliant ideas here..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full resize-none border border-[#a2c7e5]/20 bg-[#131710] px-3 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70"
+          className="w-full resize-none border border-slate-300 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="h-11 w-full bg-[#58fcec] text-sm font-black text-[#131710] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="h-11 w-full bg-blue-600 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {loading ? 'Publishing...' : 'Publish Article'}
       </button>

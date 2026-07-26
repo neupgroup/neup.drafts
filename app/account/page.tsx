@@ -41,10 +41,10 @@ export default async function AccountPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#131710] p-6 text-center text-[#e2e8f0]">
-        <section className="max-w-md border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8">
-          <p className="font-bold text-red-300">Access Denied.</p>
-          <p className="mt-2 text-sm text-[#c1bddb]/80">
+      <main className="flex min-h-screen items-center justify-center bg-white p-6 text-center text-slate-900">
+        <section className="max-w-md border border-slate-200 bg-slate-50 p-8">
+          <p className="font-medium text-red-600">Access Denied.</p>
+          <p className="mt-2 text-sm text-slate-600">
           Please log in to view your profile and publications.
           </p>
         </section>
@@ -56,20 +56,20 @@ export default async function AccountPage() {
   const myPosts = await getUserPosts(user.id);
 
   return (
-    <main className="min-h-screen bg-[#131710] px-6 py-10 text-[#e2e8f0]">
+    <main className="min-h-screen bg-white px-6 py-10 text-slate-900">
       <section className="mx-auto max-w-4xl space-y-8">
       {/* USER PROFILE CARD */}
-      <div className="flex flex-col gap-6 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-6 border border-slate-200 bg-slate-50 p-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#58fcec]">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-blue-600">
             Account
           </p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">User Profile</h1>
-          <div className="mt-5 space-y-2 text-sm text-[#d8d5e8]">
+          <h1 className="mt-3 text-3xl font-medium tracking-tight text-slate-950">User Profile</h1>
+          <div className="mt-5 space-y-2 text-sm text-slate-700">
             <p><strong>Display Name:</strong> {user.username}</p>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Role:</strong> <span className="capitalize">{user.role}</span></p>
-            <p className="break-all text-xs text-[#a2c7e5]/60"><strong>User ID:</strong> {user.id}</p>
+            <p className="break-all text-xs text-slate-500"><strong>User ID:</strong> {user.id}</p>
           </div>
         </div>
 
@@ -77,7 +77,7 @@ export default async function AccountPage() {
         <form action="/api/auth/signout" method="POST">
           <button 
             type="submit" 
-            className="h-10 cursor-pointer border border-red-500/30 bg-red-500/10 px-4 text-sm font-bold text-red-300 transition-colors hover:bg-red-500/20"
+            className="h-10 cursor-pointer border border-red-500/30 bg-red-500/10 px-4 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/20"
           >
             Sign Out
           </button>
@@ -85,23 +85,23 @@ export default async function AccountPage() {
       </div>
 
       {/* USER PUBLICATIONS SECTION */}
-      <div className="border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-6">
-        <h2 className="mb-5 text-xl font-black tracking-tight text-white">
+      <div className="border border-slate-200 bg-slate-50 p-6">
+        <h2 className="mb-5 text-xl font-medium tracking-tight text-slate-950">
           Your Publications ({myPosts.length})
         </h2>
 
         {myPosts.length === 0 ? (
-          <p className="text-sm italic text-[#a2c7e5]/60">
+          <p className="text-sm italic text-slate-500">
             {"You haven't published any articles yet."}
           </p>
         ) : (
-          <div className="divide-y divide-[#a2c7e5]/10">
+          <div className="divide-y divide-slate-200">
             {myPosts.map((post) => (
               <div key={post.id} className="py-3 first:pt-0 last:pb-0">
-                <h3 className="cursor-pointer font-bold text-white transition-colors hover:text-[#58fcec]">
+                <h3 className="cursor-pointer font-medium text-slate-950 transition-colors hover:text-blue-600">
                   {post.title}
                 </h3>
-                <div className="mt-2 flex gap-4 font-mono text-xs text-[#a2c7e5]/70">
+                <div className="mt-2 flex gap-4 font-mono text-xs text-slate-500">
                   <span>{post.reactions.length} reactions</span>
                   <span>{post.comments.length} comments</span>
                 </div>

@@ -51,24 +51,24 @@ export default async function HomePage() {
     : '';
 
   return (
-    <main className="min-h-screen bg-[#131710] text-[#e2e8f0] antialiased selection:bg-[#58fcec] selection:text-[#131710]">
+    <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
       {/* Navigation */}
-      <nav className="border-b border-[#a2c7e5]/10 sticky top-0 z-50 bg-[#131710]/90 backdrop-blur-md">
+      <nav className="border-b border-slate-200 sticky top-0 z-50 bg-white/90 shadow-md shadow-slate-200/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-black tracking-tighter text-white hover:text-[#58fcec] transition-colors">
-            HOME PAGE
+          <Link href="/" className="text-[22px] font-bold tracking-tighter text-slate-950 hover:text-blue-600 transition-colors">
+            Neup.Drafts
           </Link>
           
           <div className="flex items-center gap-4 text-sm font-medium">
             {user ? (
               <>
-                <Link href="/new-post" className="text-[#a2c7e5] hover:text-[#58fcec] transition-colors">
+                <Link href="/new-post" className="text-slate-600 hover:text-blue-600 transition-colors">
                   Create Post
                 </Link>
-                <Link href="/translation" className="text-[#a2c7e5] hover:text-[#58fcec] transition-colors">
+                <Link href="/translation" className="text-slate-600 hover:text-blue-600 transition-colors">
                   Translate
                 </Link>
-                <Link href="/account" className="flex items-center gap-2 border border-[#a2c7e5]/25 bg-[#a2c7e5]/5 px-3 py-1.5 text-white transition-all hover:bg-[#a2c7e5]/15">
+                <Link href="/account" className="flex items-center gap-2 border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-950 transition-all hover:bg-slate-100">
                   @{userDisplayName}
                 </Link>
 
@@ -76,7 +76,7 @@ export default async function HomePage() {
                 <form action="/api/auth/signout" method="POST">
                   <button 
                     type="submit" 
-                    className="cursor-pointer border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-all hover:bg-red-500/20 hover:text-red-300"
+                    className="cursor-pointer border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-600 transition-all hover:bg-red-500/20 hover:text-red-700"
                   >
                     Sign Out
                   </button>
@@ -86,13 +86,13 @@ export default async function HomePage() {
               <div className="flex items-center gap-3">
                 <Link 
                   href="/login" 
-                  className="bg-[#58fcec] px-4 py-1.5 font-bold text-[#131710] transition-all hover:bg-opacity-90"
+                  className="bg-blue-600 px-4 py-1.5 font-medium text-white transition-all hover:bg-opacity-90"
                 >
                   Sign In
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="border border-[#a2c7e5]/30 px-4 py-1.5 font-medium text-white transition-all hover:bg-[#a2c7e5]/10"
+                  className="border border-slate-300 px-4 py-1.5 font-medium text-slate-950 transition-all hover:bg-slate-100"
                 >
                   Sign Up
                 </Link>
@@ -103,21 +103,21 @@ export default async function HomePage() {
       </nav>
 
       {/* Main Layout */}
-      <div className="max-w-6xl mx-auto px-6 py-12 grid gap-12 lg:grid-cols-3">
+      <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Feed Column */}
-        <section className="lg:col-span-2 space-y-10">
-          <div className="border-b border-[#a2c7e5]/10 pb-4">
-            <h2 className="text-xs uppercase font-bold tracking-widest text-[#58fcec]">
+        <section className="space-y-10">
+          <div className="border-b border-slate-200 pb-4">
+            <h2 className="text-xs uppercase font-medium tracking-widest text-blue-600">
               {user ? 'Recent Publications' : 'Sign In'}
             </h2>
           </div>
 
           {!user ? (
             /* Inline Direct Sign-In Card for Unauthenticated Visitors */
-            <div className="max-w-md space-y-6 border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-8">
+            <div className="max-w-md space-y-6 border border-slate-200 bg-slate-50 p-8">
               <div>
-                <h3 className="text-2xl font-bold text-white">Welcome Back</h3>
-                <p className="text-sm text-[#c1bddb]/80 mt-1">
+                <h3 className="text-2xl font-medium text-slate-950">Welcome Back</h3>
+                <p className="text-sm text-slate-600 mt-1">
                   Please log in to access publications and join discussions.
                 </p>
               </div>
@@ -125,21 +125,21 @@ export default async function HomePage() {
               <div className="pt-2 space-y-3">
                 <Link
                   href="/login"
-                  className="block w-full bg-[#58fcec] py-3 text-center font-bold text-[#131710] transition-all hover:bg-opacity-90"
+                  className="block w-full bg-blue-600 py-3 text-center font-medium text-white transition-all hover:bg-opacity-90"
                 >
                   Go to Login Page
                 </Link>
                 
-                <p className="text-center text-xs text-[#a2c7e5]/70 pt-2">
+                <p className="text-center text-xs text-slate-500 pt-2">
                   {"Don't have an account yet?"}{' '}
-                  <Link href="/signup" className="text-[#58fcec] font-semibold hover:underline">
+                  <Link href="/signup" className="text-blue-600 font-medium hover:underline">
                     Sign Up
                   </Link>
                 </p>
               </div>
             </div>
           ) : posts.length === 0 ? (
-            <p className="text-[#a2c7e5]/60 italic py-8">No articles found in the database.</p>
+            <p className="text-slate-500 italic py-8">No articles found in the database.</p>
           ) : (
             <div className="space-y-12">
               {posts.map((post) => {
@@ -161,25 +161,25 @@ export default async function HomePage() {
 
                 return (
                   <article key={post.id} className="group relative space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[#ff99c9]">
+                    <div className="flex items-center gap-2 text-xs font-medium text-rose-600">
                       <span>@{authorName}</span>
-                      <span className="text-[#a2c7e5]/40">•</span>
-                      <span className="text-[#a2c7e5]/70">ID #{post.id.slice(-6)}</span>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-slate-500">ID #{post.id.slice(-6)}</span>
                     </div>
 
-                    <Link href={`/article/${post.id}`} className="block group-hover:text-white">
-                      <h3 className="text-2xl font-extrabold tracking-tight text-white group-hover:text-[#58fcec] transition-colors duration-200">
+                    <Link href={`/article/${post.id}`} className="block group-hover:text-slate-700">
+                      <h3 className="text-3xl font-medium tracking-tight text-slate-950 group-hover:text-blue-600 transition-colors duration-200">
                         {post.title}
                       </h3>
                     </Link>
 
-                    <p className="text-[#c1bddb]/90 text-sm leading-relaxed line-clamp-3">
+                    <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
                       {post.content}
                     </p>
 
-                    <div className="pt-2 flex items-center justify-between text-xs font-mono text-[#a2c7e5]/80">
+                    <div className="pt-2 flex items-center justify-between text-xs font-mono text-slate-600">
                       <div className="flex items-center gap-4">
-                        <span className="hover:text-[#ff99c9] transition-colors">
+                        <span className="hover:text-rose-600 transition-colors">
                           {likesCount} likes
                         </span>
                         <span>
@@ -189,13 +189,13 @@ export default async function HomePage() {
 
                       <Link 
                         href={`/article/${post.id}`} 
-                        className="text-[#58fcec] opacity-0 group-hover:opacity-100 transition-opacity font-semibold"
+                        className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium"
                       >
                         Read full story
                       </Link>
                     </div>
 
-                    <div className="border-b border-[#a2c7e5]/10 pt-8" />
+                    <div className="border-b border-slate-200 pt-8" />
                   </article>
                 );
               })}
@@ -203,29 +203,6 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* Sidebar */}
-        <aside className="space-y-8">
-          <div className="sticky top-28 space-y-4 border border-[#a2c7e5]/10 bg-[#a2c7e5]/5 p-6">
-            <h3 className="font-extrabold text-white text-base tracking-tight">
-              Environment Monitor
-            </h3>
-            
-            <p className="text-xs text-[#c1bddb]/70 leading-relaxed">
-              Core authentication hooks and session verification are executing natively via Next.js Server Components.
-            </p>
-
-            <div className="pt-2 flex flex-col gap-2">
-              <div className="inline-flex w-fit items-center gap-2 border border-[#58fcec]/20 bg-[#58fcec]/10 px-2.5 py-1 font-mono text-xs font-medium text-[#58fcec]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#58fcec] animate-pulse" />
-                Gateway: Active
-              </div>
-              <div className="inline-flex w-fit items-center gap-2 border border-[#58fcec]/20 bg-[#58fcec]/10 px-2.5 py-1 font-mono text-xs font-medium text-[#58fcec]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#58fcec]" />
-                Database: PostgreSQL Active
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </main>
   );

@@ -41,12 +41,12 @@ export default function TranslationWidget() {
     <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2">
         {/* Left Box: Input */}
-        <div className="border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-4">
-          <span className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+        <div className="border border-slate-200 bg-slate-50 p-4">
+          <span className="mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
             Original (EN)
           </span>
           <textarea 
-            className="min-h-40 w-full resize-none border border-[#a2c7e5]/20 bg-[#131710] p-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-[#a2c7e5]/35 focus:border-[#58fcec]/70" 
+            className="min-h-40 w-full resize-none border border-slate-300 bg-white p-3 text-sm leading-6 text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500" 
             rows={6}
             value={sourceText}
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setSourceText(e.target.value)} 
@@ -54,28 +54,28 @@ export default function TranslationWidget() {
         </div>
         
         {/* Right Box: Display */}
-        <div className="flex flex-col justify-between border border-[#a2c7e5]/15 bg-[#a2c7e5]/5 p-4">
+        <div className="flex flex-col justify-between border border-slate-200 bg-slate-50 p-4">
           <div>
-            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-[#58fcec]">
+            <span className="mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
               Target Translation (ES)
             </span>
-            <div className="min-h-40 w-full border border-[#a2c7e5]/20 bg-[#131710] p-3 text-sm leading-6 text-[#d8d5e8]">
+            <div className="min-h-40 w-full border border-slate-300 bg-white p-3 text-sm leading-6 text-slate-700">
               {isLoading ? (
-                <span className="animate-pulse text-[#a2c7e5]/60">Translating...</span>
+                <span className="animate-pulse text-slate-500">Translating...</span>
               ) : (
-                translatedText || <span className="text-[#a2c7e5]/45">Translation will appear here...</span>
+                translatedText || <span className="text-slate-400">Translation will appear here...</span>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {error && <p className="text-sm font-medium text-red-300">{error}</p>}
+      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 
       <button 
         onClick={handleTranslate}
         disabled={isLoading}
-        className="h-11 bg-[#58fcec] px-6 text-sm font-black text-[#131710] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="h-11 bg-blue-600 px-6 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {isLoading ? 'Processing...' : 'Translate to Spanish'}
       </button>
