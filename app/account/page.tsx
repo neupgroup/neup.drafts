@@ -18,6 +18,10 @@ function getArticlePath(post: ArticleWithRelations): string {
   return `/article/${post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`}`;
 }
 
+function getArticleEditPath(post: ArticleWithRelations): string {
+  return `/compose?article=${encodeURIComponent(getArticlePath(post).replace('/article/', ''))}`;
+}
+
 function formatProfileDate(date: Date): string {
   return new Intl.DateTimeFormat('en', {
     month: 'short',
@@ -283,12 +287,20 @@ export default async function AccountPage() {
 
                     <div className="mt-5 grid gap-8 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-start">
                       <div className="min-w-0">
-                        <Link
-                          href={getArticlePath(post)}
-                          className="block break-words text-[28px] font-semibold leading-tight tracking-tight text-slate-950 transition-colors hover:text-slate-700"
-                        >
-                          {post.title}
-                        </Link>
+                        <p className="break-words text-[28px] font-semibold leading-tight tracking-tight">
+                          <Link
+                            href={getArticlePath(post)}
+                            className="text-slate-950 transition-colors hover:text-slate-700"
+                          >
+                            {post.title}
+                          </Link>
+                          <Link
+                            href={getArticleEditPath(post)}
+                            className="ml-4 font-medium text-slate-400 hover:underline"
+                          >
+                            Edit
+                          </Link>
+                        </p>
                         <p className="mt-3 line-clamp-2 text-xl leading-7 text-slate-500">
                           {getPostExcerpt(post.content)}
                         </p>
