@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ComposeImageBlocks, createImageBlock } from './ComposeImageBlocks';
+import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 
 interface ComposeArticle {
   id: string;
@@ -15,7 +15,7 @@ interface ComposePostFormProps {
   article?: ComposeArticle;
 }
 
-type SlashMenuOption = 'media' | 'image' | 'audio' | 'video' | 'carousel' | 'table';
+type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'table';
 
 interface SlashMenuPosition {
   top: number;
@@ -28,7 +28,6 @@ const slashMenuOptions: Array<{
   id: SlashMenuOption;
   label: string;
 }> = [
-  { id: 'media', label: 'Add a media block' },
   { id: 'image', label: 'Add an image block' },
   { id: 'audio', label: 'Add an audio block' },
   { id: 'video', label: 'Add a video block' },
@@ -312,31 +311,24 @@ function createMediaTrack(): HTMLTrackElement {
   return track;
 }
 
-function createMediaBlock(): HTMLElement {
+function createMediaFigureBlock(
+  editorBlock: 'audio' | 'video' | 'carousel',
+  mediaKind: string
+): HTMLElement {
   const figure = document.createElement('figure');
-  const wrapper = document.createElement('div');
 
-  figure.dataset.editorBlock = 'media';
-  figure.dataset.mediaKind = 'generic';
+  figure.dataset.editorBlock = editorBlock;
+  figure.dataset.mediaKind = mediaKind;
   figure.contentEditable = 'false';
-  wrapper.dataset.mediaPlaceholder = 'true';
-  wrapper.textContent = 'Media block';
-  figure.append(
-    wrapper,
-    createMediaAltBlock('Write media alt text'),
-    createMediaCaption(),
-    createTranscriptDetails()
-  );
 
   return figure;
 }
 
 function createVideoBlock(src: string, provider: VideoProvider | 'local'): HTMLElement {
-  const figure = document.createElement('figure');
-
-  figure.dataset.editorBlock = 'video';
-  figure.dataset.mediaKind = provider === 'local' ? 'video' : provider;
-  figure.contentEditable = 'false';
+  const figure = createMediaFigureBlock(
+    'video',
+    provider === 'local' ? 'video' : provider
+  );
 
   if (provider === 'local') {
     const video = document.createElement('video');
@@ -365,12 +357,9 @@ function createVideoBlock(src: string, provider: VideoProvider | 'local'): HTMLE
 }
 
 function createAudioBlock(src: string): HTMLElement {
-  const figure = document.createElement('figure');
+  const figure = createMediaFigureBlock('audio', 'audio');
   const audio = document.createElement('audio');
 
-  figure.dataset.editorBlock = 'audio';
-  figure.dataset.mediaKind = 'audio';
-  figure.contentEditable = 'false';
   audio.src = src;
   audio.controls = true;
   audio.append(createMediaTrack());
@@ -385,12 +374,9 @@ function createAudioBlock(src: string): HTMLElement {
 }
 
 function createCarouselBlock(srcValues: string[]): HTMLElement {
-  const figure = document.createElement('figure');
+  const figure = createMediaFigureBlock('carousel', 'carousel');
   const track = document.createElement('div');
 
-  figure.dataset.editorBlock = 'carousel';
-  figure.dataset.mediaKind = 'carousel';
-  figure.contentEditable = 'false';
   track.dataset.carouselTrack = 'true';
 
   srcValues.forEach((src) => {
@@ -738,11 +724,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   };
 
   const handleSlashMenuOption = (option: SlashMenuOption) => {
-    if (option === 'media') {
-      insertEditorBlock(createMediaBlock());
-      return;
-    }
-
     if (option === 'image') {
       insertEditorBlock(createImageBlock());
       return;
@@ -1057,7 +1038,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
           />
 
-          <ComposeImageBlocks
+          <ComposeMediaBlocks
             contentRef={contentRef}
             editorFrameRef={editorFrameRef}
             getContent={getEditorText}

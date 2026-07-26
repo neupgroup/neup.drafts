@@ -3,68 +3,76 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
-interface ComposeImageBlocksProps {
+interface ComposeMediaBlocksProps {
   contentRef: RefObject<HTMLDivElement | null>;
   editorFrameRef: RefObject<HTMLDivElement | null>;
   getContent: (element: HTMLDivElement) => string;
   onContentChange: (content: string) => void;
 }
 
-interface ImageBlockControlsPosition {
+interface MediaBlockControlsPosition {
   top: number;
   left: number;
 }
 
-interface ImageBlockAltTextPosition {
+interface MediaTextActionsPosition {
   top: number;
   left: number;
   width: number;
   height: number;
 }
 
-interface ImageBlockControl {
+interface MediaBlockControl {
   block: HTMLElement;
   altText: string;
   caption: string;
-  altTextPosition: ImageBlockAltTextPosition | null;
-  controlsPosition: ImageBlockControlsPosition;
+  textActionsPosition: MediaTextActionsPosition | null;
+  controlsPosition: MediaBlockControlsPosition;
 }
 
-type ImageTextEditMode = 'alt' | 'caption';
+type MediaTextEditMode = 'alt' | 'caption';
+type MediaBlockType = 'image' | 'audio' | 'video' | 'carousel';
 
-interface ComposeImageBlockControlsProps {
-  position: ImageBlockControlsPosition;
+const textEditableBlockSelector = [
+  '[data-editor-block="image"]',
+  '[data-editor-block="audio"]',
+  '[data-editor-block="video"]',
+  '[data-editor-block="carousel"]',
+].join(',');
+
+interface ComposeMediaBlockControlsProps {
+  position: MediaBlockControlsPosition;
   onChange: () => void;
   onRemove: () => void;
 }
 
-interface ComposeImageBlockAltTextProps {
-  activeMode: ImageTextEditMode | null;
+interface ComposeMediaTextActionsProps {
+  activeMode: MediaTextEditMode | null;
   hasAltText: boolean;
   hasCaption: boolean;
   isActive: boolean;
-  position: ImageBlockAltTextPosition;
-  onStartEditing: (mode: ImageTextEditMode) => void;
+  position: MediaTextActionsPosition;
+  onStartEditing: (mode: MediaTextEditMode) => void;
 }
 
-interface ComposeImageTextEditorProps {
+interface ComposeMediaTextEditorProps {
   block: HTMLElement;
-  mode: ImageTextEditMode;
+  mode: MediaTextEditMode;
   value: string;
   onCommit: (value: string) => void;
   onDismiss: (value: string) => void;
 }
 
-interface ImageTextDraftState {
+interface MediaTextDraftState {
   defaultValue: string;
   draftValue: string;
 }
 
-type ImageTextDrafts = Partial<Record<ImageTextEditMode, ImageTextDraftState>>;
+type MediaTextDrafts = Partial<Record<MediaTextEditMode, MediaTextDraftState>>;
 
-interface EditingImageText {
+interface EditingMediaText {
   block: HTMLElement;
-  mode: ImageTextEditMode;
+  mode: MediaTextEditMode;
   value: string;
 }
 
@@ -160,7 +168,7 @@ function isCaretOnLastTextLine(element: HTMLElement): boolean {
   return caretRect.bottom >= endRect.top - 2;
 }
 
-function handleImageTextEditorArrowDown(
+function handleMediaTextEditorArrowDown(
   event: KeyboardEvent,
   editor: HTMLElement
 ): boolean {
@@ -182,6 +190,7 @@ export function createImageBlock(src?: string): HTMLElement {
   const button = document.createElement('button');
 
   figure.dataset.editorBlock = 'image';
+  figure.dataset.mediaKind = 'image';
   figure.contentEditable = 'false';
   button.type = 'button';
   button.dataset.imagePicker = 'true';
@@ -201,10 +210,10 @@ export function createImageBlock(src?: string): HTMLElement {
   return figure;
 }
 
-function getImageBlockControlsPosition(
+function getMediaBlockControlsPosition(
   block: HTMLElement,
   container: HTMLElement
-): ImageBlockControlsPosition | null {
+): MediaBlockControlsPosition | null {
   const rect = block.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
 
@@ -221,17 +230,17 @@ function getImageBlockControlsPosition(
   };
 }
 
-function getImageBlockAltTextPosition(
+function getMediaTextActionsPosition(
   block: HTMLElement,
   container: HTMLElement
-): ImageBlockAltTextPosition | null {
-  const image = block.querySelector('img');
-  const rect = image?.getBoundingClientRect() ?? block.getBoundingClientRect();
+): MediaTextActionsPosition | null {
+  const media = block.querySelector('[data-carousel-track], img, audio, video, iframe');
+  const rect = media?.getBoundingClientRect() ?? block.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
 
   if (
     !block.isConnected ||
-    !image ||
+    !media ||
     rect.bottom <= 0 ||
     rect.top >= window.innerHeight
   ) {
@@ -254,11 +263,11 @@ function getImageBlockAltTextPosition(
   };
 }
 
-function ComposeImageBlockControls({
+function ComposeMediaBlockControls({
   position,
   onChange,
   onRemove,
-}: ComposeImageBlockControlsProps) {
+}: ComposeMediaBlockControlsProps) {
   return (
     <div
       data-image-block-controls
@@ -307,14 +316,14 @@ function ComposeImageBlockControls({
   );
 }
 
-function ComposeImageBlockAltText({
+function ComposeMediaTextActions({
   activeMode,
   hasAltText,
   hasCaption,
   isActive,
   position,
   onStartEditing,
-}: ComposeImageBlockAltTextProps) {
+}: ComposeMediaTextActionsProps) {
   const overlayClassName = [
     'group absolute z-[9] flex items-end justify-center bg-gradient-to-t from-slate-950/65 to-transparent p-4 transition-opacity duration-300 hover:opacity-100 focus-within:opacity-100',
     isActive ? 'opacity-100' : 'opacity-0',
@@ -326,7 +335,7 @@ function ComposeImageBlockAltText({
 
   return (
     <div
-      data-image-alt-text-control
+      data-media-text-actions
       style={{
         top: position.top,
         left: position.left,
@@ -343,7 +352,7 @@ function ComposeImageBlockAltText({
             event.preventDefault();
             onStartEditing('alt');
           }}
-          className="compose-image-action-link"
+          className="compose-media-action-link"
           data-active={activeMode === 'alt' ? 'true' : undefined}
         >
           {activeMode === 'alt' ? 'Save alt text' : hasAltText ? 'Edit alt text' : 'Add alt text'}
@@ -356,23 +365,36 @@ function ComposeImageBlockAltText({
             event.preventDefault();
             onStartEditing('caption');
           }}
-          className="compose-image-action-link"
+          className="compose-media-action-link"
           data-active={activeMode === 'caption' ? 'true' : undefined}
         >
-          {activeMode === 'caption' ? 'Save caption' : hasCaption ? 'Edit caption' : 'Write caption'}
+          {activeMode === 'caption' ? 'Save caption' : hasCaption ? 'Edit caption' : 'Add caption'}
         </a>
       </div>
     </div>
   );
 }
 
-function ComposeImageTextEditor({
+function getMediaBlockType(block: HTMLElement): MediaBlockType | null {
+  const blockType = block.dataset.editorBlock;
+
+  return (
+    blockType === 'image' ||
+    blockType === 'audio' ||
+    blockType === 'video' ||
+    blockType === 'carousel'
+  )
+    ? blockType
+    : null;
+}
+
+function ComposeMediaTextEditor({
   block,
   mode,
   value,
   onCommit,
   onDismiss,
-}: ComposeImageTextEditorProps) {
+}: ComposeMediaTextEditorProps) {
   const placeholder = mode === 'alt' ? 'Write alt text here' : 'Write caption here';
   const onCommitRef = useRef(onCommit);
   const onDismissRef = useRef(onDismiss);
@@ -405,7 +427,7 @@ function ComposeImageTextEditor({
       }
 
       if (event.key === 'ArrowDown') {
-        handleImageTextEditorArrowDown(event, editor);
+        handleMediaTextEditorArrowDown(event, editor);
       }
     };
     const handleMouseDown = (event: MouseEvent) => {
@@ -427,11 +449,11 @@ function ComposeImageTextEditor({
       document.execCommand('insertText', false, event.clipboardData?.getData('text/plain') ?? '');
     };
 
-    editor.className = 'compose-image-text-editor';
+    editor.className = 'compose-media-text-editor';
     editor.contentEditable = 'plaintext-only';
     editor.dataset.placeholder = placeholder;
-    editor.dataset.imageTextEditor = 'true';
-    editor.dataset.imageTextMode = mode;
+    editor.dataset.mediaTextEditor = 'true';
+    editor.dataset.mediaTextMode = mode;
     editor.textContent = value;
     editor.addEventListener('keydown', handleKeyDown);
     editor.addEventListener('mousedown', handleMouseDown);
@@ -461,28 +483,28 @@ function ComposeImageTextEditor({
   return null;
 }
 
-export function ComposeImageBlocks({
+export function ComposeMediaBlocks({
   contentRef,
   editorFrameRef,
   getContent,
   onContentChange,
-}: ComposeImageBlocksProps) {
+}: ComposeMediaBlocksProps) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUploadTargetRef = useRef<HTMLElement | null>(null);
-  const imageTextDraftsRef = useRef<WeakMap<HTMLElement, ImageTextDrafts>>(new WeakMap());
-  const editingImageTextRef = useRef<EditingImageText | null>(null);
-  const commitImageTextRef = useRef<(
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode,
+  const mediaTextDraftsRef = useRef<WeakMap<HTMLElement, MediaTextDrafts>>(new WeakMap());
+  const editingMediaTextRef = useRef<EditingMediaText | null>(null);
+  const commitMediaTextRef = useRef<(
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode,
     value: string
   ) => void>(() => {});
-  const dismissImageTextEditRef = useRef<(
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode,
+  const dismissMediaTextEditRef = useRef<(
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode,
     value: string
   ) => void>(() => {});
-  const [imageBlockControls, setImageBlockControls] = useState<ImageBlockControl[]>([]);
-  const [editingImageText, setEditingImageText] = useState<EditingImageText | null>(null);
+  const [mediaBlockControls, setMediaBlockControls] = useState<MediaBlockControl[]>([]);
+  const [editingMediaText, setEditingMediaText] = useState<EditingMediaText | null>(null);
 
   const syncContent = useCallback(() => {
     const contentEditor = contentRef.current;
@@ -491,29 +513,29 @@ export function ComposeImageBlocks({
       const contentSnapshot = contentEditor.cloneNode(true) as HTMLDivElement;
 
       contentSnapshot
-        .querySelectorAll('[data-image-text-editor]')
+        .querySelectorAll('[data-media-text-editor]')
         .forEach((node) => node.remove());
       contentSnapshot
-        .querySelectorAll<HTMLElement>('[data-image-text-editing]')
-        .forEach((node) => delete node.dataset.imageTextEditing);
+        .querySelectorAll<HTMLElement>('[data-media-text-editing]')
+        .forEach((node) => delete node.dataset.mediaTextEditing);
       onContentChange(getContent(contentSnapshot));
     }
   }, [contentRef, getContent, onContentChange]);
 
-  const updateImageBlockControls = useCallback(() => {
+  const updateMediaBlockControls = useCallback(() => {
     const contentEditor = contentRef.current;
     const editorFrame = editorFrameRef.current;
 
     if (!contentEditor || !editorFrame) {
-      setImageBlockControls([]);
+      setMediaBlockControls([]);
       return;
     }
 
     const controls = Array.from(
-      contentEditor.querySelectorAll<HTMLElement>('[data-editor-block="image"]')
+      contentEditor.querySelectorAll<HTMLElement>(textEditableBlockSelector)
     ).flatMap((block) => {
-      const controlsPosition = getImageBlockControlsPosition(block, editorFrame);
-      const image = block.querySelector('img');
+      const controlsPosition = getMediaBlockControlsPosition(block, editorFrame);
+      const blockType = getMediaBlockType(block);
 
       if (!controlsPosition) {
         return [];
@@ -522,57 +544,85 @@ export function ComposeImageBlocks({
       return [
         {
           block,
-          altText: image?.alt ?? '',
+          altText: blockType === 'image'
+            ? block.querySelector('img')?.alt ?? ''
+            : block.querySelector('[data-media-alt]')?.textContent ?? '',
           caption: block.querySelector('figcaption')?.textContent ?? '',
-          altTextPosition: getImageBlockAltTextPosition(block, editorFrame),
+          textActionsPosition: getMediaTextActionsPosition(block, editorFrame),
           controlsPosition,
         },
       ];
     });
 
-    setImageBlockControls(controls);
+    setMediaBlockControls(controls);
   }, [contentRef, editorFrameRef]);
 
-  const clearImageTextEditingMarker = (imageBlock: HTMLElement | null) => {
-    if (imageBlock) {
-      delete imageBlock.dataset.imageTextEditing;
+  const clearMediaTextEditingMarker = (mediaBlock: HTMLElement | null) => {
+    if (mediaBlock) {
+      delete mediaBlock.dataset.mediaTextEditing;
     }
   };
 
-  const getCommittedImageText = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode
+  const getCommittedMediaText = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode
   ): string => {
     if (mode === 'alt') {
-      return imageBlock.querySelector('img')?.alt ?? '';
+      return getMediaBlockType(mediaBlock) === 'image'
+        ? mediaBlock.querySelector('img')?.alt ?? ''
+        : mediaBlock.querySelector('[data-media-alt]')?.textContent ?? '';
     }
 
-    return imageBlock.querySelector('figcaption')?.textContent ?? '';
+    return mediaBlock.querySelector('figcaption')?.textContent ?? '';
   };
 
-  const setCommittedImageText = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode,
+  const setCommittedMediaText = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode,
     value: string
   ) => {
     const trimmedValue = value.trim();
 
     if (mode === 'alt') {
-      const image = imageBlock.querySelector('img');
+      if (getMediaBlockType(mediaBlock) === 'image') {
+        const image = mediaBlock.querySelector('img');
 
-      if (image) {
-        image.alt = trimmedValue;
+        if (image) {
+          image.alt = trimmedValue;
+        }
+
+        return;
+      }
+
+      let altBlock = mediaBlock.querySelector<HTMLElement>('[data-media-alt]');
+
+      if (trimmedValue) {
+        if (!altBlock) {
+          altBlock = document.createElement('p');
+          altBlock.dataset.mediaAlt = 'true';
+          const caption = mediaBlock.querySelector('figcaption');
+
+          if (caption) {
+            caption.before(altBlock);
+          } else {
+            mediaBlock.append(altBlock);
+          }
+        }
+
+        altBlock.textContent = trimmedValue;
+      } else {
+        altBlock?.remove();
       }
 
       return;
     }
 
-    let caption = imageBlock.querySelector('figcaption');
+    let caption = mediaBlock.querySelector('figcaption');
 
     if (trimmedValue) {
       if (!caption) {
         caption = document.createElement('figcaption');
-        imageBlock.append(caption);
+        mediaBlock.append(caption);
       }
 
       caption.textContent = trimmedValue;
@@ -581,20 +631,20 @@ export function ComposeImageBlocks({
     }
   };
 
-  const getImageTextEditValue = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode
+  const getMediaTextEditValue = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode
   ): string => {
-    const draft = imageTextDraftsRef.current.get(imageBlock)?.[mode];
+    const draft = mediaTextDraftsRef.current.get(mediaBlock)?.[mode];
 
-    return draft?.draftValue ?? getCommittedImageText(imageBlock, mode);
+    return draft?.draftValue ?? getCommittedMediaText(mediaBlock, mode);
   };
 
-  const clearImageTextDraft = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode
+  const clearMediaTextDraft = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode
   ) => {
-    const drafts = imageTextDraftsRef.current.get(imageBlock);
+    const drafts = mediaTextDraftsRef.current.get(mediaBlock);
 
     if (!drafts) {
       return;
@@ -603,7 +653,7 @@ export function ComposeImageBlocks({
     delete drafts[mode];
 
     if (!drafts.alt && !drafts.caption) {
-      imageTextDraftsRef.current.delete(imageBlock);
+      mediaTextDraftsRef.current.delete(mediaBlock);
     }
   };
 
@@ -622,18 +672,18 @@ export function ComposeImageBlocks({
       }
 
       const imagePicker = target.closest('[data-image-picker]');
-      const imageBlock = target.closest('[data-editor-block="image"]');
+      const mediaBlock = target.closest('[data-editor-block="image"]');
 
-      if (!(imageBlock instanceof HTMLElement) || !(imagePicker instanceof HTMLElement)) {
+      if (!(mediaBlock instanceof HTMLElement) || !(imagePicker instanceof HTMLElement)) {
         return;
       }
 
       event.preventDefault();
-      imageUploadTargetRef.current = imageBlock;
+      imageUploadTargetRef.current = mediaBlock;
       imageInputRef.current?.click();
     };
 
-    const observer = new MutationObserver(() => updateImageBlockControls());
+    const observer = new MutationObserver(() => updateMediaBlockControls());
 
     contentEditor.addEventListener('click', handleEditorClick);
     observer.observe(contentEditor, {
@@ -641,100 +691,100 @@ export function ComposeImageBlocks({
       childList: true,
       subtree: true,
     });
-    requestAnimationFrame(updateImageBlockControls);
+    requestAnimationFrame(updateMediaBlockControls);
 
     return () => {
       contentEditor.removeEventListener('click', handleEditorClick);
       observer.disconnect();
     };
-  }, [contentRef, updateImageBlockControls]);
+  }, [contentRef, updateMediaBlockControls]);
 
   useEffect(() => {
-    window.addEventListener('resize', updateImageBlockControls);
-    window.addEventListener('scroll', updateImageBlockControls, true);
+    window.addEventListener('resize', updateMediaBlockControls);
+    window.addEventListener('scroll', updateMediaBlockControls, true);
 
     return () => {
-      window.removeEventListener('resize', updateImageBlockControls);
-      window.removeEventListener('scroll', updateImageBlockControls, true);
+      window.removeEventListener('resize', updateMediaBlockControls);
+      window.removeEventListener('scroll', updateMediaBlockControls, true);
     };
-  }, [updateImageBlockControls]);
+  }, [updateMediaBlockControls]);
 
-  const handleRemoveImageBlock = (imageBlock: HTMLElement) => {
-    imageBlock.remove();
-    imageTextDraftsRef.current.delete(imageBlock);
-    setEditingImageText((currentEdit) =>
-      currentEdit?.block === imageBlock ? null : currentEdit
+  const handleRemoveImageBlock = (mediaBlock: HTMLElement) => {
+    mediaBlock.remove();
+    mediaTextDraftsRef.current.delete(mediaBlock);
+    setEditingMediaText((currentEdit) =>
+      currentEdit?.block === mediaBlock ? null : currentEdit
     );
-    updateImageBlockControls();
+    updateMediaBlockControls();
     syncContent();
   };
 
-  const handleChangeImageBlock = (imageBlock: HTMLElement) => {
-    imageUploadTargetRef.current = imageBlock;
+  const handleChangeImageBlock = (mediaBlock: HTMLElement) => {
+    imageUploadTargetRef.current = mediaBlock;
     imageInputRef.current?.click();
   };
 
-  const handleStartImageTextEdit = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode
+  const handleStartMediaTextEdit = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode
   ) => {
-    const existingDrafts = imageTextDraftsRef.current.get(imageBlock) ?? {};
+    const existingDrafts = mediaTextDraftsRef.current.get(mediaBlock) ?? {};
 
     if (!existingDrafts[mode]) {
-      const defaultValue = getCommittedImageText(imageBlock, mode);
+      const defaultValue = getCommittedMediaText(mediaBlock, mode);
       existingDrafts[mode] = {
         defaultValue,
         draftValue: defaultValue,
       };
-      imageTextDraftsRef.current.set(imageBlock, existingDrafts);
+      mediaTextDraftsRef.current.set(mediaBlock, existingDrafts);
     }
 
-    clearImageTextEditingMarker(editingImageText?.block ?? null);
-    imageBlock.dataset.imageTextEditing = mode;
-    setEditingImageText({
-      block: imageBlock,
+    clearMediaTextEditingMarker(editingMediaText?.block ?? null);
+    mediaBlock.dataset.mediaTextEditing = mode;
+    setEditingMediaText({
+      block: mediaBlock,
       mode,
-      value: getImageTextEditValue(imageBlock, mode),
+      value: getMediaTextEditValue(mediaBlock, mode),
     });
-    requestAnimationFrame(updateImageBlockControls);
+    requestAnimationFrame(updateMediaBlockControls);
   };
 
-  const handleDismissImageTextEdit = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode,
+  const handleDismissMediaTextEdit = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode,
     value: string
   ) => {
-    const drafts = imageTextDraftsRef.current.get(imageBlock) ?? {};
+    const drafts = mediaTextDraftsRef.current.get(mediaBlock) ?? {};
     const currentDraft = drafts[mode];
 
     drafts[mode] = {
-      defaultValue: currentDraft?.defaultValue ?? getCommittedImageText(imageBlock, mode),
+      defaultValue: currentDraft?.defaultValue ?? getCommittedMediaText(mediaBlock, mode),
       draftValue: value,
     };
-    imageTextDraftsRef.current.set(imageBlock, drafts);
+    mediaTextDraftsRef.current.set(mediaBlock, drafts);
 
-    clearImageTextEditingMarker(imageBlock);
-    setEditingImageText(null);
-    requestAnimationFrame(updateImageBlockControls);
+    clearMediaTextEditingMarker(mediaBlock);
+    setEditingMediaText(null);
+    requestAnimationFrame(updateMediaBlockControls);
   };
 
-  const handleCommitImageText = (
-    imageBlock: HTMLElement,
-    mode: ImageTextEditMode,
+  const handleCommitMediaText = (
+    mediaBlock: HTMLElement,
+    mode: MediaTextEditMode,
     value: string
   ) => {
-    setCommittedImageText(imageBlock, mode, value);
-    clearImageTextDraft(imageBlock, mode);
-    clearImageTextEditingMarker(imageBlock);
-    setEditingImageText(null);
-    updateImageBlockControls();
+    setCommittedMediaText(mediaBlock, mode, value);
+    clearMediaTextDraft(mediaBlock, mode);
+    clearMediaTextEditingMarker(mediaBlock);
+    setEditingMediaText(null);
+    updateMediaBlockControls();
     syncContent();
   };
 
   useEffect(() => {
-    editingImageTextRef.current = editingImageText;
-    commitImageTextRef.current = handleCommitImageText;
-    dismissImageTextEditRef.current = handleDismissImageTextEdit;
+    editingMediaTextRef.current = editingMediaText;
+    commitMediaTextRef.current = handleCommitMediaText;
+    dismissMediaTextEditRef.current = handleDismissMediaTextEdit;
   });
 
   useEffect(() => {
@@ -744,11 +794,11 @@ export function ComposeImageBlocks({
       return;
     }
 
-    const getActiveImageTextEditor = (event: KeyboardEvent): HTMLElement | null => {
+    const getActiveMediaTextEditor = (event: KeyboardEvent): HTMLElement | null => {
       const target = event.target;
 
       if (target instanceof HTMLElement) {
-        const targetEditor = target.closest('[data-image-text-editor]');
+        const targetEditor = target.closest('[data-media-text-editor]');
 
         if (targetEditor instanceof HTMLElement) {
           return targetEditor;
@@ -758,12 +808,12 @@ export function ComposeImageBlocks({
       const selectionNode = window.getSelection()?.anchorNode;
       const selectionElement =
         selectionNode instanceof HTMLElement ? selectionNode : selectionNode?.parentElement;
-      const selectionEditor = selectionElement?.closest('[data-image-text-editor]');
+      const selectionEditor = selectionElement?.closest('[data-media-text-editor]');
 
       return selectionEditor instanceof HTMLElement ? selectionEditor : null;
     };
 
-    const handleImageTextEditorKeyDown = (event: KeyboardEvent) => {
+    const handleMediaTextEditorKeyDown = (event: KeyboardEvent) => {
       if (
         event.key !== 'Enter' &&
         event.key !== 'Escape' &&
@@ -772,16 +822,16 @@ export function ComposeImageBlocks({
         return;
       }
 
-      const activeEditor = getActiveImageTextEditor(event);
+      const activeEditor = getActiveMediaTextEditor(event);
 
-      const currentEdit = editingImageTextRef.current;
+      const currentEdit = editingMediaTextRef.current;
 
       if (!activeEditor || !currentEdit) {
         return;
       }
 
       if (event.key === 'ArrowDown') {
-        handleImageTextEditorArrowDown(event, activeEditor);
+        handleMediaTextEditorArrowDown(event, activeEditor);
         return;
       }
 
@@ -790,7 +840,7 @@ export function ComposeImageBlocks({
       event.stopImmediatePropagation();
 
       if (event.key === 'Enter') {
-        commitImageTextRef.current(
+        commitMediaTextRef.current(
           currentEdit.block,
           currentEdit.mode,
           activeEditor.innerText
@@ -798,51 +848,51 @@ export function ComposeImageBlocks({
         return;
       }
 
-      dismissImageTextEditRef.current(
+      dismissMediaTextEditRef.current(
         currentEdit.block,
         currentEdit.mode,
         activeEditor.innerText
       );
     };
 
-    contentEditor.addEventListener('keydown', handleImageTextEditorKeyDown, true);
+    contentEditor.addEventListener('keydown', handleMediaTextEditorKeyDown, true);
 
     return () => {
-      contentEditor.removeEventListener('keydown', handleImageTextEditorKeyDown, true);
+      contentEditor.removeEventListener('keydown', handleMediaTextEditorKeyDown, true);
     };
   }, [contentRef]);
 
   useEffect(() => {
-    const handleOutsideImageTextEditPointerDown = (event: PointerEvent) => {
-      const currentEdit = editingImageTextRef.current;
+    const handleOutsideMediaTextEditPointerDown = (event: PointerEvent) => {
+      const currentEdit = editingMediaTextRef.current;
       const target = event.target;
 
       if (!currentEdit || !(target instanceof HTMLElement)) {
         return;
       }
 
-      const activeEditor = document.querySelector<HTMLElement>('[data-image-text-editor]');
+      const activeEditor = document.querySelector<HTMLElement>('[data-media-text-editor]');
 
       if (
         currentEdit.block.contains(target) ||
         activeEditor?.contains(target) ||
-        target.closest('[data-image-alt-text-control]') ||
+        target.closest('[data-media-text-actions]') ||
         target.closest('[data-image-block-controls]')
       ) {
         return;
       }
 
-      dismissImageTextEditRef.current(
+      dismissMediaTextEditRef.current(
         currentEdit.block,
         currentEdit.mode,
         activeEditor?.innerText ?? currentEdit.value
       );
     };
 
-    document.addEventListener('pointerdown', handleOutsideImageTextEditPointerDown, true);
+    document.addEventListener('pointerdown', handleOutsideMediaTextEditPointerDown, true);
 
     return () => {
-      document.removeEventListener('pointerdown', handleOutsideImageTextEditPointerDown, true);
+      document.removeEventListener('pointerdown', handleOutsideMediaTextEditPointerDown, true);
     };
   }, []);
 
@@ -853,10 +903,10 @@ export function ComposeImageBlocks({
       return;
     }
 
-    const isInsideActiveImageTextArea = (
+    const isInsideActiveMediaTextArea = (
       node: Node | null,
       activeEditor: HTMLElement | null,
-      currentEdit: EditingImageText
+      currentEdit: EditingMediaText
     ): boolean => {
       if (!node) {
         return false;
@@ -870,25 +920,25 @@ export function ComposeImageBlocks({
 
     const handleSelectionChange = () => {
       requestAnimationFrame(() => {
-        const currentEdit = editingImageTextRef.current;
+        const currentEdit = editingMediaTextRef.current;
 
         if (!currentEdit) {
           return;
         }
 
         const activeEditor = contentEditor.querySelector<HTMLElement>(
-          '[data-image-text-editor]'
+          '[data-media-text-editor]'
         );
         const activeElement = document.activeElement;
         const selectionNode = window.getSelection()?.anchorNode ?? null;
 
         if (
-          isInsideActiveImageTextArea(selectionNode, activeEditor, currentEdit) ||
-          isInsideActiveImageTextArea(activeElement, activeEditor, currentEdit) ||
+          isInsideActiveMediaTextArea(selectionNode, activeEditor, currentEdit) ||
+          isInsideActiveMediaTextArea(activeElement, activeEditor, currentEdit) ||
           (
             activeElement instanceof HTMLElement &&
             (
-              activeElement.closest('[data-image-alt-text-control]') ||
+              activeElement.closest('[data-media-text-actions]') ||
               activeElement.closest('[data-image-block-controls]')
             )
           )
@@ -896,7 +946,7 @@ export function ComposeImageBlocks({
           return;
         }
 
-        dismissImageTextEditRef.current(
+        dismissMediaTextEditRef.current(
           currentEdit.block,
           currentEdit.mode,
           activeEditor?.innerText ?? currentEdit.value
@@ -913,11 +963,11 @@ export function ComposeImageBlocks({
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    const imageBlock = imageUploadTargetRef.current;
+    const mediaBlock = imageUploadTargetRef.current;
 
     event.target.value = '';
 
-    if (!file || !imageBlock || !contentRef.current) {
+    if (!file || !mediaBlock || !contentRef.current) {
       return;
     }
 
@@ -930,25 +980,25 @@ export function ComposeImageBlocks({
         return;
       }
 
-      let image = imageBlock.querySelector('img');
+      let image = mediaBlock.querySelector('img');
 
       if (!image) {
         image = document.createElement('img');
         image.alt = '';
         image.loading = 'lazy';
-        imageBlock.prepend(image);
+        mediaBlock.prepend(image);
       }
 
       image.src = src;
 
-      const button = imageBlock.querySelector('[data-image-picker]');
+      const button = mediaBlock.querySelector('[data-image-picker]');
 
       if (button) {
         button.textContent = 'Change image';
       }
 
       syncContent();
-      requestAnimationFrame(updateImageBlockControls);
+      requestAnimationFrame(updateMediaBlockControls);
     };
 
     reader.readAsDataURL(file);
@@ -956,46 +1006,49 @@ export function ComposeImageBlocks({
 
   return (
     <>
-      {imageBlockControls.map(({
+      {mediaBlockControls.map(({
         altText,
-        altTextPosition,
         block,
         caption,
         controlsPosition,
+        textActionsPosition,
       }, index) => {
         const currentEdit =
-          editingImageText?.block === block ? editingImageText : null;
+          editingMediaText?.block === block ? editingMediaText : null;
+        const blockType = getMediaBlockType(block);
 
         return (
           <div key={index}>
-            <ComposeImageBlockControls
-              position={controlsPosition}
-              onChange={() => handleChangeImageBlock(block)}
-              onRemove={() => handleRemoveImageBlock(block)}
-            />
+            {blockType === 'image' && (
+              <ComposeMediaBlockControls
+                position={controlsPosition}
+                onChange={() => handleChangeImageBlock(block)}
+                onRemove={() => handleRemoveImageBlock(block)}
+              />
+            )}
 
-            {altTextPosition && (
-              <ComposeImageBlockAltText
+            {textActionsPosition && (
+              <ComposeMediaTextActions
                 activeMode={currentEdit?.mode ?? null}
                 hasAltText={Boolean(altText)}
                 hasCaption={Boolean(caption)}
                 isActive={Boolean(currentEdit)}
-                position={altTextPosition}
-                onStartEditing={(mode) => handleStartImageTextEdit(block, mode)}
+                position={textActionsPosition}
+                onStartEditing={(mode) => handleStartMediaTextEdit(block, mode)}
               />
             )}
 
             {currentEdit && (
-              <ComposeImageTextEditor
+              <ComposeMediaTextEditor
                 block={currentEdit.block}
                 mode={currentEdit.mode}
                 value={currentEdit.value}
-                onCommit={(value) => handleCommitImageText(
+                onCommit={(value) => handleCommitMediaText(
                   currentEdit.block,
                   currentEdit.mode,
                   value
                 )}
-                onDismiss={(value) => handleDismissImageTextEdit(
+                onDismiss={(value) => handleDismissMediaTextEdit(
                   currentEdit.block,
                   currentEdit.mode,
                   value
