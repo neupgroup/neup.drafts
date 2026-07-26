@@ -26,6 +26,116 @@ function getContentBlocks(content: string): string[] {
     .filter(Boolean);
 }
 
+function isHtmlContent(content: string): boolean {
+  return /<\/?[a-z][\s\S]*>/i.test(content);
+}
+
+function sanitizeUrl(value: string): string {
+  const trimmedValue = value.trim();
+
+  if (
+    trimmedValue.startsWith('data:image/') ||
+    trimmedValue.startsWith('data:video/') ||
+    trimmedValue.startsWith('https://') ||
+    trimmedValue.startsWith('http://')
+  ) {
+    return trimmedValue;
+  }
+
+  return '';
+}
+
+function sanitizeAttributeValue(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function getAllowedAttributes(tagName: string, attributes: string): string {
+  const allowedAttributes: string[] = [];
+  const attributePattern = /([a-zA-Z0-9:-]+)(?:\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = attributePattern.exec(attributes)) !== null) {
+    const attributeName = match[1].toLowerCase();
+    const attributeValue = match[3] ?? match[4] ?? match[5] ?? '';
+
+    if (attributeName.startsWith('on')) {
+      continue;
+    }
+
+    if (attributeName === 'data-editor-block' && ['figure', 'div'].includes(tagName)) {
+      allowedAttributes.push(`data-editor-block="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'src' && ['img', 'video'].includes(tagName)) {
+      const safeUrl = sanitizeUrl(attributeValue);
+
+      if (safeUrl) {
+        allowedAttributes.push(`src="${sanitizeAttributeValue(safeUrl)}"`);
+      }
+
+      continue;
+    }
+
+    if (attributeName === 'alt' && tagName === 'img') {
+      allowedAttributes.push(`alt="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'loading' && tagName === 'img') {
+      allowedAttributes.push(`loading="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'controls' && tagName === 'video') {
+      allowedAttributes.push('controls');
+    }
+  }
+
+  return allowedAttributes.length > 0 ? ` ${allowedAttributes.join(' ')}` : '';
+}
+
+function sanitizeArticleHtml(content: string): string {
+  const allowedTags = new Set([
+    'br',
+    'div',
+    'figure',
+    'img',
+    'p',
+    'table',
+    'tbody',
+    'td',
+    'tr',
+    'video',
+  ]);
+
+  return content
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
+    .replace(/<button\b[\s\S]*?<\/button>/gi, '')
+    .replace(/<\/?([a-zA-Z0-9-]+)([^>]*)>/g, (tag, rawTagName: string, attributes: string) => {
+      const tagName = rawTagName.toLowerCase();
+
+      if (!allowedTags.has(tagName)) {
+        return '';
+      }
+
+      if (tag.startsWith('</')) {
+        return tagName === 'br' || tagName === 'img' ? '' : `</${tagName}>`;
+      }
+
+      const safeAttributes = getAllowedAttributes(tagName, attributes);
+
+      return tagName === 'br' || tagName === 'img'
+        ? `<${tagName}${safeAttributes}>`
+        : `<${tagName}${safeAttributes}>`;
+    });
+}
+
 // 1. Fetch data from internal API route
 async function getPostFromApi(id: string, token: string) {
   try {
@@ -109,7 +219,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
   const commentsCount = post.comments?.length ?? 0;
   const likesCount = post.likes ?? post.reactions?.length ?? 0;
+  const hasHtmlContent = isHtmlContent(post.content);
   const contentBlocks = getContentBlocks(post.content);
+  const articleHtml = hasHtmlContent ? sanitizeArticleHtml(post.content) : '';
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
@@ -136,13 +248,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             </div>
           </header>
 
-          <div className="max-w-3xl space-y-6 font-serif text-[20px] font-medium leading-8 text-slate-600">
-            {contentBlocks.map((block, index) => (
-              <p key={index} className="whitespace-pre-line">
-                {block}
-              </p>
-            ))}
-          </div>
+          {hasHtmlContent ? (
+            <div
+              className="article-content-html max-w-3xl font-serif text-[20px] font-medium leading-8 text-slate-600"
+              dangerouslySetInnerHTML={{ __html: articleHtml }}
+            />
+          ) : (
+            <div className="max-w-3xl space-y-6 font-serif text-[20px] font-medium leading-8 text-slate-600">
+              {contentBlocks.map((block, index) => (
+                <p key={index} className="whitespace-pre-line">
+                  {block}
+                </p>
+              ))}
+            </div>
+          )}
         </article>
 
         <section className="border-t border-slate-200 pt-8">

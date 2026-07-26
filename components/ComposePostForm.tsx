@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface ComposeArticle {
@@ -13,6 +13,22 @@ interface ComposeArticle {
 interface ComposePostFormProps {
   article?: ComposeArticle;
 }
+
+type SlashMenuOption = 'image' | 'video' | 'table';
+
+interface SlashMenuPosition {
+  top: number;
+  left: number;
+}
+
+const slashMenuOptions: Array<{
+  id: SlashMenuOption;
+  label: string;
+}> = [
+  { id: 'image', label: 'Add an image' },
+  { id: 'video', label: 'Add a video' },
+  { id: 'table', label: 'Add a table' },
+];
 
 function createDraftArticleId(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -49,6 +65,10 @@ function escapeHtml(value: string): string {
 }
 
 function getEditorHtml(value: string): string {
+  if (value.includes('data-editor-block=')) {
+    return value;
+  }
+
   return value
     .split(/\n{2,}/)
     .map((block) => block.trim())
@@ -58,6 +78,12 @@ function getEditorHtml(value: string): string {
 }
 
 function getEditorText(element: HTMLDivElement): string {
+  const htmlContent = element.innerHTML.trim();
+
+  if (htmlContent.includes('data-editor-block=')) {
+    return htmlContent;
+  }
+
   const blocks = Array.from(element.children)
     .filter((child) => child instanceof HTMLElement)
     .map((child) => child.textContent?.replace(/\u00a0/g, ' ').trim() ?? '')
@@ -120,8 +146,12 @@ function setCaretPosition(element: HTMLElement, edge: 'start' | 'end') {
 
 function getContentBlockFromSelection(editor: HTMLDivElement): HTMLElement {
   const selection = window.getSelection();
-  let node = selection?.anchorNode ?? null;
+  const node = selection?.anchorNode ?? null;
 
+  return getEditorBlockForNode(editor, node);
+}
+
+function getEditorBlockForNode(editor: HTMLDivElement, node: Node | null): HTMLElement {
   while (node && node.parentNode !== editor) {
     node = node.parentNode;
   }
@@ -161,10 +191,156 @@ function ensureEditorParagraph(editor: HTMLDivElement): HTMLElement {
   return paragraph;
 }
 
+function getSelectionRect(): DOMRect | null {
+  const selection = window.getSelection();
+
+  if (!selection?.rangeCount) {
+    return null;
+  }
+
+  const range = selection.getRangeAt(0).cloneRange();
+  const rect = range.getBoundingClientRect();
+
+  if (rect.width || rect.height) {
+    return rect;
+  }
+
+  const marker = document.createElement('span');
+  marker.append(document.createTextNode('\u200b'));
+  range.insertNode(marker);
+  const markerRect = marker.getBoundingClientRect();
+  marker.remove();
+
+  return markerRect;
+}
+
+function createImageBlock(src?: string): HTMLElement {
+  const figure = document.createElement('figure');
+  const button = document.createElement('button');
+  const removeButton = document.createElement('button');
+
+  figure.dataset.editorBlock = 'image';
+  figure.contentEditable = 'false';
+  removeButton.type = 'button';
+  removeButton.dataset.imageRemove = 'true';
+  removeButton.ariaLabel = 'Remove image block';
+  removeButton.textContent = 'x';
+  button.type = 'button';
+  button.dataset.imagePicker = 'true';
+  button.innerHTML = src
+    ? '<span>Change image</span>'
+    : '<span class="compose-image-picker-icon">+</span><span class="compose-image-picker-title">Add image</span><span class="compose-image-picker-help">Click to choose a file from your device</span>';
+  figure.append(removeButton);
+  figure.append(button);
+
+  if (src) {
+    const image = document.createElement('img');
+    image.src = src;
+    image.alt = '';
+    image.loading = 'lazy';
+    figure.prepend(image);
+  }
+
+  return figure;
+}
+
+function createVideoBlock(src: string): HTMLElement {
+  const figure = document.createElement('figure');
+  const video = document.createElement('video');
+
+  figure.dataset.editorBlock = 'video';
+  figure.contentEditable = 'false';
+  video.src = src;
+  video.controls = true;
+  figure.append(video);
+
+  return figure;
+}
+
+function createTableBlock(): HTMLElement {
+  const wrapper = document.createElement('div');
+  const table = document.createElement('table');
+  const tbody = document.createElement('tbody');
+
+  wrapper.dataset.editorBlock = 'table';
+
+  for (let rowIndex = 0; rowIndex < 3; rowIndex += 1) {
+    const row = document.createElement('tr');
+
+    for (let cellIndex = 0; cellIndex < 3; cellIndex += 1) {
+      const cell = document.createElement('td');
+      cell.append(document.createElement('br'));
+      row.append(cell);
+    }
+
+    tbody.append(row);
+  }
+
+  table.append(tbody);
+  wrapper.append(table);
+
+  return wrapper;
+}
+
+function getSlashCommandContext(editor: HTMLDivElement): {
+  position: SlashMenuPosition;
+  query: string;
+  range: Range;
+} | null {
+  const selection = window.getSelection();
+
+  if (
+    !selection?.anchorNode ||
+    !selection.isCollapsed ||
+    !selection.rangeCount ||
+    !editor.contains(selection.anchorNode) ||
+    selection.anchorNode.nodeType !== Node.TEXT_NODE
+  ) {
+    return null;
+  }
+
+  const textNode = selection.anchorNode;
+  const textContent = textNode.textContent ?? '';
+  const textBeforeCaret = textContent.slice(0, selection.anchorOffset);
+  const slashIndex = textBeforeCaret.lastIndexOf('/');
+
+  if (slashIndex === -1) {
+    return null;
+  }
+
+  const query = textBeforeCaret.slice(slashIndex + 1);
+
+  if (/\s/.test(query)) {
+    return null;
+  }
+
+  const rect = getSelectionRect();
+
+  if (!rect) {
+    return null;
+  }
+
+  const range = document.createRange();
+  range.setStart(textNode, slashIndex);
+  range.setEnd(textNode, selection.anchorOffset);
+
+  return {
+    position: {
+      top: rect.bottom + 8,
+      left: rect.left,
+    },
+    query,
+    range,
+  };
+}
+
 export default function ComposePostForm({ article }: ComposePostFormProps) {
   const router = useRouter();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageUploadTargetRef = useRef<HTMLElement | null>(null);
+  const slashMenuRangeRef = useRef<Range | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
   const [articleId] = useState(() => article?.id ?? createDraftArticleId());
@@ -172,8 +348,14 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [content, setContent] = useState(article?.content ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [slashMenuPosition, setSlashMenuPosition] = useState<SlashMenuPosition | null>(null);
+  const [slashMenuQuery, setSlashMenuQuery] = useState('');
+  const [activeSlashMenuOptionIndex, setActiveSlashMenuOptionIndex] = useState(0);
   const isEditing = Boolean(article);
   const slugBase = slugify(title);
+  const filteredSlashMenuOptions = slashMenuOptions.filter((option) =>
+    option.label.toLowerCase().includes(slashMenuQuery.toLowerCase())
+  );
 
   const normalizeTitle = (value: string): string => value.replace(/\s*\r?\n\s*/g, ' ');
 
@@ -194,6 +376,31 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     titleRef.current.textContent = title;
     initializedTitleArticleIdRef.current = articleId;
   }, [articleId, title]);
+
+  useEffect(() => {
+    if (!slashMenuPosition) {
+      return;
+    }
+
+    const closeSlashMenu = (event: MouseEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest('[data-slash-menu]')
+      ) {
+        return;
+      }
+
+      slashMenuRangeRef.current = null;
+      setSlashMenuPosition(null);
+      setSlashMenuQuery('');
+    };
+
+    document.addEventListener('mousedown', closeSlashMenu);
+
+    return () => {
+      document.removeEventListener('mousedown', closeSlashMenu);
+    };
+  }, [slashMenuPosition]);
 
   const focusFirstContentBlock = () => {
     const contentEditor = contentRef.current;
@@ -217,6 +424,208 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     titleRef.current.focus();
     setCaretPosition(titleRef.current, 'end');
+  };
+
+  const updateSlashMenuFromSelection = () => {
+    const contentEditor = contentRef.current;
+    const context = contentEditor ? getSlashCommandContext(contentEditor) : null;
+
+    if (!context) {
+      slashMenuRangeRef.current = null;
+      setSlashMenuPosition(null);
+      setSlashMenuQuery('');
+      return;
+    }
+
+    slashMenuRangeRef.current = context.range;
+    setSlashMenuPosition(context.position);
+
+    if (slashMenuQuery !== context.query) {
+      setActiveSlashMenuOptionIndex(0);
+    }
+
+    setSlashMenuQuery(context.query);
+  };
+
+  const updateSlashMenuAfterCaretMove = () => {
+    requestAnimationFrame(() => {
+      updateSlashMenuFromSelection();
+    });
+  };
+
+  const openSlashMenuAfterTextInput = () => {
+    requestAnimationFrame(() => {
+      updateSlashMenuFromSelection();
+
+      if (contentRef.current) {
+        setContent(getEditorText(contentRef.current));
+      }
+    });
+  };
+
+  const syncContentAfterInput = (element: HTMLDivElement) => {
+    setContent(getEditorText(element));
+
+    if (slashMenuPosition) {
+      requestAnimationFrame(() => {
+        updateSlashMenuFromSelection();
+      });
+    }
+  };
+
+  const closeSlashMenu = () => {
+    slashMenuRangeRef.current = null;
+    setSlashMenuPosition(null);
+    setSlashMenuQuery('');
+    setActiveSlashMenuOptionIndex(0);
+  };
+
+  const moveActiveSlashMenuOption = (direction: 1 | -1) => {
+    setActiveSlashMenuOptionIndex((currentIndex) => {
+      if (filteredSlashMenuOptions.length === 0) {
+        return 0;
+      }
+
+      return (
+        currentIndex +
+        direction +
+        filteredSlashMenuOptions.length
+      ) % filteredSlashMenuOptions.length;
+    });
+  };
+
+  const insertEditorBlock = (block: HTMLElement) => {
+    const contentEditor = contentRef.current;
+
+    if (!contentEditor) {
+      return;
+    }
+
+    const selection = window.getSelection();
+    const range = slashMenuRangeRef.current;
+    const commandBlock = range
+      ? getEditorBlockForNode(contentEditor, range.startContainer)
+      : null;
+    const shouldReplaceCommandBlock =
+      commandBlock &&
+      commandBlock !== contentEditor &&
+      commandBlock.textContent?.trim() === range?.toString().trim();
+
+    contentEditor.focus();
+
+    if (shouldReplaceCommandBlock) {
+      commandBlock.replaceWith(block);
+    } else if (range) {
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      range.deleteContents();
+      range.insertNode(block);
+    } else {
+      contentEditor.append(block);
+    }
+
+    const paragraph = createEditorParagraph();
+    block.after(paragraph);
+    setCaretPosition(paragraph, 'start');
+    setContent(getEditorText(contentEditor));
+    closeSlashMenu();
+  };
+
+  const handleSlashMenuOption = (option: SlashMenuOption) => {
+    if (option === 'image') {
+      insertEditorBlock(createImageBlock());
+      return;
+    }
+
+    if (option === 'video') {
+      const src = window.prompt('Video URL');
+
+      if (src?.trim()) {
+        insertEditorBlock(createVideoBlock(src.trim()));
+      }
+
+      return;
+    }
+
+    insertEditorBlock(createTableBlock());
+  };
+
+  const handleEditorClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const imagePicker = target.closest('[data-image-picker]');
+    const imageRemove = target.closest('[data-image-remove]');
+    const imageBlock = target.closest('[data-editor-block="image"]');
+
+    if (!(imageBlock instanceof HTMLElement)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (imageRemove instanceof HTMLElement) {
+      imageBlock.remove();
+
+      if (contentRef.current) {
+        setContent(getEditorText(contentRef.current));
+      }
+
+      return;
+    }
+
+    if (!(imagePicker instanceof HTMLElement)) {
+      return;
+    }
+
+    imageUploadTargetRef.current = imageBlock;
+    imageInputRef.current?.click();
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    const imageBlock = imageUploadTargetRef.current;
+    const contentEditor = contentRef.current;
+
+    event.target.value = '';
+
+    if (!file || !imageBlock || !contentEditor) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const src = typeof reader.result === 'string' ? reader.result : '';
+
+      if (!src) {
+        return;
+      }
+
+      let image = imageBlock.querySelector('img');
+
+      if (!image) {
+        image = document.createElement('img');
+        image.alt = '';
+        image.loading = 'lazy';
+        imageBlock.prepend(image);
+      }
+
+      image.src = src;
+
+      const button = imageBlock.querySelector('[data-image-picker]');
+
+      if (button) {
+        button.textContent = 'Change image';
+      }
+
+      setContent(getEditorText(contentEditor));
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -315,9 +724,77 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             document.execCommand('defaultParagraphSeparator', false, 'p');
             ensureEditorParagraph(e.currentTarget);
           }}
-          onInput={(e) => setContent(getEditorText(e.currentTarget))}
+          onClick={handleEditorClick}
+          onInput={(e) => syncContentAfterInput(e.currentTarget)}
           onKeyDown={(e) => {
             document.execCommand('defaultParagraphSeparator', false, 'p');
+
+            if (e.key === 'Escape' && slashMenuPosition) {
+              e.preventDefault();
+              closeSlashMenu();
+              return;
+            }
+
+            if (slashMenuPosition && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+              e.preventDefault();
+              moveActiveSlashMenuOption(e.key === 'ArrowDown' ? 1 : -1);
+              return;
+            }
+
+            if (slashMenuPosition && e.key === 'Enter') {
+              e.preventDefault();
+              const activeOption = filteredSlashMenuOptions[activeSlashMenuOptionIndex];
+
+              if (activeOption) {
+                handleSlashMenuOption(activeOption.id);
+              } else {
+                closeSlashMenu();
+              }
+
+              return;
+            }
+
+            if (slashMenuPosition && e.key === 'Tab') {
+              e.preventDefault();
+              closeSlashMenu();
+              return;
+            }
+
+            if (slashMenuPosition && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+              const commandContext = getSlashCommandContext(e.currentTarget);
+              const commandRange = commandContext?.range;
+              const commandTextNode = commandRange?.startContainer;
+
+              if (
+                e.key === 'ArrowLeft' &&
+                commandRange &&
+                commandRange.endOffset <= commandRange.startOffset + 1
+              ) {
+                closeSlashMenu();
+                return;
+              }
+
+              if (
+                e.key === 'ArrowRight' &&
+                commandRange &&
+                commandTextNode &&
+                commandTextNode.nodeType === Node.TEXT_NODE &&
+                !(commandTextNode.textContent ?? '')[commandRange.endOffset]
+              ) {
+                e.preventDefault();
+                closeSlashMenu();
+                return;
+              }
+
+              updateSlashMenuAfterCaretMove();
+              return;
+            }
+
+            if (e.key === '/') {
+              openSlashMenuAfterTextInput();
+              return;
+            }
+
             const currentBlock = getContentBlockFromSelection(e.currentTarget);
 
             if (
@@ -381,7 +858,46 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
           }}
           className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
         />
+
+        {slashMenuPosition && (
+          <div
+            data-slash-menu
+            style={{
+              top: slashMenuPosition.top,
+              left: slashMenuPosition.left,
+            }}
+            className="fixed z-50 w-56 border border-slate-200 bg-white p-1 shadow-lg"
+          >
+            {filteredSlashMenuOptions.map((option, index) => (
+              <button
+                key={option.id}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleSlashMenuOption(option.id)}
+                className={`block w-full rounded px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-100 ${
+                  index === activeSlashMenuOptionIndex ? 'bg-slate-100' : ''
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+
+            {filteredSlashMenuOptions.length === 0 && (
+              <div className="px-3 py-2 text-sm text-slate-500">
+                No blocks found
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageUpload}
+      />
 
       <div className="flex items-center gap-3">
         <button
