@@ -62,18 +62,18 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
     const { title, content, slug, articleId } = await req.json();
 
-    if (!title || !content || !slug) {
-      return NextResponse.json({ error: 'Missing title, slug, or content' }, { status: 400 });
+    if (!title || !content) {
+      return NextResponse.json({ error: 'Missing title or content' }, { status: 400 });
     }
 
     const id =
       typeof articleId === 'string' && ARTICLE_ID_PATTERN.test(articleId)
         ? articleId
         : createArticleId();
-    const finalSlug = buildArticleSlug(slug, id);
+    const finalSlug = buildArticleSlug(slug || title, id);
 
     if (!finalSlug) {
-      return NextResponse.json({ error: 'Slug must contain letters or numbers' }, { status: 400 });
+      return NextResponse.json({ error: 'Title must contain letters or numbers' }, { status: 400 });
     }
 
     // Create the article in PostgreSQL using authorId

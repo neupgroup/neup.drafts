@@ -54,6 +54,81 @@ export const GET = withAuth(
   }
 );
 
+// PROTECTED: Only authenticated author (or admin) can update
+export const PATCH = withAuth(
+  async (req: NextRequest, context: AuthContext) => {
+    try {
+      const articleLookup = getArticleLookupFromUrl(req);
+      let body: unknown;
+
+      try {
+        body = await req.json();
+      } catch {
+        return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+      }
+
+      const { title, content } =
+        typeof body === 'object' && body !== null
+          ? body as { title?: unknown; content?: unknown }
+          : {};
+
+      if (typeof title !== 'string' || typeof content !== 'string') {
+        return NextResponse.json({ error: "Missing title or content" }, { status: 400 });
+      }
+
+      const nextTitle = title.trim();
+      const nextContent = content.trim();
+
+      if (!nextTitle || !nextContent) {
+        return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
+      }
+
+      const post = await prisma.article.findFirst({
+        where: {
+          OR: [
+            { id: articleLookup.id },
+            { slug: articleLookup.slug },
+          ],
+        },
+        select: { id: true, authorId: true },
+      });
+
+      if (!post) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+
+      const isOwner = post.authorId === context.user.id;
+      const isAdmin = context.user.role === 'ADMIN';
+
+      if (!isOwner && !isAdmin) {
+        return NextResponse.json(
+          { error: "Forbidden: You cannot edit this post" },
+          { status: 403 }
+        );
+      }
+
+      const updatedPost = await prisma.article.update({
+        where: { id: post.id },
+        data: {
+          title: nextTitle,
+          content: nextContent,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Post updated successfully",
+          post: updatedPost,
+        },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.error("Update failed:", error);
+      return NextResponse.json({ error: "Server Error" }, { status: 500 });
+    }
+  }
+);
+
 // PROTECTED: Only authenticated author (or admin) can delete
 export const DELETE = withAuth(
   async (req: NextRequest, context: AuthContext) => {

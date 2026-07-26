@@ -1,0 +1,87 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import ComposePostForm from '@/components/ComposePostForm';
+import SiteHeader from '@/components/SiteHeader';
+import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
+import { prisma } from '@/inapp/lib/prisma';
+
+interface ComposePageProps {
+  searchParams: Promise<{
+    article?: string | string[];
+  }>;
+}
+
+function getArticleLookup(article: string): { id: string; slug: string } {
+  const articleSegmentParts = article.split('-');
+  return {
+    id: articleSegmentParts[articleSegmentParts.length - 1] || article,
+    slug: article,
+  };
+}
+
+export default async function ComposePage({ searchParams }: ComposePageProps) {
+  const query = await searchParams;
+  const articleParam = Array.isArray(query.article) ? query.article[0] : query.article;
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+
+  if (!token) {
+    redirect('/unauthorized');
+  }
+
+  const user = await verifyTokenWithBridge(token);
+
+  if (!user) {
+    redirect('/unauthorized');
+  }
+
+  if (!articleParam) {
+    return (
+      <main className="min-h-screen bg-white text-slate-900">
+        <SiteHeader user={user} />
+
+        <section className="mx-auto max-w-4xl px-6 py-8">
+          <ComposePostForm />
+        </section>
+      </main>
+    );
+  }
+
+  const articleLookup = getArticleLookup(articleParam);
+  const article = await prisma.article.findFirst({
+    where: {
+      OR: [
+        { id: articleLookup.id },
+        { slug: articleLookup.slug },
+      ],
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      slug: true,
+      authorId: true,
+    },
+  });
+
+  if (!article) {
+    redirect('/compose');
+  }
+
+  const canEdit = article.authorId === user.id || user.role === 'ADMIN';
+
+  if (!canEdit) {
+    redirect('/unauthorized');
+  }
+
+  return (
+    <main className="min-h-screen bg-white text-slate-900">
+      <SiteHeader user={user} />
+
+      <section className="mx-auto max-w-4xl px-6 py-8">
+        <ComposePostForm article={article} />
+      </section>
+    </main>
+  );
+}

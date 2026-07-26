@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+:where(button, input, textarea, select) {
+  border-radius: 0.5rem;
+}
+
+:where(
+  a[class*="border"],
+  a[class*="bg-"],
+  div[class*="border"][class*="bg-"],
+  section[class*="border"][class*="bg-"],
+  p[class*="border"],
+  span[class*="border"]
+) {
+  border-radius: 0.5rem;
+}

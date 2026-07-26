@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
+import SiteHeader from '@/components/SiteHeader';
 
 // Post interface matching the real DB structure and fallback types
 interface Author {
@@ -54,62 +55,9 @@ export default async function HomePage() {
   // Only fetch articles if the user is authenticated
   const posts = user ? await getAllPosts() : [];
 
-  // User display name fallback (username or email prefix)
-  const userDisplayName = user
-    ? user.username || user.email.split('@')[0]
-    : '';
-
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
-      {/* Navigation */}
-      <nav className="border-b border-slate-200 sticky top-0 z-50 bg-white/90 shadow-md shadow-slate-200/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-[22px] font-bold tracking-tighter text-slate-950 hover:text-blue-600 transition-colors">
-            Neup.Drafts
-          </Link>
-          
-          <div className="flex items-center gap-4 text-sm font-medium">
-            {user ? (
-              <>
-                <Link href="/create" className="text-slate-600 hover:text-blue-600 transition-colors">
-                  Create Post
-                </Link>
-                <Link href="/translation" className="text-slate-600 hover:text-blue-600 transition-colors">
-                  Translate
-                </Link>
-                <Link href="/account" className="flex items-center gap-2 border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-950 transition-all hover:bg-slate-100">
-                  @{userDisplayName}
-                </Link>
-
-                {/* SIGN OUT BUTTON */}
-                <form action="/api/auth/signout" method="POST">
-                  <button 
-                    type="submit" 
-                    className="cursor-pointer border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-600 transition-all hover:bg-red-500/20 hover:text-red-700"
-                  >
-                    Sign Out
-                  </button>
-                </form>
-              </>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link 
-                  href="/login" 
-                  className="bg-blue-600 px-4 py-1.5 font-medium text-white transition-all hover:bg-opacity-90"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/signup" 
-                  className="border border-slate-300 px-4 py-1.5 font-medium text-slate-950 transition-all hover:bg-slate-100"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      <SiteHeader user={user} />
 
       {/* Main Layout */}
       <div className="max-w-4xl mx-auto px-6 py-12">

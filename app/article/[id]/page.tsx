@@ -18,6 +18,13 @@ function getCanonicalArticleSlug(post: { id: string; slug?: string | null }): st
   return post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`;
 }
 
+function getContentBlocks(content: string): string[] {
+  return content
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+}
+
 // 1. Fetch data from internal API route
 async function getPostFromApi(id: string, token: string) {
   try {
@@ -99,6 +106,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
   const commentsCount = post.comments?.length ?? 0;
   const likesCount = post.likes ?? post.reactions?.length ?? 0;
+  const contentBlocks = getContentBlocks(post.content);
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
@@ -124,11 +132,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           <header className="border-b border-slate-200 pb-8">
             <div className="flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.18em] text-rose-600">
               <span>@{authorDisplayName || 'Anonymous'}</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-500">ID #{post.id.slice(-6)}</span>
             </div>
 
-            <h1 className="mt-5 max-w-3xl text-5xl font-medium leading-tight tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-3 max-w-3xl font-serif text-4xl font-medium leading-tight tracking-tight text-slate-700">
               {post.title}
             </h1>
 
@@ -142,8 +148,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             </div>
           </header>
 
-          <div className="max-w-3xl whitespace-pre-line text-base leading-8 text-slate-700 md:text-lg md:leading-9">
-            {post.content}
+          <div className="max-w-3xl space-y-6 font-serif text-[20px] font-medium leading-8 text-slate-600">
+            {contentBlocks.map((block, index) => (
+              <p key={index} className="whitespace-pre-line">
+                {block}
+              </p>
+            ))}
           </div>
         </article>
 

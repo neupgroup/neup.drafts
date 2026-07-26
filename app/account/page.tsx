@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
 import { Prisma } from '@/app/generated/prisma/client';
+import SiteHeader from '@/components/SiteHeader';
 
 // Extract the exact return type for Article + included relations
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -50,13 +51,16 @@ export default async function AccountPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white p-6 text-center text-slate-900">
-        <section className="max-w-md border border-slate-200 bg-slate-50 p-8">
-          <p className="font-medium text-red-600">Access Denied.</p>
-          <p className="mt-2 text-sm text-slate-600">
-          Please log in to view your profile and publications.
-          </p>
-        </section>
+      <main className="min-h-screen bg-white text-slate-900">
+        <SiteHeader user={null} />
+        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-6 text-center">
+          <section className="max-w-md border border-slate-200 bg-slate-50 p-8">
+            <p className="font-medium text-red-600">Access Denied.</p>
+            <p className="mt-2 text-sm text-slate-600">
+            Please log in to view your profile and publications.
+            </p>
+          </section>
+        </div>
       </main>
     );
   }
@@ -65,8 +69,9 @@ export default async function AccountPage() {
   const myPosts = await getUserPosts(user.id);
 
   return (
-    <main className="min-h-screen bg-white px-6 py-10 text-slate-900">
-      <section className="mx-auto max-w-4xl space-y-8">
+    <main className="min-h-screen bg-white text-slate-900">
+      <SiteHeader user={user} />
+      <section className="mx-auto max-w-4xl space-y-8 px-6 py-10">
       {/* USER PROFILE CARD */}
       <div className="flex flex-col gap-6 border border-slate-200 bg-slate-50 p-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
