@@ -1,6 +1,7 @@
 'use client';
 
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 
 interface ComposeImageBlocksProps {
   contentRef: RefObject<HTMLDivElement | null>;
@@ -38,13 +39,142 @@ interface ComposeImageBlockControlsProps {
 }
 
 interface ComposeImageBlockAltTextProps {
-  editingMode: ImageTextEditMode | null;
+  activeMode: ImageTextEditMode | null;
+  hasAltText: boolean;
+  hasCaption: boolean;
+  isActive: boolean;
   position: ImageBlockAltTextPosition;
-  caption: string;
-  value: string;
   onStartEditing: (mode: ImageTextEditMode) => void;
-  onCancel: () => void;
-  onCommit: (mode: ImageTextEditMode, value: string) => void;
+}
+
+interface ComposeImageTextEditorProps {
+  block: HTMLElement;
+  mode: ImageTextEditMode;
+  value: string;
+  onCommit: (value: string) => void;
+  onDismiss: (value: string) => void;
+}
+
+interface ImageTextDraftState {
+  defaultValue: string;
+  draftValue: string;
+}
+
+type ImageTextDrafts = Partial<Record<ImageTextEditMode, ImageTextDraftState>>;
+
+interface EditingImageText {
+  block: HTMLElement;
+  mode: ImageTextEditMode;
+  value: string;
+}
+
+function getCaretTextOffset(element: HTMLElement): number | null {
+  const selection = window.getSelection();
+
+  if (
+    !selection?.anchorNode ||
+    !selection.isCollapsed ||
+    !selection.rangeCount ||
+    !element.contains(selection.anchorNode)
+  ) {
+    return null;
+  }
+
+  const range = selection.getRangeAt(0);
+  const textBeforeCaret = range.cloneRange();
+  textBeforeCaret.selectNodeContents(element);
+  textBeforeCaret.setEnd(range.endContainer, range.endOffset);
+
+  return textBeforeCaret.toString().length;
+}
+
+function setCaretToTextEnd(element: HTMLElement) {
+  const selection = window.getSelection();
+
+  if (!selection) {
+    return;
+  }
+
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function getCollapsedRangeRect(range: Range): DOMRect | null {
+  const rangeRect = range.getClientRects()[0];
+
+  if (rangeRect) {
+    return rangeRect;
+  }
+
+  const selection = window.getSelection();
+  const originalRange = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+  const marker = document.createElement('span');
+
+  marker.textContent = '\u200b';
+  range.cloneRange().insertNode(marker);
+
+  const markerParent = marker.parentNode;
+  const markerRect = marker.getBoundingClientRect();
+
+  marker.remove();
+  markerParent?.normalize();
+
+  if (originalRange && selection) {
+    selection.removeAllRanges();
+    selection.addRange(originalRange);
+  }
+
+  return markerRect;
+}
+
+function isCaretOnLastTextLine(element: HTMLElement): boolean {
+  const selection = window.getSelection();
+
+  if (
+    !selection?.anchorNode ||
+    !selection.isCollapsed ||
+    !selection.rangeCount ||
+    !element.contains(selection.anchorNode)
+  ) {
+    return true;
+  }
+
+  const caretRange = selection.getRangeAt(0);
+  const endRange = document.createRange();
+
+  endRange.selectNodeContents(element);
+  endRange.collapse(false);
+
+  const caretRect = getCollapsedRangeRect(caretRange);
+  const endRect = getCollapsedRangeRect(endRange);
+
+  if (!caretRect || !endRect) {
+    const caretOffset = getCaretTextOffset(element);
+
+    return caretOffset === null || caretOffset >= element.innerText.length;
+  }
+
+  return caretRect.bottom >= endRect.top - 2;
+}
+
+function handleImageTextEditorArrowDown(
+  event: KeyboardEvent,
+  editor: HTMLElement
+): boolean {
+  event.stopPropagation();
+
+  if (!isCaretOnLastTextLine(editor)) {
+    return false;
+  }
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  setCaretToTextEnd(editor);
+
+  return true;
 }
 
 export function createImageBlock(src?: string): HTMLElement {
@@ -178,14 +308,22 @@ function ComposeImageBlockControls({
 }
 
 function ComposeImageBlockAltText({
-  editingMode,
+  activeMode,
+  hasAltText,
+  hasCaption,
+  isActive,
   position,
-  caption,
-  value,
   onStartEditing,
-  onCancel,
-  onCommit,
 }: ComposeImageBlockAltTextProps) {
+  const overlayClassName = [
+    'group absolute z-[9] flex items-end justify-center bg-gradient-to-t from-slate-950/65 to-transparent p-4 transition-opacity duration-300 hover:opacity-100 focus-within:opacity-100',
+    isActive ? 'opacity-100' : 'opacity-0',
+  ].join(' ');
+  const actionClassName = [
+    'flex items-center gap-5 font-serif text-sm font-semibold text-white shadow-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100',
+    isActive ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
+  ].join(' ');
+
   return (
     <div
       data-image-alt-text-control
@@ -195,56 +333,132 @@ function ComposeImageBlockAltText({
         width: position.width,
         height: position.height,
       }}
-      className="group absolute z-[9] flex items-end justify-center bg-gradient-to-t from-slate-950/65 to-transparent p-4 opacity-0 transition-opacity duration-300 hover:opacity-100 focus-within:opacity-100"
+      className={overlayClassName}
     >
-      {editingMode ? (
-        <input
-          autoFocus
-          defaultValue={editingMode === 'alt' ? value : caption}
-          placeholder={editingMode === 'alt' ? 'Add alt text' : 'Write caption'}
-          onBlur={(event) => onCommit(editingMode, event.currentTarget.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              onCommit(editingMode, event.currentTarget.value);
-            }
-
-            if (event.key === 'Escape') {
-              event.preventDefault();
-              onCancel();
-            }
+      <div className={actionClassName}>
+        <a
+          href="#"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={(event) => {
+            event.preventDefault();
+            onStartEditing('alt');
           }}
-          className="h-9 w-full max-w-md rounded-full border border-white/20 bg-white/95 px-4 text-center font-serif text-sm font-medium text-slate-700 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300"
-        />
-      ) : (
-        <div className="flex translate-y-3 items-center gap-5 font-serif text-sm font-semibold text-white opacity-0 shadow-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
-          <a
-            href="#"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={(event) => {
-              event.preventDefault();
-              onStartEditing('alt');
-            }}
-            className="compose-image-action-link"
-          >
-            Add alt text
-          </a>
+          className="compose-image-action-link"
+          data-active={activeMode === 'alt' ? 'true' : undefined}
+        >
+          {activeMode === 'alt' ? 'Save alt text' : hasAltText ? 'Edit alt text' : 'Add alt text'}
+        </a>
 
-          <a
-            href="#"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={(event) => {
-              event.preventDefault();
-              onStartEditing('caption');
-            }}
-            className="compose-image-action-link"
-          >
-            Write caption
-          </a>
-        </div>
-      )}
+        <a
+          href="#"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={(event) => {
+            event.preventDefault();
+            onStartEditing('caption');
+          }}
+          className="compose-image-action-link"
+          data-active={activeMode === 'caption' ? 'true' : undefined}
+        >
+          {activeMode === 'caption' ? 'Save caption' : hasCaption ? 'Edit caption' : 'Write caption'}
+        </a>
+      </div>
     </div>
   );
+}
+
+function ComposeImageTextEditor({
+  block,
+  mode,
+  value,
+  onCommit,
+  onDismiss,
+}: ComposeImageTextEditorProps) {
+  const placeholder = mode === 'alt' ? 'Write alt text here' : 'Write caption here';
+  const onCommitRef = useRef(onCommit);
+  const onDismissRef = useRef(onDismiss);
+
+  useEffect(() => {
+    onCommitRef.current = onCommit;
+    onDismissRef.current = onDismiss;
+  }, [onCommit, onDismiss]);
+
+  useEffect(() => {
+    const editor = document.createElement('p');
+    let didFinish = false;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        didFinish = true;
+        editor.blur();
+        onCommitRef.current((event.currentTarget as HTMLElement).innerText);
+      }
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        didFinish = true;
+        editor.blur();
+        onDismissRef.current((event.currentTarget as HTMLElement).innerText);
+      }
+
+      if (event.key === 'ArrowDown') {
+        handleImageTextEditorArrowDown(event, editor);
+      }
+    };
+    const handleMouseDown = (event: MouseEvent) => {
+      event.stopPropagation();
+    };
+    const handleInput = (event: Event) => {
+      event.stopPropagation();
+    };
+    const handleBlur = (event: FocusEvent) => {
+      if (didFinish) {
+        return;
+      }
+
+      didFinish = true;
+      onDismissRef.current((event.currentTarget as HTMLElement).innerText);
+    };
+    const handlePaste = (event: ClipboardEvent) => {
+      event.preventDefault();
+      document.execCommand('insertText', false, event.clipboardData?.getData('text/plain') ?? '');
+    };
+
+    editor.className = 'compose-image-text-editor';
+    editor.contentEditable = 'plaintext-only';
+    editor.dataset.placeholder = placeholder;
+    editor.dataset.imageTextEditor = 'true';
+    editor.dataset.imageTextMode = mode;
+    editor.textContent = value;
+    editor.addEventListener('keydown', handleKeyDown);
+    editor.addEventListener('mousedown', handleMouseDown);
+    editor.addEventListener('input', handleInput);
+    editor.addEventListener('blur', handleBlur);
+    editor.addEventListener('paste', handlePaste);
+    block.after(editor);
+    editor.focus();
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    return () => {
+      editor.removeEventListener('keydown', handleKeyDown);
+      editor.removeEventListener('mousedown', handleMouseDown);
+      editor.removeEventListener('input', handleInput);
+      editor.removeEventListener('blur', handleBlur);
+      editor.removeEventListener('paste', handlePaste);
+      editor.remove();
+    };
+  }, [block, mode, placeholder, value]);
+
+  return null;
 }
 
 export function ComposeImageBlocks({
@@ -255,17 +469,34 @@ export function ComposeImageBlocks({
 }: ComposeImageBlocksProps) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUploadTargetRef = useRef<HTMLElement | null>(null);
+  const imageTextDraftsRef = useRef<WeakMap<HTMLElement, ImageTextDrafts>>(new WeakMap());
+  const editingImageTextRef = useRef<EditingImageText | null>(null);
+  const commitImageTextRef = useRef<(
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode,
+    value: string
+  ) => void>(() => {});
+  const dismissImageTextEditRef = useRef<(
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode,
+    value: string
+  ) => void>(() => {});
   const [imageBlockControls, setImageBlockControls] = useState<ImageBlockControl[]>([]);
-  const [editingImageText, setEditingImageText] = useState<{
-    block: HTMLElement;
-    mode: ImageTextEditMode;
-  } | null>(null);
+  const [editingImageText, setEditingImageText] = useState<EditingImageText | null>(null);
 
   const syncContent = useCallback(() => {
     const contentEditor = contentRef.current;
 
     if (contentEditor) {
-      onContentChange(getContent(contentEditor));
+      const contentSnapshot = contentEditor.cloneNode(true) as HTMLDivElement;
+
+      contentSnapshot
+        .querySelectorAll('[data-image-text-editor]')
+        .forEach((node) => node.remove());
+      contentSnapshot
+        .querySelectorAll<HTMLElement>('[data-image-text-editing]')
+        .forEach((node) => delete node.dataset.imageTextEditing);
+      onContentChange(getContent(contentSnapshot));
     }
   }, [contentRef, getContent, onContentChange]);
 
@@ -301,6 +532,80 @@ export function ComposeImageBlocks({
 
     setImageBlockControls(controls);
   }, [contentRef, editorFrameRef]);
+
+  const clearImageTextEditingMarker = (imageBlock: HTMLElement | null) => {
+    if (imageBlock) {
+      delete imageBlock.dataset.imageTextEditing;
+    }
+  };
+
+  const getCommittedImageText = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode
+  ): string => {
+    if (mode === 'alt') {
+      return imageBlock.querySelector('img')?.alt ?? '';
+    }
+
+    return imageBlock.querySelector('figcaption')?.textContent ?? '';
+  };
+
+  const setCommittedImageText = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode,
+    value: string
+  ) => {
+    const trimmedValue = value.trim();
+
+    if (mode === 'alt') {
+      const image = imageBlock.querySelector('img');
+
+      if (image) {
+        image.alt = trimmedValue;
+      }
+
+      return;
+    }
+
+    let caption = imageBlock.querySelector('figcaption');
+
+    if (trimmedValue) {
+      if (!caption) {
+        caption = document.createElement('figcaption');
+        imageBlock.append(caption);
+      }
+
+      caption.textContent = trimmedValue;
+    } else {
+      caption?.remove();
+    }
+  };
+
+  const getImageTextEditValue = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode
+  ): string => {
+    const draft = imageTextDraftsRef.current.get(imageBlock)?.[mode];
+
+    return draft?.draftValue ?? getCommittedImageText(imageBlock, mode);
+  };
+
+  const clearImageTextDraft = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode
+  ) => {
+    const drafts = imageTextDraftsRef.current.get(imageBlock);
+
+    if (!drafts) {
+      return;
+    }
+
+    delete drafts[mode];
+
+    if (!drafts.alt && !drafts.caption) {
+      imageTextDraftsRef.current.delete(imageBlock);
+    }
+  };
 
   useEffect(() => {
     const contentEditor = contentRef.current;
@@ -356,6 +661,7 @@ export function ComposeImageBlocks({
 
   const handleRemoveImageBlock = (imageBlock: HTMLElement) => {
     imageBlock.remove();
+    imageTextDraftsRef.current.delete(imageBlock);
     setEditingImageText((currentEdit) =>
       currentEdit?.block === imageBlock ? null : currentEdit
     );
@@ -368,37 +674,242 @@ export function ComposeImageBlocks({
     imageInputRef.current?.click();
   };
 
+  const handleStartImageTextEdit = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode
+  ) => {
+    const existingDrafts = imageTextDraftsRef.current.get(imageBlock) ?? {};
+
+    if (!existingDrafts[mode]) {
+      const defaultValue = getCommittedImageText(imageBlock, mode);
+      existingDrafts[mode] = {
+        defaultValue,
+        draftValue: defaultValue,
+      };
+      imageTextDraftsRef.current.set(imageBlock, existingDrafts);
+    }
+
+    clearImageTextEditingMarker(editingImageText?.block ?? null);
+    imageBlock.dataset.imageTextEditing = mode;
+    setEditingImageText({
+      block: imageBlock,
+      mode,
+      value: getImageTextEditValue(imageBlock, mode),
+    });
+    requestAnimationFrame(updateImageBlockControls);
+  };
+
+  const handleDismissImageTextEdit = (
+    imageBlock: HTMLElement,
+    mode: ImageTextEditMode,
+    value: string
+  ) => {
+    const drafts = imageTextDraftsRef.current.get(imageBlock) ?? {};
+    const currentDraft = drafts[mode];
+
+    drafts[mode] = {
+      defaultValue: currentDraft?.defaultValue ?? getCommittedImageText(imageBlock, mode),
+      draftValue: value,
+    };
+    imageTextDraftsRef.current.set(imageBlock, drafts);
+
+    clearImageTextEditingMarker(imageBlock);
+    setEditingImageText(null);
+    requestAnimationFrame(updateImageBlockControls);
+  };
+
   const handleCommitImageText = (
     imageBlock: HTMLElement,
     mode: ImageTextEditMode,
     value: string
   ) => {
-    const trimmedValue = value.trim();
-    const image = imageBlock.querySelector('img');
-
-    if (mode === 'alt' && image) {
-      image.alt = trimmedValue;
-    }
-
-    if (mode === 'caption') {
-      let caption = imageBlock.querySelector('figcaption');
-
-      if (trimmedValue) {
-        if (!caption) {
-          caption = document.createElement('figcaption');
-          imageBlock.append(caption);
-        }
-
-        caption.textContent = trimmedValue;
-      } else {
-        caption?.remove();
-      }
-    }
-
+    setCommittedImageText(imageBlock, mode, value);
+    clearImageTextDraft(imageBlock, mode);
+    clearImageTextEditingMarker(imageBlock);
     setEditingImageText(null);
     updateImageBlockControls();
     syncContent();
   };
+
+  useEffect(() => {
+    editingImageTextRef.current = editingImageText;
+    commitImageTextRef.current = handleCommitImageText;
+    dismissImageTextEditRef.current = handleDismissImageTextEdit;
+  });
+
+  useEffect(() => {
+    const contentEditor = contentRef.current;
+
+    if (!contentEditor) {
+      return;
+    }
+
+    const getActiveImageTextEditor = (event: KeyboardEvent): HTMLElement | null => {
+      const target = event.target;
+
+      if (target instanceof HTMLElement) {
+        const targetEditor = target.closest('[data-image-text-editor]');
+
+        if (targetEditor instanceof HTMLElement) {
+          return targetEditor;
+        }
+      }
+
+      const selectionNode = window.getSelection()?.anchorNode;
+      const selectionElement =
+        selectionNode instanceof HTMLElement ? selectionNode : selectionNode?.parentElement;
+      const selectionEditor = selectionElement?.closest('[data-image-text-editor]');
+
+      return selectionEditor instanceof HTMLElement ? selectionEditor : null;
+    };
+
+    const handleImageTextEditorKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key !== 'Enter' &&
+        event.key !== 'Escape' &&
+        event.key !== 'ArrowDown'
+      ) {
+        return;
+      }
+
+      const activeEditor = getActiveImageTextEditor(event);
+
+      const currentEdit = editingImageTextRef.current;
+
+      if (!activeEditor || !currentEdit) {
+        return;
+      }
+
+      if (event.key === 'ArrowDown') {
+        handleImageTextEditorArrowDown(event, activeEditor);
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      if (event.key === 'Enter') {
+        commitImageTextRef.current(
+          currentEdit.block,
+          currentEdit.mode,
+          activeEditor.innerText
+        );
+        return;
+      }
+
+      dismissImageTextEditRef.current(
+        currentEdit.block,
+        currentEdit.mode,
+        activeEditor.innerText
+      );
+    };
+
+    contentEditor.addEventListener('keydown', handleImageTextEditorKeyDown, true);
+
+    return () => {
+      contentEditor.removeEventListener('keydown', handleImageTextEditorKeyDown, true);
+    };
+  }, [contentRef]);
+
+  useEffect(() => {
+    const handleOutsideImageTextEditPointerDown = (event: PointerEvent) => {
+      const currentEdit = editingImageTextRef.current;
+      const target = event.target;
+
+      if (!currentEdit || !(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const activeEditor = document.querySelector<HTMLElement>('[data-image-text-editor]');
+
+      if (
+        currentEdit.block.contains(target) ||
+        activeEditor?.contains(target) ||
+        target.closest('[data-image-alt-text-control]') ||
+        target.closest('[data-image-block-controls]')
+      ) {
+        return;
+      }
+
+      dismissImageTextEditRef.current(
+        currentEdit.block,
+        currentEdit.mode,
+        activeEditor?.innerText ?? currentEdit.value
+      );
+    };
+
+    document.addEventListener('pointerdown', handleOutsideImageTextEditPointerDown, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideImageTextEditPointerDown, true);
+    };
+  }, []);
+
+  useEffect(() => {
+    const contentEditor = contentRef.current;
+
+    if (!contentEditor) {
+      return;
+    }
+
+    const isInsideActiveImageTextArea = (
+      node: Node | null,
+      activeEditor: HTMLElement | null,
+      currentEdit: EditingImageText
+    ): boolean => {
+      if (!node) {
+        return false;
+      }
+
+      return (
+        currentEdit.block.contains(node) ||
+        Boolean(activeEditor?.contains(node))
+      );
+    };
+
+    const handleSelectionChange = () => {
+      requestAnimationFrame(() => {
+        const currentEdit = editingImageTextRef.current;
+
+        if (!currentEdit) {
+          return;
+        }
+
+        const activeEditor = contentEditor.querySelector<HTMLElement>(
+          '[data-image-text-editor]'
+        );
+        const activeElement = document.activeElement;
+        const selectionNode = window.getSelection()?.anchorNode ?? null;
+
+        if (
+          isInsideActiveImageTextArea(selectionNode, activeEditor, currentEdit) ||
+          isInsideActiveImageTextArea(activeElement, activeEditor, currentEdit) ||
+          (
+            activeElement instanceof HTMLElement &&
+            (
+              activeElement.closest('[data-image-alt-text-control]') ||
+              activeElement.closest('[data-image-block-controls]')
+            )
+          )
+        ) {
+          return;
+        }
+
+        dismissImageTextEditRef.current(
+          currentEdit.block,
+          currentEdit.mode,
+          activeEditor?.innerText ?? currentEdit.value
+        );
+      });
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, [contentRef]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -445,29 +956,55 @@ export function ComposeImageBlocks({
 
   return (
     <>
-      {imageBlockControls.map(({ altText, altTextPosition, block, caption, controlsPosition }, index) => (
-        <div key={index}>
-          <ComposeImageBlockControls
-            position={controlsPosition}
-            onChange={() => handleChangeImageBlock(block)}
-            onRemove={() => handleRemoveImageBlock(block)}
-          />
+      {imageBlockControls.map(({
+        altText,
+        altTextPosition,
+        block,
+        caption,
+        controlsPosition,
+      }, index) => {
+        const currentEdit =
+          editingImageText?.block === block ? editingImageText : null;
 
-          {altTextPosition && (
-            <ComposeImageBlockAltText
-              editingMode={
-                editingImageText?.block === block ? editingImageText.mode : null
-              }
-              position={altTextPosition}
-              caption={caption}
-              value={altText}
-              onStartEditing={(mode) => setEditingImageText({ block, mode })}
-              onCancel={() => setEditingImageText(null)}
-              onCommit={(mode, value) => handleCommitImageText(block, mode, value)}
+        return (
+          <div key={index}>
+            <ComposeImageBlockControls
+              position={controlsPosition}
+              onChange={() => handleChangeImageBlock(block)}
+              onRemove={() => handleRemoveImageBlock(block)}
             />
-          )}
-        </div>
-      ))}
+
+            {altTextPosition && (
+              <ComposeImageBlockAltText
+                activeMode={currentEdit?.mode ?? null}
+                hasAltText={Boolean(altText)}
+                hasCaption={Boolean(caption)}
+                isActive={Boolean(currentEdit)}
+                position={altTextPosition}
+                onStartEditing={(mode) => handleStartImageTextEdit(block, mode)}
+              />
+            )}
+
+            {currentEdit && (
+              <ComposeImageTextEditor
+                block={currentEdit.block}
+                mode={currentEdit.mode}
+                value={currentEdit.value}
+                onCommit={(value) => handleCommitImageText(
+                  currentEdit.block,
+                  currentEdit.mode,
+                  value
+                )}
+                onDismiss={(value) => handleDismissImageTextEdit(
+                  currentEdit.block,
+                  currentEdit.mode,
+                  value
+                )}
+              />
+            )}
+          </div>
+        );
+      })}
 
       <input
         ref={imageInputRef}

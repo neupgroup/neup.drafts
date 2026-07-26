@@ -32,20 +32,8 @@
 
 .compose-content-editor [data-editor-block="image"] {
   position: relative;
-  overflow: hidden;
-  border: 1px solid rgb(226 232 240);
+  overflow: visible;
   border-radius: 0.75rem;
-  background: white;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease;
-}
-
-.compose-content-editor [data-editor-block="image"]:hover,
-.compose-content-editor [data-editor-block="image"]:focus-within {
-  border-color: rgb(147 197 253);
-  background: rgb(248 250 252);
 }
 
 .compose-content-editor [data-editor-block="image"] img,
@@ -59,7 +47,19 @@
   max-height: 34rem;
   object-fit: contain;
   background: rgb(15 23 42);
-  border-bottom: 1px solid rgb(226 232 240);
+  border: 1px solid rgb(226 232 240);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.compose-content-editor [data-editor-block="image"][data-image-text-editing] img,
+.compose-content-editor [data-editor-block="image"][data-image-text-editing] [data-image-picker] {
+  border-color: rgb(37 99 235);
+}
+
+.compose-content-editor [data-editor-block="image"][data-image-text-editing] {
+  outline: 2px solid rgb(37 99 235);
+  outline-offset: 2px;
 }
 
 .compose-content-editor [data-editor-block="image"] [data-image-picker] {
@@ -71,11 +71,12 @@
   width: 100%;
   min-height: 12rem;
   padding: 2rem;
+  border: 1px solid rgb(226 232 240);
+  border-radius: 0.75rem;
   color: rgb(71 85 105);
   font-family: inherit;
   text-align: center;
   background: linear-gradient(180deg, rgb(248 250 252), white);
-  border: 0;
   cursor: pointer;
   transition:
     color 180ms ease,
@@ -94,14 +95,41 @@
 }
 
 .compose-content-editor [data-editor-block="image"] figcaption {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid rgb(226 232 240);
+  margin-top: 0.5rem;
+  padding: 0 0.25rem;
   color: rgb(100 116 139);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
   text-align: center;
+}
+
+.compose-content-editor [data-editor-block="image"][data-image-text-editing] figcaption {
+  display: none;
+}
+
+.compose-image-text-editor {
+  min-height: 1.3125rem;
+  margin: 0;
+  padding: 0 0.25rem;
+  background: transparent;
+  color: rgb(100 116 139);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  outline: none;
+}
+
+.compose-content-editor [data-editor-block="image"] + .compose-image-text-editor {
+  margin-top: 0.5rem;
+}
+
+.compose-image-text-editor:empty::before {
+  color: rgb(148 163 184);
+  content: attr(data-placeholder);
 }
 
 .compose-image-action-link {
@@ -124,7 +152,8 @@
 }
 
 .compose-image-action-link:hover::after,
-.compose-image-action-link:focus-visible::after {
+.compose-image-action-link:focus-visible::after,
+.compose-image-action-link[data-active="true"]::after {
   transform: scaleX(1);
 }
 
@@ -198,10 +227,7 @@
 .article-content-html [data-editor-block="image"],
 .article-content-html [data-editor-block="video"],
 .article-content-html [data-editor-block="table"] {
-  overflow: hidden;
-  border: 1px solid rgb(226 232 240);
-  border-radius: 0.75rem;
-  background: white;
+  overflow: visible;
 }
 
 .article-content-html [data-editor-block="image"]:empty {
@@ -219,16 +245,25 @@
   max-height: 34rem;
   object-fit: contain;
   background: rgb(15 23 42);
+  border: 1px solid rgb(226 232 240);
+  border-radius: 0.75rem;
 }
 
 .article-content-html [data-editor-block="image"] figcaption {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid rgb(226 232 240);
+  margin-top: 0.5rem;
+  padding: 0 0.25rem;
   color: rgb(100 116 139);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
   text-align: center;
+}
+
+.article-content-html [data-editor-block="video"],
+.article-content-html [data-editor-block="table"] {
+  border: 1px solid rgb(226 232 240);
+  border-radius: 0.75rem;
+  background: white;
 }
 
 .article-content-html [data-editor-block="table"] {
