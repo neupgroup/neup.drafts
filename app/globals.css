@@ -48,39 +48,6 @@
   background: rgb(248 250 252);
 }
 
-.compose-content-editor [data-editor-block="image"] [data-image-remove] {
-  position: absolute;
-  top: 0.625rem;
-  right: 0.625rem;
-  z-index: 1;
-  display: inline-flex;
-  width: 1.75rem;
-  height: 1.75rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgb(203 213 225);
-  border-radius: 9999px;
-  background: rgb(255 255 255 / 0.92);
-  color: rgb(100 116 139);
-  font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease;
-}
-
-.compose-content-editor [data-editor-block="image"] [data-image-remove]:hover,
-.compose-content-editor [data-editor-block="image"] [data-image-remove]:focus-visible {
-  border-color: rgb(252 165 165);
-  background: rgb(254 242 242);
-  color: rgb(220 38 38);
-  outline: none;
-}
-
 .compose-content-editor [data-editor-block="image"] img,
 .compose-content-editor [data-editor-block="video"] video {
   display: block;
@@ -123,11 +90,7 @@
 }
 
 .compose-content-editor [data-editor-block="image"]:has(img) [data-image-picker] {
-  min-height: auto;
-  padding: 0.75rem 1rem;
-  background: rgb(248 250 252);
-  border: 0;
-  color: rgb(71 85 105);
+  display: none;
 }
 
 .compose-content-editor .compose-image-picker-icon {

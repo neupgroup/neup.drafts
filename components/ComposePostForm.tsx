@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ComposeImageBlocks, createImageBlock } from './ComposeImageBlocks';
 
 interface ComposeArticle {
   id: string;
@@ -214,36 +215,6 @@ function getSelectionRect(): DOMRect | null {
   return markerRect;
 }
 
-function createImageBlock(src?: string): HTMLElement {
-  const figure = document.createElement('figure');
-  const button = document.createElement('button');
-  const removeButton = document.createElement('button');
-
-  figure.dataset.editorBlock = 'image';
-  figure.contentEditable = 'false';
-  removeButton.type = 'button';
-  removeButton.dataset.imageRemove = 'true';
-  removeButton.ariaLabel = 'Remove image block';
-  removeButton.textContent = 'x';
-  button.type = 'button';
-  button.dataset.imagePicker = 'true';
-  button.innerHTML = src
-    ? '<span>Change image</span>'
-    : '<span class="compose-image-picker-icon">+</span><span class="compose-image-picker-title">Add image</span><span class="compose-image-picker-help">Click to choose a file from your device</span>';
-  figure.append(removeButton);
-  figure.append(button);
-
-  if (src) {
-    const image = document.createElement('img');
-    image.src = src;
-    image.alt = '';
-    image.loading = 'lazy';
-    figure.prepend(image);
-  }
-
-  return figure;
-}
-
 function createVideoBlock(src: string): HTMLElement {
   const figure = document.createElement('figure');
   const video = document.createElement('video');
@@ -338,8 +309,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const router = useRouter();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const imageUploadTargetRef = useRef<HTMLElement | null>(null);
+  const editorFrameRef = useRef<HTMLDivElement>(null);
   const slashMenuRangeRef = useRef<Range | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
@@ -550,84 +520,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     insertEditorBlock(createTableBlock());
   };
 
-  const handleEditorClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.target;
-
-    if (!(target instanceof HTMLElement)) {
-      return;
-    }
-
-    const imagePicker = target.closest('[data-image-picker]');
-    const imageRemove = target.closest('[data-image-remove]');
-    const imageBlock = target.closest('[data-editor-block="image"]');
-
-    if (!(imageBlock instanceof HTMLElement)) {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (imageRemove instanceof HTMLElement) {
-      imageBlock.remove();
-
-      if (contentRef.current) {
-        setContent(getEditorText(contentRef.current));
-      }
-
-      return;
-    }
-
-    if (!(imagePicker instanceof HTMLElement)) {
-      return;
-    }
-
-    imageUploadTargetRef.current = imageBlock;
-    imageInputRef.current?.click();
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    const imageBlock = imageUploadTargetRef.current;
-    const contentEditor = contentRef.current;
-
-    event.target.value = '';
-
-    if (!file || !imageBlock || !contentEditor) {
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const src = typeof reader.result === 'string' ? reader.result : '';
-
-      if (!src) {
-        return;
-      }
-
-      let image = imageBlock.querySelector('img');
-
-      if (!image) {
-        image = document.createElement('img');
-        image.alt = '';
-        image.loading = 'lazy';
-        imageBlock.prepend(image);
-      }
-
-      image.src = src;
-
-      const button = imageBlock.querySelector('[data-image-picker]');
-
-      if (button) {
-        button.textContent = 'Change image';
-      }
-
-      setContent(getEditorText(contentEditor));
-    };
-
-    reader.readAsDataURL(file);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -713,21 +605,21 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
           className="min-h-12 w-full border-0 bg-transparent px-0 font-serif text-4xl font-medium leading-tight tracking-tight text-slate-700 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
         />
 
-        <div
-          ref={contentRef}
-          role="textbox"
-          aria-label="Article content"
-          contentEditable
-          suppressContentEditableWarning
-          data-placeholder="Tell your story..."
-          onFocus={(e) => {
-            document.execCommand('defaultParagraphSeparator', false, 'p');
-            ensureEditorParagraph(e.currentTarget);
-          }}
-          onClick={handleEditorClick}
-          onInput={(e) => syncContentAfterInput(e.currentTarget)}
-          onKeyDown={(e) => {
-            document.execCommand('defaultParagraphSeparator', false, 'p');
+        <div ref={editorFrameRef} className="relative">
+          <div
+            ref={contentRef}
+            role="textbox"
+            aria-label="Article content"
+            contentEditable
+            suppressContentEditableWarning
+            data-placeholder="Tell your story..."
+            onFocus={(e) => {
+              document.execCommand('defaultParagraphSeparator', false, 'p');
+              ensureEditorParagraph(e.currentTarget);
+            }}
+            onInput={(e) => syncContentAfterInput(e.currentTarget)}
+            onKeyDown={(e) => {
+              document.execCommand('defaultParagraphSeparator', false, 'p');
 
             if (e.key === 'Escape' && slashMenuPosition) {
               e.preventDefault();
@@ -856,8 +748,16 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             range.insertNode(fragment);
             setContent(getEditorText(e.currentTarget));
           }}
-          className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
-        />
+            className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
+          />
+
+          <ComposeImageBlocks
+            contentRef={contentRef}
+            editorFrameRef={editorFrameRef}
+            getContent={getEditorText}
+            onContentChange={setContent}
+          />
+        </div>
 
         {slashMenuPosition && (
           <div
@@ -890,14 +790,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
           </div>
         )}
       </div>
-
-      <input
-        ref={imageInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleImageUpload}
-      />
 
       <div className="flex items-center gap-3">
         <button
