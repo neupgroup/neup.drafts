@@ -14,3 +14,12 @@
 ) {
   border-radius: 0.5rem;
 }
+
+.compose-content-editor > * {
+  min-height: 2rem;
+  margin: 0;
+}
+
+.compose-content-editor > * + * {
+  margin-top: 1.5rem;
+}
