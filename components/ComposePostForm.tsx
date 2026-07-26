@@ -15,19 +15,24 @@ interface ComposePostFormProps {
   article?: ComposeArticle;
 }
 
-type SlashMenuOption = 'image' | 'video' | 'table';
+type SlashMenuOption = 'media' | 'image' | 'audio' | 'video' | 'carousel' | 'table';
 
 interface SlashMenuPosition {
   top: number;
   left: number;
 }
 
+type VideoProvider = 'youtube' | 'vimeo';
+
 const slashMenuOptions: Array<{
   id: SlashMenuOption;
   label: string;
 }> = [
-  { id: 'image', label: 'Add an image' },
-  { id: 'video', label: 'Add a video' },
+  { id: 'media', label: 'Add a media block' },
+  { id: 'image', label: 'Add an image block' },
+  { id: 'audio', label: 'Add an audio block' },
+  { id: 'video', label: 'Add a video block' },
+  { id: 'carousel', label: 'Add a carousel block' },
   { id: 'table', label: 'Add a table' },
 ];
 
@@ -215,15 +220,193 @@ function getSelectionRect(): DOMRect | null {
   return markerRect;
 }
 
-function createVideoBlock(src: string): HTMLElement {
+function getYouTubeEmbedUrl(value: string): string | null {
+  try {
+    const url = new URL(value.trim());
+    const host = url.hostname.replace(/^www\./, '').replace(/^m\./, '');
+    let videoId = '';
+
+    if (host === 'youtu.be') {
+      videoId = url.pathname.split('/').filter(Boolean)[0] ?? '';
+    }
+
+    if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+      const pathParts = url.pathname.split('/').filter(Boolean);
+      videoId = url.searchParams.get('v') ?? '';
+
+      if (!videoId && ['embed', 'shorts', 'live'].includes(pathParts[0])) {
+        videoId = pathParts[1] ?? '';
+      }
+    }
+
+    return /^[a-zA-Z0-9_-]{6,}$/.test(videoId)
+      ? `https://www.youtube.com/embed/${videoId}`
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function getVimeoEmbedUrl(value: string): string | null {
+  try {
+    const url = new URL(value.trim());
+    const host = url.hostname.replace(/^www\./, '');
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    const videoId = pathParts.find((part) => /^\d+$/.test(part)) ?? '';
+
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function getVideoEmbedUrl(provider: VideoProvider, value: string): string | null {
+  return provider === 'youtube'
+    ? getYouTubeEmbedUrl(value)
+    : getVimeoEmbedUrl(value);
+}
+
+function createMediaAltBlock(label: string): HTMLParagraphElement {
+  const altBlock = document.createElement('p');
+
+  altBlock.dataset.mediaAlt = 'true';
+  altBlock.contentEditable = 'plaintext-only';
+  altBlock.textContent = label;
+
+  return altBlock;
+}
+
+function createMediaCaption(text = 'Write caption'): HTMLElement {
+  const caption = document.createElement('figcaption');
+
+  caption.contentEditable = 'plaintext-only';
+  caption.textContent = text;
+
+  return caption;
+}
+
+function createTranscriptDetails(): HTMLElement {
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  const transcript = document.createElement('p');
+
+  summary.textContent = 'Transcript';
+  transcript.contentEditable = 'plaintext-only';
+  transcript.textContent = 'Write audio transcription';
+  details.append(summary, transcript);
+
+  return details;
+}
+
+function createMediaTrack(): HTMLTrackElement {
+  const track = document.createElement('track');
+
+  track.kind = 'captions';
+  track.label = 'Captions';
+  track.srclang = 'en';
+
+  return track;
+}
+
+function createMediaBlock(): HTMLElement {
   const figure = document.createElement('figure');
-  const video = document.createElement('video');
+  const wrapper = document.createElement('div');
+
+  figure.dataset.editorBlock = 'media';
+  figure.dataset.mediaKind = 'generic';
+  figure.contentEditable = 'false';
+  wrapper.dataset.mediaPlaceholder = 'true';
+  wrapper.textContent = 'Media block';
+  figure.append(
+    wrapper,
+    createMediaAltBlock('Write media alt text'),
+    createMediaCaption(),
+    createTranscriptDetails()
+  );
+
+  return figure;
+}
+
+function createVideoBlock(src: string, provider: VideoProvider | 'local'): HTMLElement {
+  const figure = document.createElement('figure');
 
   figure.dataset.editorBlock = 'video';
+  figure.dataset.mediaKind = provider === 'local' ? 'video' : provider;
   figure.contentEditable = 'false';
-  video.src = src;
-  video.controls = true;
-  figure.append(video);
+
+  if (provider === 'local') {
+    const video = document.createElement('video');
+
+    video.src = src;
+    video.controls = true;
+    video.append(createMediaTrack());
+    figure.append(video);
+  } else {
+    const iframe = document.createElement('iframe');
+
+    iframe.src = src;
+    iframe.title = provider === 'youtube' ? 'YouTube video' : 'Vimeo video';
+    iframe.loading = 'lazy';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    iframe.allowFullscreen = true;
+    figure.append(iframe);
+  }
+
+  figure.append(
+    createMediaAltBlock('Write video alt text'),
+    createMediaCaption()
+  );
+
+  return figure;
+}
+
+function createAudioBlock(src: string): HTMLElement {
+  const figure = document.createElement('figure');
+  const audio = document.createElement('audio');
+
+  figure.dataset.editorBlock = 'audio';
+  figure.dataset.mediaKind = 'audio';
+  figure.contentEditable = 'false';
+  audio.src = src;
+  audio.controls = true;
+  audio.append(createMediaTrack());
+  figure.append(
+    audio,
+    createMediaAltBlock('Write audio alt text'),
+    createMediaCaption(),
+    createTranscriptDetails()
+  );
+
+  return figure;
+}
+
+function createCarouselBlock(srcValues: string[]): HTMLElement {
+  const figure = document.createElement('figure');
+  const track = document.createElement('div');
+
+  figure.dataset.editorBlock = 'carousel';
+  figure.dataset.mediaKind = 'carousel';
+  figure.contentEditable = 'false';
+  track.dataset.carouselTrack = 'true';
+
+  srcValues.forEach((src) => {
+    const image = document.createElement('img');
+
+    image.src = src;
+    image.alt = '';
+    image.loading = 'lazy';
+    track.append(image);
+  });
+
+  figure.append(
+    track,
+    createMediaAltBlock('Write carousel alt text'),
+    createMediaCaption()
+  );
 
   return figure;
 }
@@ -310,6 +493,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const editorFrameRef = useRef<HTMLDivElement>(null);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
   const slashMenuRangeRef = useRef<Range | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
@@ -321,6 +505,9 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [slashMenuPosition, setSlashMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [slashMenuQuery, setSlashMenuQuery] = useState('');
   const [activeSlashMenuOptionIndex, setActiveSlashMenuOptionIndex] = useState(0);
+  const [videoMenuPosition, setVideoMenuPosition] = useState<SlashMenuPosition | null>(null);
+  const [videoProvider, setVideoProvider] = useState<VideoProvider>('youtube');
+  const [videoUrl, setVideoUrl] = useState('');
   const isEditing = Boolean(article);
   const slugBase = slugify(title);
   const filteredSlashMenuOptions = slashMenuOptions.filter((option) =>
@@ -450,6 +637,55 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setActiveSlashMenuOptionIndex(0);
   };
 
+  const closeVideoMenu = () => {
+    slashMenuRangeRef.current = null;
+    setVideoMenuPosition(null);
+    setVideoUrl('');
+    setVideoProvider('youtube');
+  };
+
+  useEffect(() => {
+    if (!videoMenuPosition) {
+      return;
+    }
+
+    const closeVideoMenuOnOutsideClick = (event: MouseEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest('[data-video-menu]')
+      ) {
+        return;
+      }
+
+      closeVideoMenu();
+    };
+
+    document.addEventListener('mousedown', closeVideoMenuOnOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', closeVideoMenuOnOutsideClick);
+    };
+  }, [videoMenuPosition]);
+
+  useEffect(() => {
+    if (!videoMenuPosition) {
+      return;
+    }
+
+    const closeVideoMenuOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeVideoMenu();
+      }
+    };
+
+    document.addEventListener('keydown', closeVideoMenuOnEscape);
+
+    return () => {
+      document.removeEventListener('keydown', closeVideoMenuOnEscape);
+    };
+  }, [videoMenuPosition]);
+
   const moveActiveSlashMenuOption = (direction: 1 | -1) => {
     setActiveSlashMenuOptionIndex((currentIndex) => {
       if (filteredSlashMenuOptions.length === 0) {
@@ -502,22 +738,92 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   };
 
   const handleSlashMenuOption = (option: SlashMenuOption) => {
+    if (option === 'media') {
+      insertEditorBlock(createMediaBlock());
+      return;
+    }
+
     if (option === 'image') {
       insertEditorBlock(createImageBlock());
       return;
     }
 
-    if (option === 'video') {
-      const src = window.prompt('Video URL');
+    if (option === 'audio') {
+      const src = window.prompt('Audio URL');
 
       if (src?.trim()) {
-        insertEditorBlock(createVideoBlock(src.trim()));
+        insertEditorBlock(createAudioBlock(src.trim()));
+      }
+
+      return;
+    }
+
+    if (option === 'video') {
+      setVideoMenuPosition(slashMenuPosition ?? { top: 0, left: 0 });
+      setSlashMenuPosition(null);
+      setSlashMenuQuery('');
+      setActiveSlashMenuOptionIndex(0);
+      return;
+    }
+
+    if (option === 'carousel') {
+      const value = window.prompt('Image URLs, separated by commas');
+      const srcValues = value
+        ?.split(',')
+        .map((src) => src.trim())
+        .filter(Boolean) ?? [];
+
+      if (srcValues.length > 0) {
+        insertEditorBlock(createCarouselBlock(srcValues));
       }
 
       return;
     }
 
     insertEditorBlock(createTableBlock());
+  };
+
+  const handleVideoEmbedSubmit = () => {
+    const embedUrl = getVideoEmbedUrl(videoProvider, videoUrl);
+
+    if (!embedUrl) {
+      setError(
+        videoProvider === 'youtube'
+          ? 'Enter a valid YouTube URL.'
+          : 'Enter a valid Vimeo URL.'
+      );
+      return;
+    }
+
+    setError('');
+    insertEditorBlock(createVideoBlock(embedUrl, videoProvider));
+    closeVideoMenu();
+  };
+
+  const handleLocalVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const src = typeof reader.result === 'string' ? reader.result : '';
+
+      if (!src) {
+        return;
+      }
+
+      setError('');
+      insertEditorBlock(createVideoBlock(src, 'local'));
+      closeVideoMenu();
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -789,7 +1095,91 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             )}
           </div>
         )}
+
+        {videoMenuPosition && (
+          <div
+            data-video-menu
+            style={{
+              top: videoMenuPosition.top,
+              left: videoMenuPosition.left,
+            }}
+            className="fixed z-50 w-80 border border-slate-200 bg-white p-3 shadow-lg"
+          >
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setVideoProvider('youtube')}
+                className={`h-9 rounded border px-3 text-sm font-medium ${
+                  videoProvider === 'youtube'
+                    ? 'border-blue-300 bg-blue-50 text-blue-700'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                YouTube
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setVideoProvider('vimeo')}
+                className={`h-9 rounded border px-3 text-sm font-medium ${
+                  videoProvider === 'vimeo'
+                    ? 'border-blue-300 bg-blue-50 text-blue-700'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                Vimeo
+              </button>
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <input
+                value={videoUrl}
+                onChange={(event) => setVideoUrl(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleVideoEmbedSubmit();
+                  }
+                }}
+                placeholder={
+                  videoProvider === 'youtube'
+                    ? 'Paste YouTube URL'
+                    : 'Paste Vimeo URL'
+                }
+                className="min-w-0 flex-1 border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-300"
+              />
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleVideoEmbedSubmit}
+                className="h-9 rounded bg-blue-600 px-3 text-sm font-medium text-white"
+              >
+                Add
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => videoFileInputRef.current?.click()}
+              className="mt-3 h-9 w-full rounded border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              Add local video
+            </button>
+          </div>
+        )}
       </div>
+
+      <input
+        ref={videoFileInputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={handleLocalVideoChange}
+      />
 
       <div className="flex items-center gap-3">
         <button

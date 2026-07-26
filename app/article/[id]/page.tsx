@@ -36,10 +36,32 @@ function sanitizeUrl(value: string): string {
   if (
     trimmedValue.startsWith('data:image/') ||
     trimmedValue.startsWith('data:video/') ||
+    trimmedValue.startsWith('data:audio/') ||
     trimmedValue.startsWith('https://') ||
     trimmedValue.startsWith('http://')
   ) {
     return trimmedValue;
+  }
+
+  return '';
+}
+
+function sanitizeEmbedUrl(value: string): string {
+  const trimmedValue = value.trim();
+
+  try {
+    const url = new URL(trimmedValue);
+    const host = url.hostname.replace(/^www\./, '');
+
+    if (
+      (host === 'youtube.com' && url.pathname.startsWith('/embed/')) ||
+      (host === 'youtube-nocookie.com' && url.pathname.startsWith('/embed/')) ||
+      (host === 'player.vimeo.com' && url.pathname.startsWith('/video/'))
+    ) {
+      return url.toString();
+    }
+  } catch {
+    return '';
   }
 
   return '';
@@ -71,7 +93,15 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'src' && ['img', 'video'].includes(tagName)) {
+    if (
+      attributeName.startsWith('data-') &&
+      ['div', 'figure', 'p'].includes(tagName)
+    ) {
+      allowedAttributes.push(`${attributeName}="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'src' && ['audio', 'img', 'video'].includes(tagName)) {
       const safeUrl = sanitizeUrl(attributeValue);
 
       if (safeUrl) {
@@ -81,17 +111,67 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
+    if (attributeName === 'src' && tagName === 'iframe') {
+      const safeUrl = sanitizeEmbedUrl(attributeValue);
+
+      if (safeUrl) {
+        allowedAttributes.push(`src="${sanitizeAttributeValue(safeUrl)}"`);
+      }
+
+      continue;
+    }
+
+    if (attributeName === 'title' && tagName === 'iframe') {
+      allowedAttributes.push(`title="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'loading' && ['iframe', 'img'].includes(tagName)) {
+      allowedAttributes.push(`loading="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'allow' && tagName === 'iframe') {
+      allowedAttributes.push(`allow="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'allowfullscreen' && tagName === 'iframe') {
+      allowedAttributes.push('allowfullscreen');
+      continue;
+    }
+
     if (attributeName === 'alt' && tagName === 'img') {
       allowedAttributes.push(`alt="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
     }
 
-    if (attributeName === 'loading' && tagName === 'img') {
-      allowedAttributes.push(`loading="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === 'kind' && tagName === 'track') {
+      allowedAttributes.push(`kind="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
     }
 
-    if (attributeName === 'controls' && tagName === 'video') {
+    if (attributeName === 'label' && tagName === 'track') {
+      allowedAttributes.push(`label="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'srclang' && tagName === 'track') {
+      allowedAttributes.push(`srclang="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'src' && tagName === 'track') {
+      const safeUrl = sanitizeUrl(attributeValue);
+
+      if (safeUrl) {
+        allowedAttributes.push(`src="${sanitizeAttributeValue(safeUrl)}"`);
+      }
+
+      continue;
+    }
+
+    if (attributeName === 'controls' && ['audio', 'video'].includes(tagName)) {
       allowedAttributes.push('controls');
     }
   }
@@ -102,14 +182,19 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
 function sanitizeArticleHtml(content: string): string {
   const allowedTags = new Set([
     'br',
+    'audio',
+    'details',
     'div',
     'figcaption',
     'figure',
+    'iframe',
     'img',
     'p',
     'table',
     'tbody',
     'td',
+    'summary',
+    'track',
     'tr',
     'video',
   ]);
@@ -126,12 +211,14 @@ function sanitizeArticleHtml(content: string): string {
       }
 
       if (tag.startsWith('</')) {
-        return tagName === 'br' || tagName === 'img' ? '' : `</${tagName}>`;
+        return tagName === 'br' || tagName === 'img' || tagName === 'track'
+          ? ''
+          : `</${tagName}>`;
       }
 
       const safeAttributes = getAllowedAttributes(tagName, attributes);
 
-      return tagName === 'br' || tagName === 'img'
+      return tagName === 'br' || tagName === 'img' || tagName === 'track'
         ? `<${tagName}${safeAttributes}>`
         : `<${tagName}${safeAttributes}>`;
     });
