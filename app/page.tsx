@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import SiteHeader from '@/components/SiteHeader';
+import HeaderV1S1 from '@/components/header.v1s1';
 
 // Post interface matching the real DB structure and fallback types
 interface Author {
@@ -57,7 +57,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
-      <SiteHeader user={user} />
+      <HeaderV1S1 user={user} />
 
       {/* Main Layout */}
       <div className="max-w-4xl mx-auto px-6 py-12">

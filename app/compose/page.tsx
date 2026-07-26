@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import ComposePostForm from '@/components/ComposePostForm';
-import SiteHeader from '@/components/SiteHeader';
+import HeaderV1S1 from '@/components/header.v1s1';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma';
 
@@ -39,7 +39,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
   if (!articleParam) {
     return (
       <main className="min-h-screen bg-white text-slate-900">
-        <SiteHeader user={user} />
+        <HeaderV1S1 user={user} />
 
         <section className="mx-auto max-w-4xl px-6 py-8">
           <ComposePostForm />
@@ -77,7 +77,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      <SiteHeader user={user} />
+      <HeaderV1S1 user={user} />
 
       <section className="mx-auto max-w-4xl px-6 py-8">
         <ComposePostForm article={article} />

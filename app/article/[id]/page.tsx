@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { ReactionButton } from '@/components/ReactionButton';
 import { CommentSection } from '@/components/CommentSection';
+import HeaderV1S1 from '@/components/header.v1s1';
 
 function getArticleIdFromSlug(slug: string): string {
   const slugParts = slug.split('-');
@@ -70,8 +71,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   // Fallback if article is not found
   if (!post) {
     return (
-      <main className="min-h-screen bg-white text-slate-900 px-6 py-16">
-        <section className="mx-auto max-w-2xl border border-slate-200 bg-slate-50 p-8 text-center">
+      <main className="min-h-screen bg-white text-slate-900">
+        <HeaderV1S1 user={user} />
+
+        <section className="mx-auto mt-16 max-w-2xl border border-slate-200 bg-slate-50 p-8 text-center">
           <p className="text-xs font-medium uppercase tracking-[0.24em] text-rose-600">
             Missing Article
           </p>
@@ -110,22 +113,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
-      <nav className="border-b border-slate-200 bg-white/90 shadow-md shadow-slate-200/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-[22px] font-bold tracking-tighter text-slate-950 transition-colors hover:text-blue-600"
-          >
-            Neup.Drafts
-          </Link>
-          <Link
-            href="/account"
-            className="border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600"
-          >
-            @{user.username || user.email.split('@')[0]}
-          </Link>
-        </div>
-      </nav>
+      <HeaderV1S1 user={user} />
 
       <div className="mx-auto grid max-w-4xl gap-10 px-6 py-10 md:py-14">
         <article className="space-y-8">

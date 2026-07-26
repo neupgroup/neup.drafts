@@ -1,20 +1,20 @@
 import Link from 'next/link';
 
-interface SiteHeaderProps {
+interface HeaderV1S1Props {
   user: {
-    username: string;
-    email: string;
+    username?: string | null;
+    email?: string | null;
   } | null;
 }
 
-export default function SiteHeader({ user }: SiteHeaderProps) {
+export default function HeaderV1S1({ user }: HeaderV1S1Props) {
   const userDisplayName = user
-    ? user.username || user.email.split('@')[0]
+    ? user.username || user.email?.split('@')[0] || 'user'
     : '';
 
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 shadow-md shadow-slate-200/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-6">
         <Link
           href="/"
           className="text-[22px] font-bold tracking-tighter text-slate-950 transition-colors hover:text-blue-600"
