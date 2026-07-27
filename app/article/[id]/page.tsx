@@ -173,6 +173,16 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
 
     if (attributeName === 'controls' && ['audio', 'video'].includes(tagName)) {
       allowedAttributes.push('controls');
+      continue;
+    }
+
+    if (attributeName === 'autoplay' && tagName === 'video') {
+      allowedAttributes.push('autoplay');
+      continue;
+    }
+
+    if (attributeName === 'muted' && tagName === 'video') {
+      allowedAttributes.push('muted');
     }
   }
 

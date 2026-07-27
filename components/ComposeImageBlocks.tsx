@@ -30,6 +30,13 @@ interface MediaBlockControl {
   controlsPosition: MediaBlockControlsPosition;
 }
 
+interface VideoSettingsMenu {
+  block: HTMLElement;
+  position: MediaBlockControlsPosition;
+  startAt: string;
+  autoplay: boolean;
+}
+
 type MediaTextEditMode = 'alt' | 'caption';
 type MediaBlockType = 'image' | 'audio' | 'video' | 'carousel';
 
@@ -44,6 +51,21 @@ interface ComposeMediaBlockControlsProps {
   position: MediaBlockControlsPosition;
   onChange: () => void;
   onRemove: () => void;
+}
+
+interface ComposeVideoBlockControlsProps {
+  isSettingsOpen: boolean;
+  position: MediaBlockControlsPosition;
+  onRemove: () => void;
+  onToggleSettings: () => void;
+}
+
+interface ComposeVideoSettingsMenuProps {
+  autoplay: boolean;
+  position: MediaBlockControlsPosition;
+  startAt: string;
+  onAutoplayChange: (autoplay: boolean) => void;
+  onStartAtChange: (startAt: string) => void;
 }
 
 interface ComposeMediaTextActionsProps {
@@ -316,6 +338,102 @@ function ComposeMediaBlockControls({
   );
 }
 
+function ComposeVideoBlockControls({
+  isSettingsOpen,
+  position,
+  onRemove,
+  onToggleSettings,
+}: ComposeVideoBlockControlsProps) {
+  return (
+    <div
+      data-video-block-controls
+      style={{
+        top: position.top,
+        left: position.left,
+      }}
+      className="absolute z-10"
+    >
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Video settings"
+          aria-expanded={isSettingsOpen}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={onToggleSettings}
+          className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-400 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2.25"
+          >
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.24.6.82 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.69 0-1.27.4-1.51 1Z" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          aria-label="Remove video block"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={onRemove}
+          className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-xl leading-none text-slate-400 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ComposeVideoSettingsMenu({
+  autoplay,
+  position,
+  startAt,
+  onAutoplayChange,
+  onStartAtChange,
+}: ComposeVideoSettingsMenuProps) {
+  return (
+    <div
+      data-video-settings-menu
+      style={{
+        top: position.top + 40,
+        left: position.left,
+      }}
+      className="absolute z-20 w-56 border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-lg"
+    >
+      <label className="block">
+        <span className="mb-1 block font-medium text-slate-600">Start at</span>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={startAt}
+          onChange={(event) => onStartAtChange(event.currentTarget.value)}
+          onMouseDown={(event) => event.stopPropagation()}
+          className="h-9 w-full border border-slate-200 px-3 text-sm outline-none focus:border-blue-300"
+        />
+      </label>
+
+      <label className="mt-3 flex items-center justify-between gap-3 font-medium text-slate-600">
+        <span>Autoplay</span>
+        <input
+          type="checkbox"
+          checked={autoplay}
+          onChange={(event) => onAutoplayChange(event.currentTarget.checked)}
+          onMouseDown={(event) => event.stopPropagation()}
+          className="size-4 accent-blue-600"
+        />
+      </label>
+    </div>
+  );
+}
+
 function ComposeMediaTextActions({
   activeMode,
   hasAltText,
@@ -386,6 +504,119 @@ function getMediaBlockType(block: HTMLElement): MediaBlockType | null {
   )
     ? blockType
     : null;
+}
+
+function getVideoStartAt(block: HTMLElement): string {
+  return block.dataset.videoStartAt ?? '';
+}
+
+function getVideoAutoplay(block: HTMLElement): boolean {
+  return block.dataset.videoAutoplay === 'true';
+}
+
+function getNormalizedStartAt(value: string): string {
+  const parsedValue = Number.parseInt(value, 10);
+
+  return Number.isFinite(parsedValue) && parsedValue > 0
+    ? String(parsedValue)
+    : '';
+}
+
+function getVideoSettings(block: HTMLElement): Pick<VideoSettingsMenu, 'startAt' | 'autoplay'> {
+  return {
+    startAt: getVideoStartAt(block),
+    autoplay: getVideoAutoplay(block),
+  };
+}
+
+function updateVideoEmbedUrl(
+  src: string,
+  startAt: string,
+  autoplay: boolean
+): string {
+  try {
+    const url = new URL(src);
+    const host = url.hostname.replace(/^www\./, '');
+
+    if (host === 'player.vimeo.com') {
+      url.searchParams.delete('start');
+      url.hash = startAt ? `t=${startAt}s` : '';
+    } else if (startAt) {
+      url.searchParams.set('start', startAt);
+    } else {
+      url.searchParams.delete('start');
+    }
+
+    if (autoplay) {
+      url.searchParams.set('autoplay', '1');
+    } else {
+      url.searchParams.delete('autoplay');
+    }
+
+    return url.toString();
+  } catch {
+    return src;
+  }
+}
+
+function updateVideoFileUrl(src: string, startAt: string): string {
+  try {
+    const url = new URL(src);
+
+    url.hash = startAt ? `t=${startAt}` : '';
+
+    return url.toString();
+  } catch {
+    const [baseSrc] = src.split('#');
+
+    return startAt ? `${baseSrc}#t=${startAt}` : baseSrc;
+  }
+}
+
+function applyVideoSettings(
+  block: HTMLElement,
+  startAtValue: string,
+  autoplay: boolean
+) {
+  const startAt = getNormalizedStartAt(startAtValue);
+  const iframe = block.querySelector('iframe');
+  const video = block.querySelector('video');
+
+  if (startAt) {
+    block.dataset.videoStartAt = startAt;
+  } else {
+    delete block.dataset.videoStartAt;
+  }
+
+  if (autoplay) {
+    block.dataset.videoAutoplay = 'true';
+  } else {
+    delete block.dataset.videoAutoplay;
+  }
+
+  if (iframe) {
+    iframe.src = updateVideoEmbedUrl(iframe.src, startAt, autoplay);
+  }
+
+  if (video) {
+    video.src = updateVideoFileUrl(video.src, startAt);
+    video.autoplay = autoplay;
+
+    if (autoplay) {
+      video.muted = true;
+    } else {
+      video.removeAttribute('autoplay');
+      video.removeAttribute('muted');
+    }
+
+    if (startAt) {
+      try {
+        video.currentTime = Number(startAt);
+      } catch {
+        // Some video sources cannot seek until metadata is loaded.
+      }
+    }
+  }
 }
 
 function ComposeMediaTextEditor({
@@ -505,6 +736,7 @@ export function ComposeMediaBlocks({
   ) => void>(() => {});
   const [mediaBlockControls, setMediaBlockControls] = useState<MediaBlockControl[]>([]);
   const [editingMediaText, setEditingMediaText] = useState<EditingMediaText | null>(null);
+  const [videoSettingsMenu, setVideoSettingsMenu] = useState<VideoSettingsMenu | null>(null);
 
   const syncContent = useCallback(() => {
     const contentEditor = contentRef.current;
@@ -555,6 +787,23 @@ export function ComposeMediaBlocks({
     });
 
     setMediaBlockControls(controls);
+    setVideoSettingsMenu((currentMenu) => {
+      if (!currentMenu) {
+        return null;
+      }
+
+      const currentControls = controls.find((control) => control.block === currentMenu.block);
+
+      if (!currentControls || !currentMenu.block.isConnected) {
+        return null;
+      }
+
+      return {
+        ...currentMenu,
+        position: currentControls.controlsPosition,
+        ...getVideoSettings(currentMenu.block),
+      };
+    });
   }, [contentRef, editorFrameRef]);
 
   const clearMediaTextEditingMarker = (mediaBlock: HTMLElement | null) => {
@@ -715,6 +964,9 @@ export function ComposeMediaBlocks({
     setEditingMediaText((currentEdit) =>
       currentEdit?.block === mediaBlock ? null : currentEdit
     );
+    setVideoSettingsMenu((currentMenu) =>
+      currentMenu?.block === mediaBlock ? null : currentMenu
+    );
     updateMediaBlockControls();
     syncContent();
   };
@@ -722,6 +974,55 @@ export function ComposeMediaBlocks({
   const handleChangeImageBlock = (mediaBlock: HTMLElement) => {
     imageUploadTargetRef.current = mediaBlock;
     imageInputRef.current?.click();
+  };
+
+  const handleToggleVideoSettings = (
+    mediaBlock: HTMLElement,
+    position: MediaBlockControlsPosition
+  ) => {
+    setVideoSettingsMenu((currentMenu) => {
+      if (currentMenu?.block === mediaBlock) {
+        return null;
+      }
+
+      return {
+        block: mediaBlock,
+        position,
+        ...getVideoSettings(mediaBlock),
+      };
+    });
+  };
+
+  const handleVideoStartAtChange = (value: string) => {
+    setVideoSettingsMenu((currentMenu) => {
+      if (!currentMenu) {
+        return null;
+      }
+
+      applyVideoSettings(currentMenu.block, value, currentMenu.autoplay);
+      syncContent();
+
+      return {
+        ...currentMenu,
+        startAt: value,
+      };
+    });
+  };
+
+  const handleVideoAutoplayChange = (autoplay: boolean) => {
+    setVideoSettingsMenu((currentMenu) => {
+      if (!currentMenu) {
+        return null;
+      }
+
+      applyVideoSettings(currentMenu.block, currentMenu.startAt, autoplay);
+      syncContent();
+
+      return {
+        ...currentMenu,
+        autoplay,
+      };
+    });
   };
 
   const handleStartMediaTextEdit = (
@@ -877,6 +1178,8 @@ export function ComposeMediaBlocks({
         currentEdit.block.contains(target) ||
         activeEditor?.contains(target) ||
         target.closest('[data-media-text-actions]') ||
+        target.closest('[data-video-settings-menu]') ||
+        target.closest('[data-video-block-controls]') ||
         target.closest('[data-image-block-controls]')
       ) {
         return;
@@ -893,6 +1196,28 @@ export function ComposeMediaBlocks({
 
     return () => {
       document.removeEventListener('pointerdown', handleOutsideMediaTextEditPointerDown, true);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideVideoSettingsPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (
+        !(target instanceof HTMLElement) ||
+        target.closest('[data-video-settings-menu]') ||
+        target.closest('[data-video-block-controls]')
+      ) {
+        return;
+      }
+
+      setVideoSettingsMenu(null);
+    };
+
+    document.addEventListener('pointerdown', handleOutsideVideoSettingsPointerDown, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideVideoSettingsPointerDown, true);
     };
   }, []);
 
@@ -939,6 +1264,8 @@ export function ComposeMediaBlocks({
             activeElement instanceof HTMLElement &&
             (
               activeElement.closest('[data-media-text-actions]') ||
+              activeElement.closest('[data-video-settings-menu]') ||
+              activeElement.closest('[data-video-block-controls]') ||
               activeElement.closest('[data-image-block-controls]')
             )
           )
@@ -1027,6 +1354,15 @@ export function ComposeMediaBlocks({
               />
             )}
 
+            {blockType === 'video' && (
+              <ComposeVideoBlockControls
+                isSettingsOpen={videoSettingsMenu?.block === block}
+                position={controlsPosition}
+                onRemove={() => handleRemoveImageBlock(block)}
+                onToggleSettings={() => handleToggleVideoSettings(block, controlsPosition)}
+              />
+            )}
+
             {textActionsPosition && (
               <ComposeMediaTextActions
                 activeMode={currentEdit?.mode ?? null}
@@ -1058,6 +1394,16 @@ export function ComposeMediaBlocks({
           </div>
         );
       })}
+
+      {videoSettingsMenu && (
+        <ComposeVideoSettingsMenu
+          autoplay={videoSettingsMenu.autoplay}
+          position={videoSettingsMenu.position}
+          startAt={videoSettingsMenu.startAt}
+          onAutoplayChange={handleVideoAutoplayChange}
+          onStartAtChange={handleVideoStartAtChange}
+        />
+      )}
 
       <input
         ref={imageInputRef}
