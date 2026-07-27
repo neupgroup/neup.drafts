@@ -308,6 +308,57 @@ function wrapClipboardInlineNodes(tagName: 'strong' | 'em' | 'u' | 'mark', nodes
   return [element];
 }
 
+function getClipboardStyleDeclaration(style: string, propertyName: string): string {
+  const declaration = style
+    .split(';')
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith(`${propertyName}:`));
+
+  return declaration?.slice(propertyName.length + 1).trim() ?? '';
+}
+
+function hasVisibleClipboardHighlight(style: string): boolean {
+  const backgroundColor = getClipboardStyleDeclaration(style, 'background-color');
+  const background = backgroundColor || getClipboardStyleDeclaration(style, 'background');
+  const normalizedBackground = background
+    .replace(/\s*!important\s*$/i, '')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+
+  if (!normalizedBackground) {
+    return false;
+  }
+
+  if (
+    [
+      'transparent',
+      'none',
+      'inherit',
+      'initial',
+      'unset',
+      'revert',
+      'currentcolor',
+      '#fff',
+      '#ffffff',
+      'white',
+      'rgb(255,255,255)',
+      'rgba(255,255,255,1)',
+    ].includes(normalizedBackground)
+  ) {
+    return false;
+  }
+
+  if (/rgba?\([^)]*,0(?:\.0+)?\)$/.test(normalizedBackground)) {
+    return false;
+  }
+
+  if (/hsla?\([^)]*,0(?:\.0+)?\)$/.test(normalizedBackground)) {
+    return false;
+  }
+
+  return true;
+}
+
 function sanitizeClipboardInlineNode(node: Node): Node[] {
   if (node.nodeType === Node.TEXT_NODE) {
     return [document.createTextNode(normalizeEditorSpaces(node.textContent ?? ''))];
@@ -381,7 +432,7 @@ function sanitizeClipboardInlineNode(node: Node): Node[] {
     wrappedNodes = wrapClipboardInlineNodes('u', wrappedNodes);
   }
 
-  if (/(^|;)\s*background(?:-color)?\s*:/.test(style)) {
+  if (hasVisibleClipboardHighlight(style)) {
     wrappedNodes = wrapClipboardInlineNodes('mark', wrappedNodes);
   }
 
