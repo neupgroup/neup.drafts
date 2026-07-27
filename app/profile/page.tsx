@@ -4,6 +4,7 @@ import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
 import { Prisma } from '@/app/generated/prisma/client';
 import HeaderV1S1 from '@/components/header.v1s1';
+import SidebarNav from '@/components/SidebarNav';
 
 // Extract the exact return type for Article + included relations
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -110,113 +111,28 @@ export default async function AccountPage() {
       <HeaderV1S1 user={user} />
 
       <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
-        <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-8 lg:py-10">
-          <nav className="flex gap-2 overflow-x-auto text-sm lg:block lg:space-y-4 lg:overflow-visible lg:text-base">
-            <Link
-              href="/"
-              className="flex shrink-0 items-center gap-4 px-3 py-2 text-slate-600 transition-colors hover:text-slate-950 lg:px-0"
-            >
-              <span className="flex size-6 items-center justify-center">
-                <span className="size-4 rotate-45 border-l border-t border-slate-500" />
-              </span>
-              Home
-            </Link>
-            <Link
-              href="/"
-              className="flex shrink-0 items-center gap-4 px-3 py-2 text-slate-600 transition-colors hover:text-slate-950 lg:px-0"
-            >
-              <span className="flex size-6 items-center justify-center">
-                <span className="h-5 w-4 border border-slate-500" />
-              </span>
-              Library
-            </Link>
-            <Link
-              href="/profile"
-              className="relative flex shrink-0 items-center gap-4 px-3 py-2 font-medium text-slate-950 lg:px-0"
-            >
-              <span className="hidden lg:absolute lg:-left-8 lg:block lg:h-7 lg:w-px lg:bg-slate-950" />
-              <span className="flex size-6 items-center justify-center">
-                <span className="size-3 rounded-full bg-slate-950" />
-              </span>
-              Profile
-            </Link>
-            <Link
-              href="/compose"
-              className="flex shrink-0 items-center gap-4 px-3 py-2 text-slate-600 transition-colors hover:text-slate-950 lg:px-0"
-            >
-              <span className="flex size-6 items-center justify-center">
-                <span className="h-5 w-4 border border-slate-500" />
-              </span>
-              Stories
-            </Link>
-            <Link
-              href="/profile"
-              className="flex shrink-0 items-center gap-4 px-3 py-2 text-slate-600 transition-colors hover:text-slate-950 lg:px-0"
-            >
-              <span className="flex size-6 items-end justify-center gap-0.5">
-                <span className="h-2 w-1 border border-slate-500" />
-                <span className="h-4 w-1 border border-slate-500" />
-                <span className="h-3 w-1 border border-slate-500" />
-              </span>
-              Stats
-            </Link>
-          </nav>
-
-          <div className="mt-8 hidden border-t border-slate-100 pt-8 lg:block">
-            <h2 className="flex items-center gap-4 text-base font-normal text-slate-600">
-              <span className="flex size-6 items-center justify-center">
-                <span className="size-4 rounded-full border border-slate-500" />
-              </span>
-              Following
-            </h2>
-            <div className="mt-6 flex items-center justify-between text-sm text-slate-600">
-              <span className="font-serif font-semibold text-slate-950">Ne</span>
-              <span>Neup Staff</span>
-              <span className="size-1.5 rounded-full bg-green-600" />
-            </div>
-            <p className="mt-8 max-w-[13rem] text-sm leading-6 text-slate-600">
-              Find writers and publications to follow.
-            </p>
-            <Link href="/" className="mt-3 inline-block text-sm text-slate-600 underline">
-              See suggestions
-            </Link>
-          </div>
-
-          <div className="mt-8 hidden border-t border-slate-100 pt-8 lg:block">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="font-semibold text-slate-950">{myPosts.length}</p>
-                <p className="mt-1 text-xs text-slate-500">Stories</p>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-950">{totalReactions}</p>
-                <p className="mt-1 text-xs text-slate-500">Likes</p>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-950">{totalComments}</p>
-                <p className="mt-1 text-xs text-slate-500">Replies</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 hidden border-t border-slate-100 pt-8 lg:block">
-            <div className="space-y-3">
-              <Link
-                href="/compose"
-                className="block border border-slate-950 bg-slate-950 px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-slate-800"
-              >
-                Write
-              </Link>
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="w-full cursor-pointer border border-red-500/30 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                >
-                  Sign Out
-                </button>
-              </form>
-            </div>
-          </div>
+        <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
+          <SidebarNav
+            sections={[
+              {
+                title: 'Profile',
+                items: [
+                  { href: '/', icon: 'home', label: 'Home' },
+                  { href: '/', icon: 'library', label: 'Library' },
+                  { active: true, href: '/profile', icon: 'profile', label: 'Profile' },
+                  { href: '/compose', icon: 'compose', label: 'New Story' },
+                ],
+              },
+              {
+                title: 'Manage',
+                items: [
+                  { href: '/manage', icon: 'overview', label: 'Overview' },
+                  { href: '/manage/articles', icon: 'articles', label: 'Articles' },
+                  { href: '/manage/stats', icon: 'stats', label: 'Stats' },
+                ],
+              },
+            ]}
+          />
         </aside>
 
         <div className="min-w-0 px-6 py-10 sm:px-10 lg:px-0 lg:pb-16 lg:pl-56 lg:pr-20 lg:pt-16">

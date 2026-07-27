@@ -15,6 +15,7 @@ Use `ManageShell` to keep navigation, title treatment, and optional summary card
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import SidebarNav from './SidebarNav';
 
 interface ManageMetric {
   label: string;
@@ -33,70 +34,15 @@ interface ManageShellProps {
 }
 
 const manageSections: Array<{
-  id: ManageShellProps['activeSection'];
+  active: boolean;
   href: string;
+  icon: 'overview' | 'articles' | 'stats' | 'compose';
   label: string;
 }> = [
-  { id: 'overview', href: '/manage', label: 'Overview' },
-  { id: 'articles', href: '/manage/articles', label: 'Articles' },
-  { id: 'stats', href: '/manage/stats', label: 'Stats' },
+  { active: false, href: '/manage', icon: 'overview', label: 'Overview' },
+  { active: false, href: '/manage/articles', icon: 'articles', label: 'Articles' },
+  { active: false, href: '/manage/stats', icon: 'stats', label: 'Stats' },
 ];
-
-function ManageSidebarIcon({
-  kind,
-}: {
-  kind: 'overview' | 'articles' | 'stats' | 'compose' | 'signout';
-}) {
-  const className = 'h-5 w-5';
-
-  if (kind === 'overview') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-        <path d="M3 11.5 12 4l9 7.5" />
-        <path d="M5.5 10.5V20h13V10.5" />
-        <path d="M10 20v-5.5h4V20" />
-      </svg>
-    );
-  }
-
-  if (kind === 'articles') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-        <rect x="5" y="4" width="14" height="16" rx="2" />
-        <path d="M8 8h8" />
-        <path d="M8 12h8" />
-        <path d="M8 16h5" />
-      </svg>
-    );
-  }
-
-  if (kind === 'stats') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-        <path d="M5 19V11" />
-        <path d="M12 19V5" />
-        <path d="M19 19v-8" />
-      </svg>
-    );
-  }
-
-  if (kind === 'compose') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-        <path d="M12 5v14" />
-        <path d="M5 12h14" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M9 6H5v13h14V6h-4" />
-      <path d="M12 3v10" />
-      <path d="m8.5 9.5 3.5 3.5 3.5-3.5" />
-    </svg>
-  );
-}
 
 export default function ManageShell({
   activeSection,
@@ -111,55 +57,29 @@ export default function ManageShell({
   return (
     <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
       <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
-        <div className="mb-6 px-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Manage
-          </p>
-        </div>
-
-        <nav className="flex gap-1 overflow-x-auto text-sm lg:block lg:space-y-2.5 lg:overflow-visible lg:text-base">
-          {manageSections.map((section) => (
-            <Link
-              key={section.id}
-              href={section.href}
-              className={`relative flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 transition-all duration-200 lg:px-3 ${
-                activeSection === section.id
-                  ? 'bg-sky-100 font-semibold text-sky-700 shadow-[inset_0_0_0_1px_rgba(125,168,201,0.18)] hover:bg-sky-150 hover:text-sky-800'
-                  : 'text-slate-800 hover:bg-sky-50 hover:text-sky-700'
-              }`}
-            >
-              <span className="flex size-6 items-center justify-center">
-                <ManageSidebarIcon kind={section.id} />
-              </span>
-              {section.label}
-            </Link>
-          ))}
-
-          <Link
-            href="/compose"
-            className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-slate-800 transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 lg:px-3"
-          >
-            <span className="flex size-6 items-center justify-center">
-              <ManageSidebarIcon kind="compose" />
-            </span>
-            New Post
-          </Link>
-        </nav>
-
-        <div className="mt-6 border-t border-slate-100 pt-4">
-          <form action="/api/auth/signout" method="POST">
-            <button
-              type="submit"
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700 lg:px-3"
-            >
-              <span className="flex size-6 items-center justify-center">
-                <ManageSidebarIcon kind="signout" />
-              </span>
-              Sign Out
-            </button>
-          </form>
-        </div>
-
+        <SidebarNav
+          sections={[
+            {
+              title: 'Profile',
+              items: [
+                { href: '/', icon: 'home', label: 'Home' },
+                { href: '/', icon: 'library', label: 'Library' },
+                { href: '/profile', icon: 'profile', label: 'Profile' },
+                { href: '/compose', icon: 'compose', label: 'New Story' },
+              ],
+            },
+            {
+              title: 'Manage',
+              items: manageSections.map((section) => ({
+                ...section,
+                active:
+                  (section.icon === 'overview' && activeSection === 'overview') ||
+                  (section.icon === 'articles' && activeSection === 'articles') ||
+                  (section.icon === 'stats' && activeSection === 'stats'),
+              })),
+            },
+          ]}
+        />
       </aside>
 
       <div className="min-w-0 px-6 py-10 sm:px-10 lg:px-0 lg:pb-16 lg:pl-20 lg:pr-20 lg:pt-16">
