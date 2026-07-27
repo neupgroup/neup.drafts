@@ -33,7 +33,7 @@ interface ComposePostFormProps {
 type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'numbered-list' | 'unnumbered-list' | 'table';
 
 type CalloutType = CalloutBlockType;
-type SemanticBlockType = 'h1' | 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
+type SemanticBlockType = 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
 type ListBlockType = 'ol' | 'ul';
 
 interface SlashMenuPosition {
@@ -99,9 +99,15 @@ function hasEditorHtml(value: string): boolean {
   return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h1|h2|h3|i|iframe|img|li|mark|ol|p|strong|summary|table|tbody|td|track|tr|u|ul|video)(\s|>|\/)/i.test(value);
 }
 
+function downgradeEditorH1Html(value: string): string {
+  return value
+    .replace(/<h1(\s[^>]*)?>/gi, '<h2$1>')
+    .replace(/<\/h1\s*>/gi, '</h2>');
+}
+
 function getEditorHtml(value: string): string {
   if (hasEditorHtml(value)) {
-    return value;
+    return downgradeEditorH1Html(value);
   }
 
   return value
@@ -119,7 +125,7 @@ function getEditorText(element: HTMLDivElement): string {
 
   if (
     htmlContent.includes('data-editor-block=') ||
-    element.querySelector('a, aside, b, em, h1, h2, h3, i, li, mark, ol, strong, u, ul')
+    element.querySelector('a, aside, b, em, h2, h3, i, li, mark, ol, strong, u, ul')
   ) {
     return htmlContent;
   }
@@ -338,7 +344,7 @@ function appendInlineClipboardChildren(target: HTMLElement, nodes: Node[]) {
 
 function createEditorHeadingFromClipboard(
   node: HTMLElement,
-  tagName: 'h1' | 'h2' | 'h3'
+  tagName: 'h2' | 'h3'
 ): HTMLHeadingElement {
   const heading = document.createElement(tagName);
   appendInlineClipboardChildren(heading, Array.from(node.childNodes));
@@ -457,7 +463,7 @@ function createEditorBlocksFromClipboardHtml(html: string): DocumentFragment | n
 
     if (tagName === 'h1') {
       flushPendingParagraph();
-      fragment.append(createEditorHeadingFromClipboard(node, 'h1'));
+      fragment.append(createEditorHeadingFromClipboard(node, 'h2'));
       return;
     }
 
@@ -513,7 +519,7 @@ function isPastedBlockFragment(fragment: DocumentFragment): boolean {
 
     const tagName = node.tagName.toLowerCase();
 
-    return ['h1', 'h2', 'h3', 'p', 'ol', 'ul'].includes(tagName) ||
+    return ['h2', 'h3', 'p', 'ol', 'ul'].includes(tagName) ||
       Boolean(node.dataset.editorBlock);
   });
 }
@@ -676,7 +682,7 @@ function normalizeEditorContent(element: HTMLElement) {
 
 function normalizeInlineMutationRange(range: Range): Range {
   const commonElement = getElementForNode(range.commonAncestorContainer);
-  const editorBlock = commonElement?.closest('p, h1, h2, h3, aside, li');
+  const editorBlock = commonElement?.closest('p, h2, h3, aside, li');
 
   if (editorBlock) {
     editorBlock.normalize();
@@ -794,10 +800,6 @@ function getSelectionMenuActiveActions(
   const activeActions: EditorMenuAction[] = [];
   const activeBlock = getEditorBlockForNode(editor, range.startContainer);
   const activeBlockTagName = activeBlock.tagName.toLowerCase();
-
-  if (activeBlockTagName === 'h1') {
-    activeActions.push('h1');
-  }
 
   if (activeBlockTagName === 'h2') {
     activeActions.push('h2');
@@ -1830,7 +1832,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     if (
       action === 'h2' ||
-      action === 'h1' ||
       action === 'h3' ||
       action === 'paragraph' ||
       action === 'numbered-list' ||
