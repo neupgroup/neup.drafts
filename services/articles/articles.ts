@@ -72,6 +72,17 @@ export async function getArticleFeed() {
   });
 }
 
+export async function getManagedArticlePosts(authorId: string) {
+  return prisma.article.findMany({
+    where: { authorId },
+    include: {
+      comments: true,
+      reactions: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
 export async function getArticleOwnershipBySlugOrId(slug: string) {
   const articleLookup = getArticleLookupFromSlug(slug);
 

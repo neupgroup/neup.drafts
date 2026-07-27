@@ -31,6 +31,9 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
               <Link href="/translation" className="text-slate-600 transition-colors hover:text-blue-600">
                 Translate
               </Link>
+              <Link href="/manage" className="text-slate-600 transition-colors hover:text-blue-600">
+                Manage
+              </Link>
               <Link
                 href="/profile"
                 className="flex items-center gap-2 border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-950 transition-all hover:bg-slate-100"
