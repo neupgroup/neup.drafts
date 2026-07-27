@@ -5,7 +5,7 @@ import {
   getArticleBySlugOrId,
   getArticleLookupFromSlug,
   getArticleOwnershipBySlugOrId,
-} from '@/services/articles';
+} from '@/services/articles/articles';
 
 function getArticleLookupFromUrl(req: NextRequest): { id: string; slug: string } {
   const url = new URL(req.url);

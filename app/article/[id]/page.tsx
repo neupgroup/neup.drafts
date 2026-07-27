@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { getArticleBySlugOrId } from '@/services/articles';
+import { getArticleBySlugOrId } from '@/services/articles/articles';
 import { ReactionButton } from '@/components/ReactionButton';
 import { CommentSection } from '@/components/CommentSection';
 import HeaderV1S1 from '@/components/header.v1s1';

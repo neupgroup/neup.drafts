@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { getArticleFeed } from '@/services/articles';
+import { getArticleFeed } from '@/services/articles/articles';
 import HeaderV1S1 from '@/components/header.v1s1';
 
 // Post interface matching the real DB structure and fallback types

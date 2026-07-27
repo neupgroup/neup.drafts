@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
 import { prisma } from '@/inapp/lib/prisma';
-import { getArticleFeed } from '@/services/articles';
+import { getArticleFeed } from '@/services/articles/articles';
 
 const ARTICLE_ID_PATTERN = /^[a-z0-9]{8,32}$/;
 
