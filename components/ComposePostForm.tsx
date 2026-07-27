@@ -14,7 +14,6 @@ import {
   setCalloutBlockType,
   type CalloutBlockType,
 } from './calloutBlock';
-import { CalloutMenu } from './calloutMenu';
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 import { EditorMenu, type EditorMenuAction } from './editorMenu';
 import { snapSelectionRange } from './SmartSelectionBehavior';
@@ -44,6 +43,7 @@ interface SelectionMenuPosition extends SlashMenuPosition {
 }
 
 type VideoProvider = 'youtube' | 'vimeo';
+type SelectionMenuMode = 'default' | 'callout';
 
 const slashMenuOptions: Array<{
   id: SlashMenuOption;
@@ -436,6 +436,11 @@ function getSelectionMenuActiveActions(
   return activeActions;
 }
 
+function isCalloutElement(element: HTMLElement): boolean {
+  return element.tagName.toLowerCase() === 'aside' &&
+    isCalloutBlockType(element.dataset.calloutType);
+}
+
 function getWordCount(value: string): number {
   return value
     .trim()
@@ -681,21 +686,6 @@ function isMenuPositionVisible(position: SlashMenuPosition): boolean {
     viewportTop <= window.innerHeight &&
     viewportLeft >= 0 &&
     viewportLeft <= window.innerWidth;
-}
-
-function isMenuElementVisible(selector: string): boolean {
-  const menu = document.querySelector(selector);
-
-  if (!(menu instanceof HTMLElement)) {
-    return false;
-  }
-
-  const rect = menu.getBoundingClientRect();
-
-  return rect.bottom >= 0 &&
-    rect.top <= window.innerHeight &&
-    rect.right >= 0 &&
-    rect.left <= window.innerWidth;
 }
 
 function restoreSelectionRange(range: Range) {
@@ -1039,7 +1029,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [selectionMenuPosition, setSelectionMenuPosition] = useState<SelectionMenuPosition | null>(null);
   const [activeSelectionMenuActions, setActiveSelectionMenuActions] = useState<EditorMenuAction[]>([]);
   const [showSelectionHeadingActions, setShowSelectionHeadingActions] = useState(true);
-  const [calloutMenuPosition, setCalloutMenuPosition] = useState<SelectionMenuPosition | null>(null);
+  const [selectionMenuMode, setSelectionMenuMode] = useState<SelectionMenuMode>('default');
   const [activeCalloutType, setActiveCalloutType] = useState<CalloutType>('informative');
   const [videoMenuPosition, setVideoMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [videoProvider, setVideoProvider] = useState<VideoProvider>('youtube');
@@ -1175,33 +1165,39 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
   const closeSelectionMenu = () => {
     selectionMenuRangeRef.current = null;
+    calloutMenuBlockRef.current = null;
     setSelectionMenuPosition(null);
     setActiveSelectionMenuActions([]);
     setShowSelectionHeadingActions(true);
+    setSelectionMenuMode('default');
   };
 
-  const closeCalloutMenu = () => {
-    calloutMenuBlockRef.current = null;
-    setCalloutMenuPosition(null);
-  };
-
-  const openCalloutMenu = (block: HTMLElement) => {
+  const openCalloutSelectionMenu = (block: HTMLElement) => {
     const rect = block.getBoundingClientRect();
     const calloutType = block.dataset.calloutType;
+    const range = document.createRange();
 
+    range.selectNodeContents(block);
+    selectionMenuRangeRef.current = range;
     calloutMenuBlockRef.current = block;
     setActiveCalloutType(
       isCalloutBlockType(calloutType)
         ? calloutType
         : 'informative'
     );
-    setCalloutMenuPosition({
+    setActiveSelectionMenuActions(['callout']);
+    setShowSelectionHeadingActions(false);
+    setSelectionMenuMode('callout');
+    setSelectionMenuPosition({
       top: window.scrollY + Math.max(8, rect.top - 58),
       left: window.scrollX + rect.left + rect.width / 2,
       transform: 'translateX(-50%)',
     });
-    closeSelectionMenu();
     closeSlashMenu();
+  };
+
+  const showDefaultSelectionMenu = () => {
+    setSelectionMenuMode('default');
   };
 
   const handleCalloutTypeChange = (calloutType: CalloutType) => {
@@ -1254,7 +1250,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setShowSelectionHeadingActions(
       getWordCount(getEditorBlockForNode(contentEditor, range.startContainer).innerText) <= 15
     );
-    closeCalloutMenu();
+    calloutMenuBlockRef.current = null;
+    setSelectionMenuMode('default');
     closeSlashMenu();
   };
 
@@ -1300,15 +1297,24 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     }
 
     if (action === 'callout') {
-      selectionMenuRangeRef.current = replaceSelectionBlock(
+      const activeBlock = getEditorBlockForNode(contentEditor, liveRange.startContainer);
+
+      if (isCalloutElement(activeBlock)) {
+        openCalloutSelectionMenu(activeBlock);
+        return;
+      }
+
+      const nextRange = replaceSelectionBlock(
         contentEditor,
         liveRange,
         'callout',
         'informative'
       );
+      const nextBlock = getEditorBlockForNode(contentEditor, nextRange.startContainer);
+
       setActiveCalloutType('informative');
       syncContentAfterFormat();
-      updateSelectionMenuAfterSelectionMove();
+      openCalloutSelectionMenu(nextBlock);
       return;
     }
 
@@ -1457,50 +1463,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
   });
-
-  useEffect(() => {
-    if (!calloutMenuPosition) {
-      return;
-    }
-
-    const closeCalloutMenuOnOutsideClick = (event: MouseEvent) => {
-      if (
-        event.target instanceof HTMLElement &&
-        (
-          event.target.closest('[data-callout-menu]') ||
-          event.target.closest('aside[data-callout-type]')
-        )
-      ) {
-        return;
-      }
-
-      closeCalloutMenu();
-    };
-
-    const closeCalloutMenuOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeCalloutMenu();
-      }
-    };
-
-    const closeCalloutMenuWhenHidden = () => {
-      if (!isMenuElementVisible('[data-callout-menu]')) {
-        closeCalloutMenu();
-      }
-    };
-
-    document.addEventListener('mousedown', closeCalloutMenuOnOutsideClick);
-    document.addEventListener('keydown', closeCalloutMenuOnEscape);
-    window.addEventListener('scroll', closeCalloutMenuWhenHidden, true);
-    window.addEventListener('resize', closeCalloutMenuWhenHidden);
-
-    return () => {
-      document.removeEventListener('mousedown', closeCalloutMenuOnOutsideClick);
-      document.removeEventListener('keydown', closeCalloutMenuOnEscape);
-      window.removeEventListener('scroll', closeCalloutMenuWhenHidden, true);
-      window.removeEventListener('resize', closeCalloutMenuWhenHidden);
-    };
-  }, [calloutMenuPosition]);
 
   useEffect(() => {
     if (!selectionMenuPosition) {
@@ -1823,17 +1785,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               document.execCommand('defaultParagraphSeparator', false, 'p');
               ensureEditorParagraph(e.currentTarget);
             }}
-            onClick={(e) => {
-              const target = e.target instanceof HTMLElement ? e.target : null;
-              const calloutBlock = target?.closest('aside[data-callout-type]');
-
-              if (
-                calloutBlock instanceof HTMLElement &&
-                e.currentTarget.contains(calloutBlock)
-              ) {
-                openCalloutMenu(calloutBlock);
-              }
-            }}
             onInput={(e) => syncContentAfterInput(e.currentTarget)}
             onKeyDown={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
@@ -1987,17 +1938,13 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         {selectionMenuPosition && (
           <EditorMenu
             activeActions={activeSelectionMenuActions}
+            activeCalloutType={activeCalloutType}
+            mode={selectionMenuMode}
             position={selectionMenuPosition}
             showHeadingActions={showSelectionHeadingActions}
             onAction={applySelectionFormat}
-          />
-        )}
-
-        {calloutMenuPosition && (
-          <CalloutMenu
-            activeType={activeCalloutType}
-            position={calloutMenuPosition}
-            onTypeChange={handleCalloutTypeChange}
+            onBack={showDefaultSelectionMenu}
+            onCalloutTypeChange={handleCalloutTypeChange}
           />
         )}
 

@@ -4,6 +4,11 @@ import {
   BaseMenuSeparator,
   type BaseMenuPosition,
 } from './baseMenu';
+import {
+  calloutBlockMetadata,
+  calloutBlockTypes,
+  type CalloutBlockType,
+} from './calloutBlock';
 
 export type EditorMenuAction =
   | 'h2'
@@ -18,17 +23,59 @@ export type EditorMenuAction =
 
 interface EditorMenuProps {
   activeActions?: EditorMenuAction[];
+  activeCalloutType?: CalloutBlockType;
+  mode?: 'default' | 'callout';
   onAction: (action: EditorMenuAction) => void;
+  onBack?: () => void;
+  onCalloutTypeChange?: (type: CalloutBlockType) => void;
   position: BaseMenuPosition;
   showHeadingActions?: boolean;
 }
 
 export function EditorMenu({
   activeActions = [],
+  activeCalloutType = 'informative',
+  mode = 'default',
   onAction,
+  onBack,
+  onCalloutTypeChange,
   position,
   showHeadingActions = true,
 }: EditorMenuProps) {
+  if (mode === 'callout') {
+    return (
+      <BaseMenu
+        ariaLabel="Callout block menu"
+        dataAttribute="data-selection-menu"
+        position={position}
+      >
+        <BaseMenuButton
+          aria-label="Back"
+          title="Back"
+          onClick={onBack}
+          className="text-lg font-bold"
+        >
+          &#8592;
+        </BaseMenuButton>
+
+        <BaseMenuSeparator />
+
+        {calloutBlockTypes.map((type) => (
+          <BaseMenuButton
+            key={type}
+            active={activeCalloutType === type}
+            aria-label={`${calloutBlockMetadata[type].label} callout`}
+            title={calloutBlockMetadata[type].label}
+            onClick={() => onCalloutTypeChange?.(type)}
+            className="text-lg font-bold"
+          >
+            {calloutBlockMetadata[type].icon}
+          </BaseMenuButton>
+        ))}
+      </BaseMenu>
+    );
+  }
+
   return (
     <BaseMenu
       ariaLabel="Editor selection menu"
