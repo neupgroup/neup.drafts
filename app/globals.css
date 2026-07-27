@@ -57,6 +57,33 @@
   line-height: 1.9rem;
 }
 
+.compose-content-editor ol,
+.compose-content-editor ul,
+.article-content-html ol,
+.article-content-html ul {
+  padding-left: 1.5rem;
+}
+
+.compose-content-editor ol,
+.article-content-html ol {
+  list-style: decimal;
+}
+
+.compose-content-editor ul,
+.article-content-html ul {
+  list-style: disc;
+}
+
+.compose-content-editor li,
+.article-content-html li {
+  padding-left: 0.25rem;
+}
+
+.compose-content-editor li + li,
+.article-content-html li + li {
+  margin-top: 0.4rem;
+}
+
 .compose-content-editor aside[data-callout-type],
 .article-content-html aside[data-callout-type] {
   border-left: 4px solid rgb(37 99 235);
@@ -92,6 +119,7 @@
 .compose-content-editor [data-editor-block="audio"],
 .compose-content-editor [data-editor-block="video"],
 .compose-content-editor [data-editor-block="carousel"],
+.compose-content-editor [data-editor-block="list"],
 .compose-content-editor [data-editor-block="table"] {
   display: block;
 }

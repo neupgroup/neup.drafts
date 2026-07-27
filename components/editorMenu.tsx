@@ -14,6 +14,8 @@ export type EditorMenuAction =
   | 'h2'
   | 'h3'
   | 'paragraph'
+  | 'numbered-list'
+  | 'unnumbered-list'
   | 'callout'
   | 'bold'
   | 'italic'
@@ -114,6 +116,26 @@ export function EditorMenu({
         className="text-sm font-bold"
       >
         P
+      </BaseMenuButton>
+
+      <BaseMenuButton
+        active={activeActions.includes('numbered-list')}
+        aria-label="Numbered list"
+        title="Numbered list"
+        onClick={() => onAction('numbered-list')}
+        className="text-sm font-bold"
+      >
+        1.
+      </BaseMenuButton>
+
+      <BaseMenuButton
+        active={activeActions.includes('unnumbered-list')}
+        aria-label="Unnumbered list"
+        title="Unnumbered list"
+        onClick={() => onAction('unnumbered-list')}
+        className="text-sm font-bold"
+      >
+        &bull;
       </BaseMenuButton>
 
       <BaseMenuSeparator />

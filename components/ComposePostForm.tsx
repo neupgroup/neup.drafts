@@ -30,9 +30,11 @@ interface ComposePostFormProps {
   article?: ComposeArticle;
 }
 
-type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'table';
+type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'numbered-list' | 'unnumbered-list' | 'table';
 
 type CalloutType = CalloutBlockType;
+type SemanticBlockType = 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
+type ListBlockType = 'ol' | 'ul';
 
 interface SlashMenuPosition {
   top: number;
@@ -54,6 +56,8 @@ const slashMenuOptions: Array<{
   { id: 'audio', label: 'Add an audio block' },
   { id: 'video', label: 'Add a video block' },
   { id: 'carousel', label: 'Add a carousel block' },
+  { id: 'numbered-list', label: 'Add a numbered list' },
+  { id: 'unnumbered-list', label: 'Add an unnumbered list' },
   { id: 'table', label: 'Add a table' },
 ];
 
@@ -92,7 +96,7 @@ function escapeHtml(value: string): string {
 }
 
 function hasEditorHtml(value: string): boolean {
-  return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h2|h3|i|iframe|img|mark|p|strong|summary|table|tbody|td|track|tr|u|video)(\s|>|\/)/i.test(value);
+  return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h2|h3|i|iframe|img|li|mark|ol|p|strong|summary|table|tbody|td|track|tr|u|ul|video)(\s|>|\/)/i.test(value);
 }
 
 function getEditorHtml(value: string): string {
@@ -115,7 +119,7 @@ function getEditorText(element: HTMLDivElement): string {
 
   if (
     htmlContent.includes('data-editor-block=') ||
-    element.querySelector('a, aside, b, em, h2, h3, i, mark, strong, u')
+    element.querySelector('a, aside, b, em, h2, h3, i, li, mark, ol, strong, u, ul')
   ) {
     return htmlContent;
   }
@@ -271,7 +275,11 @@ function getSelectionTextRange(editor: HTMLDivElement): Range | null {
 
   if (
     startBlock !== endBlock ||
-    (startBlock.dataset.editorBlock && startBlock.dataset.editorBlock !== 'callout') ||
+    (
+      startBlock.dataset.editorBlock &&
+      startBlock.dataset.editorBlock !== 'callout' &&
+      startBlock.dataset.editorBlock !== 'list'
+    ) ||
     !range.toString().trim()
   ) {
     return null;
@@ -295,7 +303,7 @@ function normalizeEditorContent(element: HTMLElement) {
 
 function normalizeInlineMutationRange(range: Range): Range {
   const commonElement = getElementForNode(range.commonAncestorContainer);
-  const editorBlock = commonElement?.closest('p, h2, h3, aside');
+  const editorBlock = commonElement?.closest('p, h2, h3, aside, li');
 
   if (editorBlock) {
     editorBlock.normalize();
@@ -426,6 +434,14 @@ function getSelectionMenuActiveActions(
     activeActions.push('paragraph');
   }
 
+  if (activeBlockTagName === 'ol') {
+    activeActions.push('numbered-list');
+  }
+
+  if (activeBlockTagName === 'ul') {
+    activeActions.push('unnumbered-list');
+  }
+
   if (activeBlockTagName === 'aside') {
     const calloutType = activeBlock.dataset.calloutType;
 
@@ -462,6 +478,12 @@ function getSelectionMenuActiveActions(
 function isCalloutElement(element: HTMLElement): boolean {
   return element.tagName.toLowerCase() === 'aside' &&
     isCalloutBlockType(element.dataset.calloutType);
+}
+
+function isListElement(element: HTMLElement): boolean {
+  const tagName = element.tagName.toLowerCase();
+
+  return tagName === 'ol' || tagName === 'ul';
 }
 
 function getWordCount(value: string): number {
@@ -653,13 +675,46 @@ function unwrapInlineFormatFromRange(range: Range, selector: string): Range {
   return nextRange;
 }
 
+function getListItemHtml(block: HTMLElement): string[] {
+  const listItems = Array.from(block.querySelectorAll(':scope > li'))
+    .map((item) => item.innerHTML.trim())
+    .filter(Boolean);
+
+  if (listItems.length > 0) {
+    return listItems;
+  }
+
+  const blockHtml = block.innerHTML.trim();
+
+  return blockHtml ? [blockHtml] : ['<br>'];
+}
+
+function createListBlock(listType: ListBlockType, items: string[] = ['']): HTMLOListElement | HTMLUListElement {
+  const list = document.createElement(listType);
+
+  list.dataset.editorBlock = 'list';
+  list.dataset.listType = listType === 'ol' ? 'numbered' : 'unnumbered';
+
+  items.forEach((item) => {
+    const listItem = document.createElement('li');
+    listItem.innerHTML = item || '<br>';
+    list.append(listItem);
+  });
+
+  return list;
+}
+
 function createSemanticBlock(
-  blockType: 'h2' | 'h3' | 'p' | 'callout',
+  blockType: SemanticBlockType,
   html: string,
   calloutType?: CalloutType
 ): HTMLElement {
   if (blockType === 'callout') {
     return createCalloutBlock(html, calloutType ?? 'informative');
+  }
+
+  if (blockType === 'ol' || blockType === 'ul') {
+    return createListBlock(blockType, [html]);
   }
 
   const block = document.createElement(blockType);
@@ -669,14 +724,28 @@ function createSemanticBlock(
   return block;
 }
 
+function getSemanticBlockHtml(block: HTMLElement, blockType: SemanticBlockType): string {
+  if (blockType === 'ol' || blockType === 'ul') {
+    return block.innerHTML;
+  }
+
+  if (isListElement(block)) {
+    return getListItemHtml(block).join('<br>');
+  }
+
+  return block.innerHTML;
+}
+
 function replaceSelectionBlock(
   editor: HTMLDivElement,
   range: Range,
-  blockType: 'h2' | 'h3' | 'p' | 'callout',
+  blockType: SemanticBlockType,
   calloutType?: CalloutType
 ): Range {
   const currentBlock = getEditorBlockForNode(editor, range.startContainer);
-  const nextBlock = createSemanticBlock(blockType, currentBlock.innerHTML, calloutType);
+  const nextBlock = blockType === 'ol' || blockType === 'ul'
+    ? createListBlock(blockType, getListItemHtml(currentBlock))
+    : createSemanticBlock(blockType, getSemanticBlockHtml(currentBlock, blockType), calloutType);
 
   currentBlock.replaceWith(nextBlock);
 
@@ -1368,11 +1437,23 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       return;
     }
 
-    if (action === 'h2' || action === 'h3' || action === 'paragraph') {
+    if (
+      action === 'h2' ||
+      action === 'h3' ||
+      action === 'paragraph' ||
+      action === 'numbered-list' ||
+      action === 'unnumbered-list'
+    ) {
       selectionMenuRangeRef.current = replaceSelectionBlock(
         contentEditor,
         liveRange,
-        action === 'paragraph' ? 'p' : action
+        action === 'paragraph'
+          ? 'p'
+          : action === 'numbered-list'
+            ? 'ol'
+            : action === 'unnumbered-list'
+              ? 'ul'
+              : action
       );
       syncContentAfterFormat();
       updateSelectionMenuAfterSelectionMove();
@@ -1678,7 +1759,12 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     const paragraph = createEditorParagraph();
     block.after(paragraph);
-    setCaretPosition(paragraph, 'start');
+
+    const listItem = isListElement(block)
+      ? block.querySelector<HTMLElement>(':scope > li')
+      : null;
+
+    setCaretPosition(listItem ?? paragraph, 'start');
     setContent(getEditorText(contentEditor));
     closeSlashMenu();
   };
@@ -1718,6 +1804,16 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         insertEditorBlock(createCarouselBlock(srcValues));
       }
 
+      return;
+    }
+
+    if (option === 'numbered-list') {
+      insertEditorBlock(createListBlock('ol'));
+      return;
+    }
+
+    if (option === 'unnumbered-list') {
+      insertEditorBlock(createListBlock('ul'));
       return;
     }
 

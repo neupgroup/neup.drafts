@@ -104,14 +104,14 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'data-editor-block' && ['aside', 'figure', 'div'].includes(tagName)) {
+    if (attributeName === 'data-editor-block' && ['aside', 'div', 'figure', 'ol', 'ul'].includes(tagName)) {
       allowedAttributes.push(`data-editor-block="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
     }
 
     if (
       attributeName.startsWith('data-') &&
-      ['aside', 'div', 'figure', 'h2', 'h3', 'p'].includes(tagName)
+      ['aside', 'div', 'figure', 'h2', 'h3', 'li', 'ol', 'p', 'ul'].includes(tagName)
     ) {
       allowedAttributes.push(`${attributeName}="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
@@ -247,7 +247,9 @@ function sanitizeArticleHtml(content: string): string {
     'i',
     'iframe',
     'img',
+    'li',
     'mark',
+    'ol',
     'p',
     'strong',
     'table',
@@ -257,6 +259,7 @@ function sanitizeArticleHtml(content: string): string {
     'track',
     'tr',
     'u',
+    'ul',
     'video',
   ]);
 
