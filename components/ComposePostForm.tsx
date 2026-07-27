@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import {
   createCalloutBlock,
@@ -11,6 +17,7 @@ import {
 import { CalloutMenu } from './calloutMenu';
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 import { EditorMenu, type EditorMenuAction } from './editorMenu';
+import { snapSelectionRange } from './SmartSelectionBehavior';
 
 interface ComposeArticle {
   id: string;
@@ -663,6 +670,12 @@ function wrapRangeWithInlineElement(range: Range, element: HTMLElement): Range {
   return nextRange;
 }
 
+function getSmartInlineSelectionRange(editor: HTMLDivElement, range: Range): Range | null {
+  const activeBlock = getEditorBlockForNode(editor, range.startContainer);
+
+  return snapSelectionRange(activeBlock, range);
+}
+
 function getSafeEditorLinkUrl(value: string): string | null {
   const trimmedValue = value.trim();
 
@@ -1239,6 +1252,15 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       return;
     }
 
+    const inlineRange = getSmartInlineSelectionRange(contentEditor, liveRange);
+
+    if (!inlineRange) {
+      closeSelectionMenu();
+      return;
+    }
+
+    restoreSelectionRange(inlineRange);
+
     if (action === 'link') {
       const rawUrl = window.prompt('Link URL');
 
@@ -1263,7 +1285,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         link.rel = 'noopener noreferrer';
       }
 
-      selectionMenuRangeRef.current = wrapRangeWithInlineElement(liveRange, link);
+      selectionMenuRangeRef.current = wrapRangeWithInlineElement(inlineRange, link);
       setError('');
       syncContentAfterFormat();
       updateSelectionMenuAfterSelectionMove();
@@ -1271,10 +1293,10 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     }
 
     if (action === 'highlight') {
-      const highlightCounts = getRangeTextFormatCounts(liveRange, 'mark');
+      const highlightCounts = getRangeTextFormatCounts(inlineRange, 'mark');
       const nextRange = highlightCounts.formatted > highlightCounts.unformatted
-        ? unwrapMarkFromRange(liveRange)
-        : wrapRangeWithMark(liveRange);
+        ? unwrapMarkFromRange(inlineRange)
+        : wrapRangeWithMark(inlineRange);
 
       selectionMenuRangeRef.current = nextRange;
       syncContentAfterFormat();
@@ -1293,9 +1315,60 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     };
     const wrapper = document.createElement(tagNameByAction[action]);
 
-    selectionMenuRangeRef.current = wrapRangeWithInlineElement(liveRange, wrapper);
+    selectionMenuRangeRef.current = wrapRangeWithInlineElement(inlineRange, wrapper);
     syncContentAfterFormat();
     updateSelectionMenuAfterSelectionMove();
+  };
+
+  const applyCurrentSelectionFormat = (action: EditorMenuAction): boolean => {
+    const contentEditor = contentRef.current;
+
+    if (!contentEditor) {
+      return false;
+    }
+
+    const range = getSelectionTextRange(contentEditor);
+
+    if (!range) {
+      return false;
+    }
+
+    selectionMenuRangeRef.current = range.cloneRange();
+    applySelectionFormat(action);
+
+    return true;
+  };
+
+  const getKeyboardFormatAction = (
+    event: ReactKeyboardEvent<HTMLDivElement>
+  ): EditorMenuAction | null => {
+    if (!event.metaKey && !event.ctrlKey) {
+      return null;
+    }
+
+    const key = event.key.toLowerCase();
+
+    if (key === 'b' && !event.shiftKey && !event.altKey) {
+      return 'bold';
+    }
+
+    if (key === 'i' && !event.shiftKey && !event.altKey) {
+      return 'italic';
+    }
+
+    if (key === 'u' && !event.shiftKey && !event.altKey) {
+      return 'underline';
+    }
+
+    if (key === 'h' && event.shiftKey && !event.altKey) {
+      return 'highlight';
+    }
+
+    if (key === 'k' && !event.shiftKey && !event.altKey) {
+      return 'link';
+    }
+
+    return null;
   };
 
   useEffect(() => {
@@ -1690,6 +1763,14 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             onKeyDown={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
 
+              const keyboardFormatAction = getKeyboardFormatAction(e);
+
+              if (keyboardFormatAction) {
+                e.preventDefault();
+                applyCurrentSelectionFormat(keyboardFormatAction);
+                return;
+              }
+
             if (e.key === 'Escape' && slashMenuPosition) {
               e.preventDefault();
               closeSlashMenu();
@@ -1852,7 +1933,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               top: slashMenuPosition.top,
               left: slashMenuPosition.left,
             }}
-            className="fixed z-50 w-56 border border-slate-200 bg-white p-1 shadow-lg"
+            className="fixed z-40 w-56 border border-slate-200 bg-white p-1 shadow-lg"
           >
             {filteredSlashMenuOptions.map((option, index) => (
               <button
@@ -1883,7 +1964,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               top: videoMenuPosition.top,
               left: videoMenuPosition.left,
             }}
-            className="fixed z-50 w-80 border border-slate-200 bg-white p-3 shadow-lg"
+            className="fixed z-40 w-80 border border-slate-200 bg-white p-3 shadow-lg"
           >
             <div className="grid grid-cols-2 gap-2">
               <button
