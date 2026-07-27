@@ -245,6 +245,58 @@ function sanitizeClipboardLinkUrl(value: string): string {
   return '';
 }
 
+function sanitizeClipboardImageUrl(value: string): string {
+  const trimmedValue = value.trim();
+
+  if (
+    trimmedValue.startsWith('data:image/') ||
+    trimmedValue.startsWith('https://') ||
+    trimmedValue.startsWith('http://')
+  ) {
+    return trimmedValue;
+  }
+
+  return '';
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      resolve(typeof reader.result === 'string' ? reader.result : '');
+    };
+
+    reader.onerror = () => {
+      resolve('');
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function getClipboardImageFiles(dataTransfer: DataTransfer): File[] {
+  const files: File[] = [];
+
+  Array.from(dataTransfer.items).forEach((item) => {
+    if (item.kind !== 'file' || !item.type.startsWith('image/')) {
+      return;
+    }
+
+    const file = item.getAsFile();
+
+    if (file) {
+      files.push(file);
+    }
+  });
+
+  if (files.length > 0) {
+    return files;
+  }
+
+  return Array.from(dataTransfer.files).filter((file) => file.type.startsWith('image/'));
+}
+
 function wrapClipboardInlineNodes(tagName: 'strong' | 'em' | 'u' | 'mark', nodes: Node[]): Node[] {
   if (nodes.length === 0) {
     return [];
@@ -401,6 +453,17 @@ function createEditorListFromClipboard(
   return list;
 }
 
+function appendClipboardInlineRunAsParagraph(
+  fragment: DocumentFragment,
+  nodes: Node[]
+) {
+  const paragraph = createEditorParagraph();
+
+  paragraph.replaceChildren();
+  appendInlineClipboardChildren(paragraph, nodes);
+  fragment.append(paragraph);
+}
+
 function createEditorBlocksFromClipboardHtml(html: string): DocumentFragment | null {
   const template = document.createElement('template');
   template.innerHTML = html;
@@ -459,6 +522,28 @@ function createEditorBlocksFromClipboardHtml(html: string): DocumentFragment | n
 
     const tagName = node.tagName.toLowerCase();
 
+    if (tagName === 'img') {
+      const src = sanitizeClipboardImageUrl(
+        node.getAttribute('src') ??
+        node.getAttribute('data-src') ??
+        ''
+      );
+
+      if (src) {
+        flushPendingParagraph();
+        fragment.append(createImageBlock(src));
+      }
+
+      return;
+    }
+
+    if (node.querySelector('img')) {
+      flushPendingParagraph();
+      Array.from(node.childNodes).forEach(appendTopLevelNode);
+      flushPendingParagraph();
+      return;
+    }
+
     if (tagName === 'ul' || tagName === 'ol') {
       flushPendingParagraph();
       fragment.append(createEditorListFromClipboard(node, tagName as ListBlockType));
@@ -491,10 +576,25 @@ function createEditorBlocksFromClipboardHtml(html: string): DocumentFragment | n
 
     if (tagName === 'p') {
       flushPendingParagraph();
-      const paragraph = createEditorParagraph();
-      paragraph.replaceChildren();
-      appendInlineClipboardChildren(paragraph, Array.from(node.childNodes));
-      fragment.append(paragraph);
+      const pendingInlineNodes: Node[] = [];
+
+      Array.from(node.childNodes).forEach((child) => {
+        if (child instanceof HTMLElement && child.tagName.toLowerCase() === 'img') {
+          if (pendingInlineNodes.length > 0) {
+            appendClipboardInlineRunAsParagraph(fragment, pendingInlineNodes.splice(0));
+          }
+
+          appendTopLevelNode(child);
+          return;
+        }
+
+        pendingInlineNodes.push(child);
+      });
+
+      if (pendingInlineNodes.length > 0) {
+        appendClipboardInlineRunAsParagraph(fragment, pendingInlineNodes);
+      }
+
       return;
     }
 
@@ -511,6 +611,17 @@ function createEditorBlocksFromClipboardHtml(html: string): DocumentFragment | n
 
   Array.from(template.content.childNodes).forEach(appendTopLevelNode);
   flushPendingParagraph();
+
+  return fragment.childNodes.length > 0 ? fragment : null;
+}
+
+async function createEditorFragmentFromClipboardImages(files: File[]): Promise<DocumentFragment | null> {
+  const fragment = document.createDocumentFragment();
+  const imageUrls = (await Promise.all(files.map(readFileAsDataUrl))).filter(Boolean);
+
+  imageUrls.forEach((src) => {
+    fragment.append(createImageBlock(src));
+  });
 
   return fragment.childNodes.length > 0 ? fragment : null;
 }
@@ -2490,6 +2601,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             }
           }}
           onPaste={(e) => {
+            const editor = e.currentTarget;
             const html = e.clipboardData.getData('text/html');
 
             if (html.trim()) {
@@ -2497,10 +2609,38 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
               if (fragment) {
                 e.preventDefault();
-                insertFragmentAtSelection(e.currentTarget, fragment);
-                setContent(getEditorText(e.currentTarget));
+                insertFragmentAtSelection(editor, fragment);
+                setContent(getEditorText(editor));
                 return;
               }
+            }
+
+            const imageFiles = getClipboardImageFiles(e.clipboardData);
+
+            if (imageFiles.length > 0) {
+              e.preventDefault();
+              const selection = window.getSelection();
+              const pasteRange = selection?.rangeCount
+                ? selection.getRangeAt(0).cloneRange()
+                : null;
+
+              void createEditorFragmentFromClipboardImages(imageFiles).then((fragment) => {
+                if (!fragment) {
+                  return;
+                }
+
+                if (
+                  pasteRange &&
+                  pasteRange.startContainer.isConnected &&
+                  editor.contains(pasteRange.startContainer)
+                ) {
+                  restoreSelectionRange(pasteRange);
+                }
+
+                insertFragmentAtSelection(editor, fragment);
+                setContent(getEditorText(editor));
+              });
+              return;
             }
 
             e.preventDefault();
@@ -2515,8 +2655,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               return;
             }
 
-            insertFragmentAtSelection(e.currentTarget, createEditorFragmentFromPlainText(text));
-            setContent(getEditorText(e.currentTarget));
+            insertFragmentAtSelection(editor, createEditorFragmentFromPlainText(text));
+            setContent(getEditorText(editor));
           }}
             className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
           />
