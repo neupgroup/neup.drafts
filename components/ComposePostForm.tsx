@@ -61,6 +61,8 @@ const slashMenuOptions: Array<{
   { id: 'table', label: 'Add a table' },
 ];
 
+const EDITOR_HISTORY_LIMIT = 100;
+
 function createDraftArticleId(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
     return globalThis.crypto.randomUUID().replace(/-/g, '').slice(0, 12);
@@ -1355,6 +1357,19 @@ function restoreSelectionRange(range: Range) {
   selection.addRange(range);
 }
 
+function placeCaretAtEditorEnd(editor: HTMLDivElement) {
+  const lastBlock = Array.from(editor.children)
+    .filter((child) => child instanceof HTMLElement)
+    .at(-1);
+
+  if (lastBlock instanceof HTMLElement) {
+    setCaretPosition(lastBlock, 'end');
+    return;
+  }
+
+  setCaretPosition(editor, 'end');
+}
+
 function wrapRangeWithInlineElement(
   range: Range,
   element: HTMLElement,
@@ -1675,6 +1690,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const pendingCalloutMenuBlockRef = useRef<HTMLElement | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
+  const editorUndoStackRef = useRef<string[]>([]);
+  const editorRedoStackRef = useRef<string[]>([]);
   const [articleId] = useState(() => article?.id ?? createDraftArticleId());
   const [title, setTitle] = useState(article?.title ?? '');
   const [content, setContent] = useState(article?.content ?? '');
@@ -1699,12 +1716,106 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
   const normalizeTitle = (value: string): string => value.replace(/\s*\r?\n\s*/g, ' ');
 
+  const getEditorHistorySnapshot = (editor: HTMLDivElement): string =>
+    normalizeEditorSpaces(editor.innerHTML.trim());
+
+  const pushEditorHistorySnapshot = (editor: HTMLDivElement) => {
+    const snapshot = getEditorHistorySnapshot(editor);
+    const undoStack = editorUndoStackRef.current;
+
+    if (undoStack.at(-1) === snapshot) {
+      return;
+    }
+
+    undoStack.push(snapshot);
+
+    if (undoStack.length > EDITOR_HISTORY_LIMIT) {
+      undoStack.splice(0, undoStack.length - EDITOR_HISTORY_LIMIT);
+    }
+
+    editorRedoStackRef.current = [];
+  };
+
+  const restoreEditorHistorySnapshot = (editor: HTMLDivElement, snapshot: string) => {
+    editor.innerHTML = getEditorHtml(snapshot);
+    ensureEditorParagraph(editor);
+    setContent(getEditorText(editor));
+    placeCaretAtEditorEnd(editor);
+    closeSlashMenu();
+    closeSelectionMenu();
+  };
+
+  const syncContentAfterEditorChange = (editor: HTMLDivElement) => {
+    const nextContent = getEditorText(editor);
+
+    setContent(nextContent);
+    pushEditorHistorySnapshot(editor);
+
+    return nextContent;
+  };
+
+  const undoEditorChange = (editor: HTMLDivElement): boolean => {
+    const undoStack = editorUndoStackRef.current;
+
+    if (undoStack.length <= 1) {
+      return false;
+    }
+
+    const currentSnapshot = undoStack.pop();
+    const previousSnapshot = undoStack.at(-1);
+
+    if (!currentSnapshot || previousSnapshot === undefined) {
+      return false;
+    }
+
+    editorRedoStackRef.current.push(currentSnapshot);
+    restoreEditorHistorySnapshot(editor, previousSnapshot);
+
+    return true;
+  };
+
+  const redoEditorChange = (editor: HTMLDivElement): boolean => {
+    const nextSnapshot = editorRedoStackRef.current.pop();
+
+    if (nextSnapshot === undefined) {
+      return false;
+    }
+
+    editorUndoStackRef.current.push(nextSnapshot);
+    restoreEditorHistorySnapshot(editor, nextSnapshot);
+
+    return true;
+  };
+
+  const getEditorHistoryAction = (
+    event: ReactKeyboardEvent<HTMLDivElement>
+  ): 'undo' | 'redo' | null => {
+    const key = event.key.toLowerCase();
+    const hasShortcutModifier = event.metaKey || event.ctrlKey;
+
+    if (!hasShortcutModifier || event.altKey) {
+      return null;
+    }
+
+    if (key === 'z' && !event.shiftKey) {
+      return 'undo';
+    }
+
+    if ((key === 'z' && event.shiftKey) || (key === 'y' && !event.shiftKey)) {
+      return 'redo';
+    }
+
+    return null;
+  };
+
   useLayoutEffect(() => {
     if (!contentRef.current || initializedEditorArticleIdRef.current === articleId) {
       return;
     }
 
     contentRef.current.innerHTML = getEditorHtml(content);
+    editorUndoStackRef.current = [getEditorHistorySnapshot(contentRef.current)];
+    editorRedoStackRef.current = [];
     initializedEditorArticleIdRef.current = articleId;
   }, [articleId, content]);
 
@@ -1798,13 +1909,13 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       updateSlashMenuFromSelection();
 
       if (contentRef.current) {
-        setContent(getEditorText(contentRef.current));
+        syncContentAfterEditorChange(contentRef.current);
       }
     });
   };
 
   const syncContentAfterInput = (element: HTMLDivElement) => {
-    setContent(getEditorText(element));
+    syncContentAfterEditorChange(element);
 
     if (slashMenuPosition) {
       requestAnimationFrame(() => {
@@ -1914,7 +2025,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setActiveCalloutType(calloutType);
 
     if (contentRef.current) {
-      setContent(getEditorText(contentRef.current));
+      syncContentAfterEditorChange(contentRef.current);
     }
   };
 
@@ -1966,7 +2077,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
   const syncContentAfterFormat = () => {
     if (contentRef.current) {
-      setContent(getEditorText(contentRef.current));
+      syncContentAfterEditorChange(contentRef.current);
     }
   };
 
@@ -2325,7 +2436,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       : null;
 
     setCaretPosition(listItem ?? paragraph, 'start');
-    setContent(getEditorText(contentEditor));
+    syncContentAfterEditorChange(contentEditor);
     closeSlashMenu();
   };
 
@@ -2528,11 +2639,25 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               document.execCommand('defaultParagraphSeparator', false, 'p');
               ensureEditorParagraph(e.currentTarget);
             }}
-            onInput={(e) => syncContentAfterInput(e.currentTarget)}
+          onInput={(e) => syncContentAfterInput(e.currentTarget)}
             onMouseDown={rememberSelectedCalloutPointerDown}
             onClick={openSelectedCalloutMenuAfterClick}
             onKeyDown={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
+
+              const historyAction = getEditorHistoryAction(e);
+
+              if (historyAction) {
+                e.preventDefault();
+
+                if (historyAction === 'undo') {
+                  undoEditorChange(e.currentTarget);
+                } else {
+                  redoEditorChange(e.currentTarget);
+                }
+
+                return;
+              }
 
               const keyboardFormatAction = getKeyboardFormatAction(e);
 
@@ -2618,7 +2743,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               e.preventDefault();
               const paragraph = convertListBlockToParagraph(currentBlock);
               setCaretPosition(paragraph, 'start');
-              setContent(getEditorText(e.currentTarget));
+              syncContentAfterEditorChange(e.currentTarget);
               closeSelectionMenu();
               return;
             }
@@ -2661,7 +2786,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               if (fragment) {
                 e.preventDefault();
                 insertFragmentAtSelection(editor, fragment);
-                setContent(getEditorText(editor));
+                syncContentAfterEditorChange(editor);
                 return;
               }
             }
@@ -2689,7 +2814,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
                 }
 
                 insertFragmentAtSelection(editor, fragment);
-                setContent(getEditorText(editor));
+                syncContentAfterEditorChange(editor);
               });
               return;
             }
@@ -2703,11 +2828,12 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
             if (paragraphs.length <= 1) {
               document.execCommand('insertText', false, text);
+              syncContentAfterEditorChange(editor);
               return;
             }
 
             insertFragmentAtSelection(editor, createEditorFragmentFromPlainText(text));
-            setContent(getEditorText(editor));
+            syncContentAfterEditorChange(editor);
           }}
             className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
           />
@@ -2716,7 +2842,13 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             contentRef={contentRef}
             editorFrameRef={editorFrameRef}
             getContent={getEditorText}
-            onContentChange={setContent}
+            onContentChange={(nextContent) => {
+              setContent(nextContent);
+
+              if (contentRef.current) {
+                pushEditorHistorySnapshot(contentRef.current);
+              }
+            }}
           />
         </div>
 
