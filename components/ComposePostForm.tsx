@@ -966,7 +966,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [selectionMenuPosition, setSelectionMenuPosition] = useState<SelectionMenuPosition | null>(null);
   const [activeSelectionMenuActions, setActiveSelectionMenuActions] = useState<EditorMenuAction[]>([]);
   const [showSelectionHeadingActions, setShowSelectionHeadingActions] = useState(true);
-  const [calloutMenuPosition, setCalloutMenuPosition] = useState<SlashMenuPosition | null>(null);
+  const [calloutMenuPosition, setCalloutMenuPosition] = useState<SelectionMenuPosition | null>(null);
   const [activeCalloutType, setActiveCalloutType] = useState<CalloutType>('informative');
   const [videoMenuPosition, setVideoMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [videoProvider, setVideoProvider] = useState<VideoProvider>('youtube');
@@ -1123,8 +1123,9 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         : 'informative'
     );
     setCalloutMenuPosition({
-      top: window.scrollY + rect.bottom + 8,
-      left: window.scrollX + Math.min(rect.left, window.innerWidth - 296),
+      top: window.scrollY + Math.max(8, rect.top - 58),
+      left: window.scrollX + rect.left + rect.width / 2,
+      transform: 'translateX(-50%)',
     });
     closeSelectionMenu();
     closeSlashMenu();

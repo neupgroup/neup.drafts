@@ -1,6 +1,6 @@
 import {
   BaseMenu,
-  BaseMenuOption,
+  BaseMenuButton,
   type BaseMenuPosition,
 } from './baseMenu';
 import {
@@ -24,18 +24,19 @@ export function CalloutMenu({
     <BaseMenu
       ariaLabel="Callout block menu"
       dataAttribute="data-callout-menu"
-      orientation="vertical"
       position={position}
     >
       {calloutBlockTypes.map((type) => (
-        <BaseMenuOption
+        <BaseMenuButton
           key={type}
           active={activeType === type}
-          description={calloutBlockMetadata[type].description}
-          icon={calloutBlockMetadata[type].icon}
+          aria-label={`${calloutBlockMetadata[type].label} callout`}
           title={calloutBlockMetadata[type].label}
           onClick={() => onTypeChange(type)}
-        />
+          className="text-lg font-bold"
+        >
+          {calloutBlockMetadata[type].icon}
+        </BaseMenuButton>
       ))}
     </BaseMenu>
   );
