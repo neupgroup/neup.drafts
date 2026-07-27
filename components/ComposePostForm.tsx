@@ -1304,6 +1304,15 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     contentEditor.focus();
     restoreSelectionRange(storedRange);
 
+    if (action === 'callout') {
+      const storedBlock = getEditorBlockForNode(contentEditor, storedRange.startContainer);
+
+      if (contentEditor.contains(storedBlock) && isCalloutElement(storedBlock)) {
+        openCalloutSelectionMenu(storedBlock);
+        return;
+      }
+    }
+
     const liveRange = getSelectionTextRange(contentEditor);
 
     if (!liveRange) {
