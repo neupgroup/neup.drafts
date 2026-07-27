@@ -41,6 +41,14 @@
   -webkit-box-decoration-break: clone;
 }
 
+.compose-content-editor h1,
+.article-content-html h1 {
+  color: rgb(15 23 42);
+  font-size: 2.15rem;
+  font-weight: 700;
+  line-height: 2.65rem;
+}
+
 .compose-content-editor h2,
 .article-content-html h2 {
   color: rgb(15 23 42);

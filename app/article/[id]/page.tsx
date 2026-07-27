@@ -111,7 +111,7 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
 
     if (
       attributeName.startsWith('data-') &&
-      ['aside', 'div', 'figure', 'h2', 'h3', 'li', 'ol', 'p', 'ul'].includes(tagName)
+      ['aside', 'div', 'figure', 'h1', 'h2', 'h3', 'li', 'ol', 'p', 'ul'].includes(tagName)
     ) {
       allowedAttributes.push(`${attributeName}="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
@@ -242,6 +242,7 @@ function sanitizeArticleHtml(content: string): string {
     'em',
     'figcaption',
     'figure',
+    'h1',
     'h2',
     'h3',
     'i',

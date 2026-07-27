@@ -11,6 +11,7 @@ import {
 } from './calloutBlock';
 
 export type EditorMenuAction =
+  | 'h1'
   | 'h2'
   | 'h3'
   | 'paragraph'
@@ -86,6 +87,16 @@ export function EditorMenu({
     >
       {showHeadingActions && (
         <>
+          <BaseMenuButton
+            active={activeActions.includes('h1')}
+            aria-label="Heading 1"
+            title="Heading 1"
+            onClick={() => onAction('h1')}
+            className="text-sm font-bold"
+          >
+            H1
+          </BaseMenuButton>
+
           <BaseMenuButton
             active={activeActions.includes('h2')}
             aria-label="Heading 2"

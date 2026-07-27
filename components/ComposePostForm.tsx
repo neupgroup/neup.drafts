@@ -33,7 +33,7 @@ interface ComposePostFormProps {
 type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'numbered-list' | 'unnumbered-list' | 'table';
 
 type CalloutType = CalloutBlockType;
-type SemanticBlockType = 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
+type SemanticBlockType = 'h1' | 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
 type ListBlockType = 'ol' | 'ul';
 
 interface SlashMenuPosition {
@@ -96,7 +96,7 @@ function escapeHtml(value: string): string {
 }
 
 function hasEditorHtml(value: string): boolean {
-  return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h2|h3|i|iframe|img|li|mark|ol|p|strong|summary|table|tbody|td|track|tr|u|ul|video)(\s|>|\/)/i.test(value);
+  return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h1|h2|h3|i|iframe|img|li|mark|ol|p|strong|summary|table|tbody|td|track|tr|u|ul|video)(\s|>|\/)/i.test(value);
 }
 
 function getEditorHtml(value: string): string {
@@ -119,7 +119,7 @@ function getEditorText(element: HTMLDivElement): string {
 
   if (
     htmlContent.includes('data-editor-block=') ||
-    element.querySelector('a, aside, b, em, h2, h3, i, li, mark, ol, strong, u, ul')
+    element.querySelector('a, aside, b, em, h1, h2, h3, i, li, mark, ol, strong, u, ul')
   ) {
     return htmlContent;
   }
@@ -215,6 +215,379 @@ function createEditorParagraph(text = ''): HTMLParagraphElement {
   return paragraph;
 }
 
+function sanitizeClipboardLinkUrl(value: string): string {
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.startsWith('/') && !trimmedValue.startsWith('//')) {
+    return trimmedValue;
+  }
+
+  try {
+    const url = new URL(trimmedValue);
+
+    if (['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) {
+      return url.toString();
+    }
+  } catch {
+    return '';
+  }
+
+  return '';
+}
+
+function wrapClipboardInlineNodes(tagName: 'strong' | 'em' | 'u' | 'mark', nodes: Node[]): Node[] {
+  if (nodes.length === 0) {
+    return [];
+  }
+
+  const element = document.createElement(tagName);
+  nodes.forEach((node) => element.append(node));
+
+  return [element];
+}
+
+function sanitizeClipboardInlineNode(node: Node): Node[] {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return [document.createTextNode(node.textContent ?? '')];
+  }
+
+  if (!(node instanceof HTMLElement)) {
+    return [];
+  }
+
+  const tagName = node.tagName.toLowerCase();
+  const sanitizedChildren = Array.from(node.childNodes).flatMap((child) =>
+    sanitizeClipboardInlineNode(child)
+  );
+
+  if (tagName === 'br') {
+    return [document.createElement('br')];
+  }
+
+  if (['script', 'style', 'meta', 'link', 'head', 'title'].includes(tagName)) {
+    return [];
+  }
+
+  if (tagName === 'a') {
+    const href = sanitizeClipboardLinkUrl(node.getAttribute('href') ?? '');
+
+    if (!href) {
+      return sanitizedChildren;
+    }
+
+    const link = document.createElement('a');
+    link.href = href;
+
+    if (node.getAttribute('target') === '_blank') {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
+
+    sanitizedChildren.forEach((child) => link.append(child));
+
+    return [link];
+  }
+
+  if (tagName === 'strong' || tagName === 'b') {
+    return wrapClipboardInlineNodes('strong', sanitizedChildren);
+  }
+
+  if (tagName === 'em' || tagName === 'i') {
+    return wrapClipboardInlineNodes('em', sanitizedChildren);
+  }
+
+  if (tagName === 'u') {
+    return wrapClipboardInlineNodes('u', sanitizedChildren);
+  }
+
+  if (tagName === 'mark') {
+    return wrapClipboardInlineNodes('mark', sanitizedChildren);
+  }
+
+  const style = (node.getAttribute('style') ?? '').toLowerCase();
+  let wrappedNodes = sanitizedChildren;
+
+  if (/(^|;)\s*font-weight\s*:\s*(bold|[6-9]00)/.test(style)) {
+    wrappedNodes = wrapClipboardInlineNodes('strong', wrappedNodes);
+  }
+
+  if (/(^|;)\s*font-style\s*:\s*(italic|oblique)/.test(style)) {
+    wrappedNodes = wrapClipboardInlineNodes('em', wrappedNodes);
+  }
+
+  if (/(^|;)\s*text-decoration(?:-line)?\s*:[^;]*underline/.test(style)) {
+    wrappedNodes = wrapClipboardInlineNodes('u', wrappedNodes);
+  }
+
+  if (/(^|;)\s*background(?:-color)?\s*:/.test(style)) {
+    wrappedNodes = wrapClipboardInlineNodes('mark', wrappedNodes);
+  }
+
+  return wrappedNodes;
+}
+
+function appendInlineClipboardChildren(target: HTMLElement, nodes: Node[]) {
+  nodes.forEach((node) => {
+    sanitizeClipboardInlineNode(node).forEach((sanitizedNode) => target.append(sanitizedNode));
+  });
+
+  if (!target.childNodes.length) {
+    target.append(document.createElement('br'));
+  }
+}
+
+function createEditorHeadingFromClipboard(
+  node: HTMLElement,
+  tagName: 'h1' | 'h2' | 'h3'
+): HTMLHeadingElement {
+  const heading = document.createElement(tagName);
+  appendInlineClipboardChildren(heading, Array.from(node.childNodes));
+
+  return heading;
+}
+
+function createEditorListItemFromClipboard(node: HTMLElement): HTMLLIElement {
+  const listItem = document.createElement('li');
+
+  Array.from(node.childNodes).forEach((child) => {
+    if (child instanceof HTMLElement) {
+      const tagName = child.tagName.toLowerCase();
+
+      if (tagName === 'ul' || tagName === 'ol') {
+        listItem.append(createEditorListFromClipboard(child, tagName as ListBlockType));
+        return;
+      }
+    }
+
+    sanitizeClipboardInlineNode(child).forEach((sanitizedNode) => listItem.append(sanitizedNode));
+  });
+
+  if (!listItem.childNodes.length) {
+    listItem.append(document.createElement('br'));
+  }
+
+  return listItem;
+}
+
+function createEditorListFromClipboard(
+  node: HTMLElement,
+  tagName: ListBlockType
+): HTMLOListElement | HTMLUListElement {
+  const list = document.createElement(tagName);
+  list.dataset.editorBlock = 'list';
+
+  Array.from(node.children).forEach((child) => {
+    if (!(child instanceof HTMLElement) || child.tagName.toLowerCase() !== 'li') {
+      return;
+    }
+
+    list.append(createEditorListItemFromClipboard(child));
+  });
+
+  if (!list.childNodes.length) {
+    list.append(createEditorListItemFromClipboard(document.createElement('li')));
+  }
+
+  return list;
+}
+
+function createEditorBlocksFromClipboardHtml(html: string): DocumentFragment | null {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+
+  const fragment = document.createDocumentFragment();
+  let pendingParagraph: HTMLParagraphElement | null = null;
+  const blockContainerTags = new Set([
+    'address',
+    'article',
+    'blockquote',
+    'body',
+    'div',
+    'footer',
+    'header',
+    'main',
+    'nav',
+    'section',
+  ]);
+
+  const ensurePendingParagraph = () => {
+    if (!pendingParagraph) {
+      pendingParagraph = createEditorParagraph();
+      pendingParagraph.replaceChildren();
+    }
+
+    return pendingParagraph;
+  };
+
+  const flushPendingParagraph = () => {
+    if (!pendingParagraph) {
+      return;
+    }
+
+    if (!pendingParagraph.childNodes.length) {
+      pendingParagraph.append(document.createElement('br'));
+    }
+
+    fragment.append(pendingParagraph);
+    pendingParagraph = null;
+  };
+
+  const appendTopLevelNode = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (!node.textContent?.trim()) {
+        return;
+      }
+
+      const paragraph = ensurePendingParagraph();
+      sanitizeClipboardInlineNode(node).forEach((sanitizedNode) => paragraph.append(sanitizedNode));
+      return;
+    }
+
+    if (!(node instanceof HTMLElement)) {
+      return;
+    }
+
+    const tagName = node.tagName.toLowerCase();
+
+    if (tagName === 'ul' || tagName === 'ol') {
+      flushPendingParagraph();
+      fragment.append(createEditorListFromClipboard(node, tagName as ListBlockType));
+      return;
+    }
+
+    if (tagName === 'h1') {
+      flushPendingParagraph();
+      fragment.append(createEditorHeadingFromClipboard(node, 'h1'));
+      return;
+    }
+
+    if (tagName === 'h2') {
+      flushPendingParagraph();
+      fragment.append(createEditorHeadingFromClipboard(node, 'h2'));
+      return;
+    }
+
+    if (tagName === 'h3') {
+      flushPendingParagraph();
+      fragment.append(createEditorHeadingFromClipboard(node, 'h3'));
+      return;
+    }
+
+    if (['h4', 'h5', 'h6'].includes(tagName)) {
+      flushPendingParagraph();
+      fragment.append(createEditorHeadingFromClipboard(node, 'h3'));
+      return;
+    }
+
+    if (tagName === 'p') {
+      flushPendingParagraph();
+      const paragraph = createEditorParagraph();
+      paragraph.replaceChildren();
+      appendInlineClipboardChildren(paragraph, Array.from(node.childNodes));
+      fragment.append(paragraph);
+      return;
+    }
+
+    if (blockContainerTags.has(tagName)) {
+      flushPendingParagraph();
+      Array.from(node.childNodes).forEach(appendTopLevelNode);
+      flushPendingParagraph();
+      return;
+    }
+
+    const paragraph = ensurePendingParagraph();
+    sanitizeClipboardInlineNode(node).forEach((sanitizedNode) => paragraph.append(sanitizedNode));
+  };
+
+  Array.from(template.content.childNodes).forEach(appendTopLevelNode);
+  flushPendingParagraph();
+
+  return fragment.childNodes.length > 0 ? fragment : null;
+}
+
+function isPastedBlockFragment(fragment: DocumentFragment): boolean {
+  return Array.from(fragment.childNodes).some((node) => {
+    if (!(node instanceof HTMLElement)) {
+      return false;
+    }
+
+    const tagName = node.tagName.toLowerCase();
+
+    return ['h1', 'h2', 'h3', 'p', 'ol', 'ul'].includes(tagName) ||
+      Boolean(node.dataset.editorBlock);
+  });
+}
+
+function isEditorBlockEmpty(block: HTMLElement): boolean {
+  return !block.textContent?.replace(/\u00a0/g, ' ').trim() &&
+    !block.querySelector('img, iframe, audio, video, table');
+}
+
+function createEditorFragmentFromPlainText(text: string): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    fragment.append(createEditorParagraph(text));
+    return fragment;
+  }
+
+  paragraphs.forEach((paragraphText) => {
+    fragment.append(createEditorParagraph(paragraphText));
+  });
+
+  return fragment;
+}
+
+function insertFragmentAtSelection(editor: HTMLDivElement, fragment: DocumentFragment) {
+  const selection = window.getSelection();
+  const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+  const lastChild = fragment.lastChild;
+
+  if (!range) {
+    editor.append(fragment);
+    return;
+  }
+
+  if (isPastedBlockFragment(fragment)) {
+    const startBlock = getEditorBlockForNode(editor, range.startContainer);
+    const endBlock = getEditorBlockForNode(editor, range.endContainer);
+
+    if (startBlock === endBlock && startBlock !== editor && startBlock.parentElement === editor) {
+      if (isEditorBlockEmpty(startBlock)) {
+        startBlock.replaceWith(fragment);
+      } else {
+        range.deleteContents();
+        startBlock.after(fragment);
+      }
+
+      if (lastChild) {
+        const nextRange = document.createRange();
+        nextRange.setStartAfter(lastChild);
+        nextRange.collapse(true);
+        selection?.removeAllRanges();
+        selection?.addRange(nextRange);
+      }
+
+      return;
+    }
+  }
+
+  range.deleteContents();
+  range.insertNode(fragment);
+
+  if (lastChild) {
+    const nextRange = document.createRange();
+    nextRange.setStartAfter(lastChild);
+    nextRange.collapse(true);
+    selection?.removeAllRanges();
+    selection?.addRange(nextRange);
+  }
+}
+
 function ensureEditorParagraph(editor: HTMLDivElement): HTMLElement {
   const firstBlock = Array.from(editor.children).find(
     (child) => child instanceof HTMLElement
@@ -303,7 +676,7 @@ function normalizeEditorContent(element: HTMLElement) {
 
 function normalizeInlineMutationRange(range: Range): Range {
   const commonElement = getElementForNode(range.commonAncestorContainer);
-  const editorBlock = commonElement?.closest('p, h2, h3, aside, li');
+  const editorBlock = commonElement?.closest('p, h1, h2, h3, aside, li');
 
   if (editorBlock) {
     editorBlock.normalize();
@@ -421,6 +794,10 @@ function getSelectionMenuActiveActions(
   const activeActions: EditorMenuAction[] = [];
   const activeBlock = getEditorBlockForNode(editor, range.startContainer);
   const activeBlockTagName = activeBlock.tagName.toLowerCase();
+
+  if (activeBlockTagName === 'h1') {
+    activeActions.push('h1');
+  }
 
   if (activeBlockTagName === 'h2') {
     activeActions.push('h2');
@@ -1453,6 +1830,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     if (
       action === 'h2' ||
+      action === 'h1' ||
       action === 'h3' ||
       action === 'paragraph' ||
       action === 'numbered-list' ||
@@ -2102,6 +2480,19 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             }
           }}
           onPaste={(e) => {
+            const html = e.clipboardData.getData('text/html');
+
+            if (html.trim()) {
+              const fragment = createEditorBlocksFromClipboardHtml(html);
+
+              if (fragment) {
+                e.preventDefault();
+                insertFragmentAtSelection(e.currentTarget, fragment);
+                setContent(getEditorText(e.currentTarget));
+                return;
+              }
+            }
+
             e.preventDefault();
             const text = e.clipboardData.getData('text/plain');
             const paragraphs = text
@@ -2114,22 +2505,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               return;
             }
 
-            const fragment = document.createDocumentFragment();
-            paragraphs.forEach((paragraphText) => {
-              fragment.append(createEditorParagraph(paragraphText));
-            });
-
-            const selection = window.getSelection();
-            const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-
-            if (!range) {
-              e.currentTarget.append(fragment);
-              setContent(getEditorText(e.currentTarget));
-              return;
-            }
-
-            range.deleteContents();
-            range.insertNode(fragment);
+            insertFragmentAtSelection(e.currentTarget, createEditorFragmentFromPlainText(text));
             setContent(getEditorText(e.currentTarget));
           }}
             className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
