@@ -108,7 +108,7 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'data-editor-block' && ['figure', 'div'].includes(tagName)) {
+    if (attributeName === 'data-editor-block' && ['aside', 'figure', 'div'].includes(tagName)) {
       allowedAttributes.push(`data-editor-block="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
     }

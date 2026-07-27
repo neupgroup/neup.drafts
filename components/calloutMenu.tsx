@@ -3,46 +3,17 @@ import {
   BaseMenuOption,
   type BaseMenuPosition,
 } from './baseMenu';
-
-export type CalloutMenuType = 'informative' | 'warning' | 'error' | 'caution';
+import {
+  calloutBlockMetadata,
+  calloutBlockTypes,
+  type CalloutBlockType,
+} from './calloutBlock';
 
 interface CalloutMenuProps {
-  activeType: CalloutMenuType;
-  onTypeChange: (type: CalloutMenuType) => void;
+  activeType: CalloutBlockType;
+  onTypeChange: (type: CalloutBlockType) => void;
   position: BaseMenuPosition;
 }
-
-const calloutOptions: Array<{
-  description: string;
-  icon: string;
-  title: string;
-  type: CalloutMenuType;
-}> = [
-  {
-    type: 'informative',
-    icon: 'i',
-    title: 'Informative',
-    description: 'Neutral context, notes, and useful background.',
-  },
-  {
-    type: 'warning',
-    icon: '!',
-    title: 'Warning',
-    description: 'Important risk or condition to notice before acting.',
-  },
-  {
-    type: 'error',
-    icon: 'x',
-    title: 'Error',
-    description: 'Critical failure, blocker, or destructive outcome.',
-  },
-  {
-    type: 'caution',
-    icon: '?',
-    title: 'Caution',
-    description: 'Careful guidance for ambiguous or sensitive steps.',
-  },
-];
 
 export function CalloutMenu({
   activeType,
@@ -56,14 +27,14 @@ export function CalloutMenu({
       orientation="vertical"
       position={position}
     >
-      {calloutOptions.map((option) => (
+      {calloutBlockTypes.map((type) => (
         <BaseMenuOption
-          key={option.type}
-          active={activeType === option.type}
-          description={option.description}
-          icon={option.icon}
-          title={option.title}
-          onClick={() => onTypeChange(option.type)}
+          key={type}
+          active={activeType === type}
+          description={calloutBlockMetadata[type].description}
+          icon={calloutBlockMetadata[type].icon}
+          title={calloutBlockMetadata[type].label}
+          onClick={() => onTypeChange(type)}
         />
       ))}
     </BaseMenu>

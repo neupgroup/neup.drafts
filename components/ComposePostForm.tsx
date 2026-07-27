@@ -2,7 +2,13 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CalloutMenu, type CalloutMenuType } from './calloutMenu';
+import {
+  createCalloutBlock,
+  isCalloutBlockType,
+  setCalloutBlockType,
+  type CalloutBlockType,
+} from './calloutBlock';
+import { CalloutMenu } from './calloutMenu';
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 import { EditorMenu, type EditorMenuAction } from './editorMenu';
 
@@ -19,7 +25,7 @@ interface ComposePostFormProps {
 
 type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'table';
 
-type CalloutType = CalloutMenuType;
+type CalloutType = CalloutBlockType;
 
 interface SlashMenuPosition {
   top: number;
@@ -42,33 +48,6 @@ const slashMenuOptions: Array<{
   { id: 'carousel', label: 'Add a carousel block' },
   { id: 'table', label: 'Add a table' },
 ];
-
-const calloutMetadata: Record<CalloutType, {
-  description: string;
-  icon: string;
-  label: string;
-}> = {
-  informative: {
-    icon: 'i',
-    label: 'Informative',
-    description: 'Neutral context, notes, and useful background.',
-  },
-  warning: {
-    icon: '!',
-    label: 'Warning',
-    description: 'Important risk or condition to notice before acting.',
-  },
-  error: {
-    icon: 'x',
-    label: 'Error',
-    description: 'Critical failure, blocker, or destructive outcome.',
-  },
-  caution: {
-    icon: '?',
-    label: 'Caution',
-    description: 'Careful guidance for ambiguous or sensitive steps.',
-  },
-};
 
 function createDraftArticleId(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -282,7 +261,7 @@ function getSelectionTextRange(editor: HTMLDivElement): Range | null {
 
   if (
     startBlock !== endBlock ||
-    startBlock.dataset.editorBlock ||
+    (startBlock.dataset.editorBlock && startBlock.dataset.editorBlock !== 'callout') ||
     !range.toString().trim()
   ) {
     return null;
@@ -383,12 +362,7 @@ function getSelectionMenuActiveActions(
   if (activeBlockTagName === 'aside') {
     const calloutType = activeBlock.dataset.calloutType;
 
-    if (
-      calloutType === 'warning' ||
-      calloutType === 'error' ||
-      calloutType === 'informative' ||
-      calloutType === 'caution'
-    ) {
+    if (isCalloutBlockType(calloutType)) {
       activeActions.push('callout');
     }
   }
@@ -585,25 +559,15 @@ function createSemanticBlock(
   html: string,
   calloutType?: CalloutType
 ): HTMLElement {
-  const block = document.createElement(blockType === 'callout' ? 'aside' : blockType);
+  if (blockType === 'callout') {
+    return createCalloutBlock(html, calloutType ?? 'informative');
+  }
+
+  const block = document.createElement(blockType);
 
   block.innerHTML = html || '<br>';
 
-  if (blockType === 'callout' && calloutType) {
-    block.setAttribute('role', 'note');
-    setCalloutBlockType(block, calloutType);
-  }
-
   return block;
-}
-
-function setCalloutBlockType(block: HTMLElement, calloutType: CalloutType) {
-  const metadata = calloutMetadata[calloutType];
-
-  block.dataset.calloutType = calloutType;
-  block.dataset.calloutIcon = metadata.icon;
-  block.dataset.calloutLabel = metadata.label;
-  block.dataset.calloutDescription = metadata.description;
 }
 
 function replaceSelectionBlock(
@@ -1119,10 +1083,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     calloutMenuBlockRef.current = block;
     setActiveCalloutType(
-      calloutType === 'warning' ||
-      calloutType === 'error' ||
-      calloutType === 'informative' ||
-      calloutType === 'caution'
+      isCalloutBlockType(calloutType)
         ? calloutType
         : 'informative'
     );
