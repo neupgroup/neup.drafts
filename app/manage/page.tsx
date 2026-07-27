@@ -83,12 +83,6 @@ export default async function ManageOverviewPage() {
           { label: 'Reactions', value: totalReactions },
           { label: 'Comments', value: totalComments },
         ]}
-        sidebarSummary={{
-          comments: totalComments,
-          displayName,
-          posts: posts.length,
-          reactions: totalReactions,
-        }}
         title="Overview"
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.8fr)]">

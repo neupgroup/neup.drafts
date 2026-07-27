@@ -70,7 +70,6 @@ export default async function ManageArticlesPage() {
   const posts = await getManagedArticlePosts(user.id);
   const totalReactions = posts.reduce((sum, post) => sum + post.reactions.length, 0);
   const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
-  const displayName = user.username || user.email.split('@')[0];
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -86,12 +85,6 @@ export default async function ManageArticlesPage() {
           { label: 'Reactions', value: totalReactions },
           { label: 'Comments', value: totalComments },
         ]}
-        sidebarSummary={{
-          comments: totalComments,
-          displayName,
-          posts: posts.length,
-          reactions: totalReactions,
-        }}
         title="Articles"
       >
         {posts.length === 0 ? (

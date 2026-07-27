@@ -21,13 +21,6 @@ interface ManageMetric {
   value: string | number;
 }
 
-interface ManageSidebarSummary {
-  comments: number;
-  displayName: string;
-  posts: number;
-  reactions: number;
-}
-
 interface ManageShellProps {
   activeSection: 'overview' | 'articles' | 'stats';
   children: ReactNode;
@@ -36,7 +29,6 @@ interface ManageShellProps {
   description: string;
   eyebrow?: string;
   metrics?: ManageMetric[];
-  sidebarSummary: ManageSidebarSummary;
   title: string;
 }
 
@@ -50,6 +42,62 @@ const manageSections: Array<{
   { id: 'stats', href: '/manage/stats', label: 'Stats' },
 ];
 
+function ManageSidebarIcon({
+  kind,
+}: {
+  kind: 'overview' | 'articles' | 'stats' | 'compose' | 'signout';
+}) {
+  const className = 'h-5 w-5';
+
+  if (kind === 'overview') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+        <path d="M3 11.5 12 4l9 7.5" />
+        <path d="M5.5 10.5V20h13V10.5" />
+        <path d="M10 20v-5.5h4V20" />
+      </svg>
+    );
+  }
+
+  if (kind === 'articles') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+        <rect x="5" y="4" width="14" height="16" rx="2" />
+        <path d="M8 8h8" />
+        <path d="M8 12h8" />
+        <path d="M8 16h5" />
+      </svg>
+    );
+  }
+
+  if (kind === 'stats') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+        <path d="M5 19V11" />
+        <path d="M12 19V5" />
+        <path d="M19 19v-8" />
+      </svg>
+    );
+  }
+
+  if (kind === 'compose') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M9 6H5v13h14V6h-4" />
+      <path d="M12 3v10" />
+      <path d="m8.5 9.5 3.5 3.5 3.5-3.5" />
+    </svg>
+  );
+}
+
 export default function ManageShell({
   activeSection,
   children,
@@ -58,40 +106,30 @@ export default function ManageShell({
   description,
   eyebrow = 'Manage',
   metrics = [],
-  sidebarSummary,
   title,
 }: ManageShellProps) {
   return (
     <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
-      <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-8 lg:py-10">
-        <nav className="flex gap-2 overflow-x-auto text-sm lg:block lg:space-y-4 lg:overflow-visible lg:text-base">
+      <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
+        <div className="mb-6 px-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Manage
+          </p>
+        </div>
+
+        <nav className="flex gap-1 overflow-x-auto text-sm lg:block lg:space-y-2.5 lg:overflow-visible lg:text-base">
           {manageSections.map((section) => (
             <Link
               key={section.id}
               href={section.href}
-              className={`relative flex shrink-0 items-center gap-4 px-3 py-2 transition-colors lg:px-0 ${
+              className={`relative flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 transition-all duration-200 lg:px-3 ${
                 activeSection === section.id
-                  ? 'font-medium text-slate-950'
-                  : 'text-slate-600 hover:text-slate-950'
+                  ? 'bg-sky-100 font-semibold text-sky-700 shadow-[inset_0_0_0_1px_rgba(125,168,201,0.18)] hover:bg-sky-150 hover:text-sky-800'
+                  : 'text-slate-800 hover:bg-sky-50 hover:text-sky-700'
               }`}
             >
-              {activeSection === section.id ? (
-                <span className="hidden lg:absolute lg:-left-8 lg:block lg:h-7 lg:w-px lg:bg-slate-950" />
-              ) : null}
               <span className="flex size-6 items-center justify-center">
-                {section.id === 'overview' ? (
-                  <span className={`size-3 rounded-full ${activeSection === section.id ? 'bg-slate-950' : 'bg-slate-300'}`} />
-                ) : null}
-                {section.id === 'articles' ? (
-                  <span className={`h-5 w-4 border ${activeSection === section.id ? 'border-slate-950' : 'border-slate-500'}`} />
-                ) : null}
-                {section.id === 'stats' ? (
-                  <span className="flex items-end justify-center gap-0.5">
-                    <span className={`h-2 w-1 border ${activeSection === section.id ? 'border-slate-950' : 'border-slate-500'}`} />
-                    <span className={`h-4 w-1 border ${activeSection === section.id ? 'border-slate-950' : 'border-slate-500'}`} />
-                    <span className={`h-3 w-1 border ${activeSection === section.id ? 'border-slate-950' : 'border-slate-500'}`} />
-                  </span>
-                ) : null}
+                <ManageSidebarIcon kind={section.id} />
               </span>
               {section.label}
             </Link>
@@ -99,37 +137,29 @@ export default function ManageShell({
 
           <Link
             href="/compose"
-            className="flex shrink-0 items-center gap-4 px-3 py-2 text-slate-600 transition-colors hover:text-slate-950 lg:px-0"
+            className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-slate-800 transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 lg:px-3"
           >
             <span className="flex size-6 items-center justify-center">
-              <span className="size-4 rotate-45 border-l border-t border-slate-500" />
+              <ManageSidebarIcon kind="compose" />
             </span>
             New Post
           </Link>
         </nav>
 
-        <div className="mt-8 hidden border-t border-slate-100 pt-8 lg:block">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <p className="font-semibold text-slate-950">{sidebarSummary.posts}</p>
-              <p className="mt-1 text-xs text-slate-500">Posts</p>
-            </div>
-            <div>
-              <p className="font-semibold text-slate-950">{sidebarSummary.reactions}</p>
-              <p className="mt-1 text-xs text-slate-500">Likes</p>
-            </div>
-            <div>
-              <p className="font-semibold text-slate-950">{sidebarSummary.comments}</p>
-              <p className="mt-1 text-xs text-slate-500">Replies</p>
-            </div>
-          </div>
+        <div className="mt-6 border-t border-slate-100 pt-4">
+          <form action="/api/auth/signout" method="POST">
+            <button
+              type="submit"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700 lg:px-3"
+            >
+              <span className="flex size-6 items-center justify-center">
+                <ManageSidebarIcon kind="signout" />
+              </span>
+              Sign Out
+            </button>
+          </form>
         </div>
 
-        <div className="mt-8 hidden border-t border-slate-100 pt-8 lg:block">
-          <p className="text-sm leading-6 text-slate-600">
-            Management workspace for @{sidebarSummary.displayName}. Open article inventory, inspect engagement, and jump back into editing.
-          </p>
-        </div>
       </aside>
 
       <div className="min-w-0 px-6 py-10 sm:px-10 lg:px-0 lg:pb-16 lg:pl-20 lg:pr-20 lg:pt-16">

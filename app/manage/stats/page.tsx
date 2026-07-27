@@ -48,7 +48,6 @@ export default async function ManageStatsPage() {
   const posts = await getManagedArticlePosts(user.id);
   const totalReactions = posts.reduce((sum, post) => sum + post.reactions.length, 0);
   const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
-  const displayName = user.username || user.email.split('@')[0];
   const averageReactions = posts.length > 0 ? totalReactions / posts.length : 0;
   const averageComments = posts.length > 0 ? totalComments / posts.length : 0;
   const topReactionPosts = [...posts]
@@ -72,12 +71,6 @@ export default async function ManageStatsPage() {
           { label: 'Avg comments', value: formatRatio(averageComments) },
           { label: 'Total posts', value: posts.length },
         ]}
-        sidebarSummary={{
-          comments: totalComments,
-          displayName,
-          posts: posts.length,
-          reactions: totalReactions,
-        }}
         title="Stats"
       >
         <div className="grid gap-6 lg:grid-cols-2">

@@ -67,7 +67,6 @@ export default async function ManageArticleDetailPage(
   }
 
   const previewText = getPreviewText(post.content);
-  const displayName = user.username || user.email.split('@')[0];
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -83,12 +82,6 @@ export default async function ManageArticleDetailPage(
           { label: 'Comments', value: post.comments.length },
           { label: 'Updated', value: formatDate(post.updatedAt) },
         ]}
-        sidebarSummary={{
-          comments: post.comments.length,
-          displayName,
-          posts: 1,
-          reactions: post.reactions.length,
-        }}
         title={post.title}
       >
         <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-slate-500">

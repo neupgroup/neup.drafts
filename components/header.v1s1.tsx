@@ -40,15 +40,6 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
               >
                 @{userDisplayName}
               </Link>
-
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="cursor-pointer border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-600 transition-all hover:bg-red-500/20 hover:text-red-700"
-                >
-                  Sign Out
-                </button>
-              </form>
             </>
           ) : (
             <div className="flex items-center gap-3">
