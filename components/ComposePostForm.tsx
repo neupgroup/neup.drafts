@@ -486,6 +486,10 @@ function isListElement(element: HTMLElement): boolean {
   return tagName === 'ol' || tagName === 'ul';
 }
 
+function isNumberedListElement(element: HTMLElement): boolean {
+  return element.tagName.toLowerCase() === 'ol';
+}
+
 function getWordCount(value: string): number {
   return value
     .trim()
@@ -734,6 +738,16 @@ function getSemanticBlockHtml(block: HTMLElement, blockType: SemanticBlockType):
   }
 
   return block.innerHTML;
+}
+
+function convertListBlockToParagraph(block: HTMLElement): HTMLParagraphElement {
+  const paragraph = document.createElement('p');
+  const html = getListItemHtml(block).join('<br>');
+
+  paragraph.innerHTML = html || '<br>';
+  block.replaceWith(paragraph);
+
+  return paragraph;
 }
 
 function replaceSelectionBlock(
@@ -2045,6 +2059,19 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             }
 
             const currentBlock = getContentBlockFromSelection(e.currentTarget);
+
+            if (
+              e.key === 'Backspace' &&
+              isNumberedListElement(currentBlock) &&
+              isCaretAtTextStart(currentBlock)
+            ) {
+              e.preventDefault();
+              const paragraph = convertListBlockToParagraph(currentBlock);
+              setCaretPosition(paragraph, 'start');
+              setContent(getEditorText(e.currentTarget));
+              closeSelectionMenu();
+              return;
+            }
 
             if (
               (e.key === 'ArrowLeft' || e.key === 'ArrowUp') &&
