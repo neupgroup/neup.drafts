@@ -32,12 +32,45 @@ interface SidebarNavItem {
   label: string;
 }
 
+interface SidebarNavSection {
+  items: SidebarNavItem[];
+  title: string;
+}
+
 interface SidebarNavProps {
-  sections: Array<{
-    items: SidebarNavItem[];
-    title: string;
-  }>;
+  sections: SidebarNavSection[];
   signOutLabel?: string;
+}
+
+export type SidebarNavActiveKey =
+  | 'library'
+  | 'manage-articles'
+  | 'manage-overview'
+  | 'manage-stats'
+  | 'profile';
+
+export function getSharedSidebarSections(
+  activeKey: SidebarNavActiveKey | null
+): SidebarNavSection[] {
+  return [
+    {
+      title: 'Profile',
+      items: [
+        { href: '/', icon: 'home', label: 'Home' },
+        { href: '/library', icon: 'library', label: 'Library', active: activeKey === 'library' },
+        { href: '/profile', icon: 'profile', label: 'Profile', active: activeKey === 'profile' },
+        { href: '/compose', icon: 'compose', label: 'New Story' },
+      ],
+    },
+    {
+      title: 'Manage',
+      items: [
+        { href: '/manage', icon: 'overview', label: 'Overview', active: activeKey === 'manage-overview' },
+        { href: '/manage/articles', icon: 'articles', label: 'Articles', active: activeKey === 'manage-articles' },
+        { href: '/manage/stats', icon: 'stats', label: 'Stats', active: activeKey === 'manage-stats' },
+      ],
+    },
+  ];
 }
 
 function SidebarNavIconGlyph({ kind }: { kind: SidebarNavIcon }) {

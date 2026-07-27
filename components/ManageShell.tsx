@@ -15,7 +15,7 @@ Use `ManageShell` to keep navigation, title treatment, and optional summary card
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import SidebarNav from './SidebarNav';
+import SidebarNav, { getSharedSidebarSections } from './SidebarNav';
 
 interface ManageMetric {
   label: string;
@@ -33,17 +33,6 @@ interface ManageShellProps {
   title: string;
 }
 
-const manageSections: Array<{
-  active: boolean;
-  href: string;
-  icon: 'overview' | 'articles' | 'stats' | 'compose';
-  label: string;
-}> = [
-  { active: false, href: '/manage', icon: 'overview', label: 'Overview' },
-  { active: false, href: '/manage/articles', icon: 'articles', label: 'Articles' },
-  { active: false, href: '/manage/stats', icon: 'stats', label: 'Stats' },
-];
-
 export default function ManageShell({
   activeSection,
   children,
@@ -58,27 +47,13 @@ export default function ManageShell({
     <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
       <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
         <SidebarNav
-          sections={[
-            {
-              title: 'Profile',
-              items: [
-                { href: '/', icon: 'home', label: 'Home' },
-                { href: '/', icon: 'library', label: 'Library' },
-                { href: '/profile', icon: 'profile', label: 'Profile' },
-                { href: '/compose', icon: 'compose', label: 'New Story' },
-              ],
-            },
-            {
-              title: 'Manage',
-              items: manageSections.map((section) => ({
-                ...section,
-                active:
-                  (section.icon === 'overview' && activeSection === 'overview') ||
-                  (section.icon === 'articles' && activeSection === 'articles') ||
-                  (section.icon === 'stats' && activeSection === 'stats'),
-              })),
-            },
-          ]}
+          sections={getSharedSidebarSections(
+            activeSection === 'overview'
+              ? 'manage-overview'
+              : activeSection === 'articles'
+                ? 'manage-articles'
+                : 'manage-stats'
+          )}
         />
       </aside>
 

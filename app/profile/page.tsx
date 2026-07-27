@@ -4,7 +4,7 @@ import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
 import { Prisma } from '@/app/generated/prisma/client';
 import HeaderV1S1 from '@/components/header.v1s1';
-import SidebarNav from '@/components/SidebarNav';
+import SidebarNav, { getSharedSidebarSections } from '@/components/SidebarNav';
 
 // Extract the exact return type for Article + included relations
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -113,25 +113,7 @@ export default async function AccountPage() {
       <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
         <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
           <SidebarNav
-            sections={[
-              {
-                title: 'Profile',
-                items: [
-                  { href: '/', icon: 'home', label: 'Home' },
-                  { href: '/', icon: 'library', label: 'Library' },
-                  { active: true, href: '/profile', icon: 'profile', label: 'Profile' },
-                  { href: '/compose', icon: 'compose', label: 'New Story' },
-                ],
-              },
-              {
-                title: 'Manage',
-                items: [
-                  { href: '/manage', icon: 'overview', label: 'Overview' },
-                  { href: '/manage/articles', icon: 'articles', label: 'Articles' },
-                  { href: '/manage/stats', icon: 'stats', label: 'Stats' },
-                ],
-              },
-            ]}
+            sections={getSharedSidebarSections('profile')}
           />
         </aside>
 
