@@ -58,7 +58,6 @@ export default function EditPostForm({ article }: EditPostFormProps) {
         throw new Error(data.error || 'Failed to update article');
       }
 
-      router.push(getArticlePath(data.post));
       router.refresh();
     } catch (err) {
       setError((err as Error).message || 'Something went wrong');

@@ -840,8 +840,12 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         throw new Error(data.error || (isEditing ? 'Failed to update article' : 'Failed to publish post'));
       }
 
-      router.push(getArticlePath(data.post));
-      router.refresh();
+      if (isEditing) {
+        router.refresh();
+      } else {
+        router.push(getArticlePath(data.post));
+        router.refresh();
+      }
     } catch (err) {
       setError((err as Error).message || 'Something went wrong');
     } finally {
