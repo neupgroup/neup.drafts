@@ -324,14 +324,17 @@ function getRangeTextFormatCounts(range: Range, selector: string): {
   formatted: number;
   unformatted: number;
 } {
-  const selectedContent = range.cloneContents();
-  const walker = document.createTreeWalker(selectedContent, NodeFilter.SHOW_TEXT);
+  const root = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+    ? range.commonAncestorContainer.parentNode
+    : range.commonAncestorContainer;
   let formatted = 0;
   let unformatted = 0;
-  let node = walker.nextNode();
+  const textNodes = root
+    ? getTextNodesInRange(root, range)
+    : [];
 
-  while (node) {
-    const textLength = node.textContent?.length ?? 0;
+  textNodes.forEach((node) => {
+    const textLength = getSelectedTextLength(range, node);
     const element = getElementForNode(node);
 
     if (element?.closest(selector)) {
@@ -339,11 +342,45 @@ function getRangeTextFormatCounts(range: Range, selector: string): {
     } else {
       unformatted += textLength;
     }
+  });
+
+  return { formatted, unformatted };
+}
+
+function getTextNodesInRange(root: Node, range: Range): Text[] {
+  if (root.nodeType === Node.TEXT_NODE) {
+    return range.intersectsNode(root) ? [root as Text] : [];
+  }
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  let node = walker.nextNode();
+
+  while (node) {
+    if (range.intersectsNode(node)) {
+      textNodes.push(node as Text);
+    }
 
     node = walker.nextNode();
   }
 
-  return { formatted, unformatted };
+  return textNodes;
+}
+
+function getSelectedTextLength(range: Range, textNode: Text): number {
+  const textLength = textNode.textContent?.length ?? 0;
+  let startOffset = 0;
+  let endOffset = textLength;
+
+  if (range.startContainer === textNode) {
+    startOffset = range.startOffset;
+  }
+
+  if (range.endContainer === textNode) {
+    endOffset = range.endOffset;
+  }
+
+  return Math.max(0, endOffset - startOffset);
 }
 
 function getSelectionMenuActiveActions(
@@ -466,13 +503,17 @@ function insertAtSplitMarkBoundary(range: Range, node: Node): Range {
   return nextRange;
 }
 
-function insertFragmentAtSplitMarkBoundary(range: Range, fragment: DocumentFragment): Range {
+function insertFragmentAtSplitInlineBoundary(
+  range: Range,
+  fragment: DocumentFragment,
+  selector: string
+): Range {
   const marker = document.createElement('span');
   const nodes = Array.from(fragment.childNodes);
 
   marker.dataset.selectionBoundary = 'true';
   range.insertNode(marker);
-  splitClosestElementAtMarker(marker, 'mark');
+  splitClosestElementAtMarker(marker, selector);
 
   if (nodes.length === 0) {
     const nextRange = document.createRange();
@@ -563,7 +604,18 @@ function unwrapMarkFromRange(range: Range): Range {
 
   unwrapInlineElements(selectedContent, 'mark');
 
-  const nextRange = insertFragmentAtSplitMarkBoundary(range, selectedContent);
+  const nextRange = insertFragmentAtSplitInlineBoundary(range, selectedContent, 'mark');
+  restoreSelectionRange(nextRange);
+
+  return nextRange;
+}
+
+function unwrapInlineFormatFromRange(range: Range, selector: string): Range {
+  const selectedContent = range.extractContents();
+
+  unwrapInlineElements(selectedContent, selector);
+
+  const nextRange = insertFragmentAtSplitInlineBoundary(range, selectedContent, selector);
   restoreSelectionRange(nextRange);
 
   return nextRange;
@@ -657,8 +709,16 @@ function restoreSelectionRange(range: Range) {
   selection.addRange(range);
 }
 
-function wrapRangeWithInlineElement(range: Range, element: HTMLElement): Range {
+function wrapRangeWithInlineElement(
+  range: Range,
+  element: HTMLElement,
+  nestedSelector?: string
+): Range {
   const selectedContent = range.extractContents();
+
+  if (nestedSelector) {
+    unwrapInlineElements(selectedContent, nestedSelector);
+  }
 
   element.append(selectedContent);
   range.insertNode(element);
@@ -1313,9 +1373,24 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       italic: 'em',
       underline: 'u',
     };
+    const selectorByAction: Record<typeof action, string> = {
+      bold: 'strong, b',
+      italic: 'em, i',
+      underline: 'u',
+    };
+    const selector = selectorByAction[action];
+    const formatCounts = getRangeTextFormatCounts(inlineRange, selector);
+
+    if (formatCounts.formatted > formatCounts.unformatted) {
+      selectionMenuRangeRef.current = unwrapInlineFormatFromRange(inlineRange, selector);
+      syncContentAfterFormat();
+      updateSelectionMenuAfterSelectionMove();
+      return;
+    }
+
     const wrapper = document.createElement(tagNameByAction[action]);
 
-    selectionMenuRangeRef.current = wrapRangeWithInlineElement(inlineRange, wrapper);
+    selectionMenuRangeRef.current = wrapRangeWithInlineElement(inlineRange, wrapper, selector);
     syncContentAfterFormat();
     updateSelectionMenuAfterSelectionMove();
   };
