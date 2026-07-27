@@ -115,9 +115,14 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
 
     if (
       attributeName.startsWith('data-') &&
-      ['div', 'figure', 'p'].includes(tagName)
+      ['aside', 'div', 'figure', 'h2', 'h3', 'p'].includes(tagName)
     ) {
       allowedAttributes.push(`${attributeName}="${sanitizeAttributeValue(attributeValue)}"`);
+      continue;
+    }
+
+    if (attributeName === 'role' && tagName === 'aside' && attributeValue === 'note') {
+      allowedAttributes.push('role="note"');
       continue;
     }
 
@@ -232,6 +237,7 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
 function sanitizeArticleHtml(content: string): string {
   const allowedTags = new Set([
     'a',
+    'aside',
     'audio',
     'b',
     'br',
@@ -240,6 +246,8 @@ function sanitizeArticleHtml(content: string): string {
     'em',
     'figcaption',
     'figure',
+    'h2',
+    'h3',
     'i',
     'iframe',
     'img',

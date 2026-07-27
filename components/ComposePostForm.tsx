@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CalloutMenu, type CalloutMenuType } from './calloutMenu';
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 import { EditorMenu, type EditorMenuAction } from './editorMenu';
 
@@ -17,6 +18,8 @@ interface ComposePostFormProps {
 }
 
 type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'table';
+
+type CalloutType = CalloutMenuType;
 
 interface SlashMenuPosition {
   top: number;
@@ -39,6 +42,33 @@ const slashMenuOptions: Array<{
   { id: 'carousel', label: 'Add a carousel block' },
   { id: 'table', label: 'Add a table' },
 ];
+
+const calloutMetadata: Record<CalloutType, {
+  description: string;
+  icon: string;
+  label: string;
+}> = {
+  informative: {
+    icon: 'i',
+    label: 'Informative',
+    description: 'Neutral context, notes, and useful background.',
+  },
+  warning: {
+    icon: '!',
+    label: 'Warning',
+    description: 'Important risk or condition to notice before acting.',
+  },
+  error: {
+    icon: 'x',
+    label: 'Error',
+    description: 'Critical failure, blocker, or destructive outcome.',
+  },
+  caution: {
+    icon: '?',
+    label: 'Caution',
+    description: 'Careful guidance for ambiguous or sensitive steps.',
+  },
+};
 
 function createDraftArticleId(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
@@ -75,7 +105,7 @@ function escapeHtml(value: string): string {
 }
 
 function hasEditorHtml(value: string): boolean {
-  return /<\/?(a|audio|b|br|details|div|em|figcaption|figure|i|iframe|img|mark|p|strong|summary|table|tbody|td|track|tr|u|video)(\s|>|\/)/i.test(value);
+  return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h2|h3|i|iframe|img|mark|p|strong|summary|table|tbody|td|track|tr|u|video)(\s|>|\/)/i.test(value);
 }
 
 function getEditorHtml(value: string): string {
@@ -96,7 +126,7 @@ function getEditorText(element: HTMLDivElement): string {
 
   if (
     htmlContent.includes('data-editor-block=') ||
-    element.querySelector('a, b, em, i, mark, strong, u')
+    element.querySelector('a, aside, b, em, h2, h3, i, mark, strong, u')
   ) {
     return htmlContent;
   }
@@ -335,6 +365,33 @@ function getSelectionMenuActiveActions(
   range: Range
 ): EditorMenuAction[] {
   const activeActions: EditorMenuAction[] = [];
+  const activeBlock = getEditorBlockForNode(editor, range.startContainer);
+  const activeBlockTagName = activeBlock.tagName.toLowerCase();
+
+  if (activeBlockTagName === 'h2') {
+    activeActions.push('h2');
+  }
+
+  if (activeBlockTagName === 'h3') {
+    activeActions.push('h3');
+  }
+
+  if (activeBlockTagName === 'p') {
+    activeActions.push('paragraph');
+  }
+
+  if (activeBlockTagName === 'aside') {
+    const calloutType = activeBlock.dataset.calloutType;
+
+    if (
+      calloutType === 'warning' ||
+      calloutType === 'error' ||
+      calloutType === 'informative' ||
+      calloutType === 'caution'
+    ) {
+      activeActions.push('callout');
+    }
+  }
 
   if (rangeHasElementMatching(range, 'strong, b', editor)) {
     activeActions.push('bold');
@@ -518,6 +575,51 @@ function unwrapMarkFromRange(range: Range): Range {
   unwrapInlineElements(selectedContent, 'mark');
 
   const nextRange = insertFragmentAtSplitMarkBoundary(range, selectedContent);
+  restoreSelectionRange(nextRange);
+
+  return nextRange;
+}
+
+function createSemanticBlock(
+  blockType: 'h2' | 'h3' | 'p' | 'callout',
+  html: string,
+  calloutType?: CalloutType
+): HTMLElement {
+  const block = document.createElement(blockType === 'callout' ? 'aside' : blockType);
+
+  block.innerHTML = html || '<br>';
+
+  if (blockType === 'callout' && calloutType) {
+    block.setAttribute('role', 'note');
+    setCalloutBlockType(block, calloutType);
+  }
+
+  return block;
+}
+
+function setCalloutBlockType(block: HTMLElement, calloutType: CalloutType) {
+  const metadata = calloutMetadata[calloutType];
+
+  block.dataset.calloutType = calloutType;
+  block.dataset.calloutIcon = metadata.icon;
+  block.dataset.calloutLabel = metadata.label;
+  block.dataset.calloutDescription = metadata.description;
+}
+
+function replaceSelectionBlock(
+  editor: HTMLDivElement,
+  range: Range,
+  blockType: 'h2' | 'h3' | 'p' | 'callout',
+  calloutType?: CalloutType
+): Range {
+  const currentBlock = getEditorBlockForNode(editor, range.startContainer);
+  const nextBlock = createSemanticBlock(blockType, currentBlock.innerHTML, calloutType);
+
+  currentBlock.replaceWith(nextBlock);
+
+  const nextRange = document.createRange();
+
+  nextRange.selectNodeContents(nextBlock);
   restoreSelectionRange(nextRange);
 
   return nextRange;
@@ -853,6 +955,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const videoFileInputRef = useRef<HTMLInputElement>(null);
   const slashMenuRangeRef = useRef<Range | null>(null);
   const selectionMenuRangeRef = useRef<Range | null>(null);
+  const calloutMenuBlockRef = useRef<HTMLElement | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
   const [articleId] = useState(() => article?.id ?? createDraftArticleId());
@@ -865,6 +968,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [activeSlashMenuOptionIndex, setActiveSlashMenuOptionIndex] = useState(0);
   const [selectionMenuPosition, setSelectionMenuPosition] = useState<SelectionMenuPosition | null>(null);
   const [activeSelectionMenuActions, setActiveSelectionMenuActions] = useState<EditorMenuAction[]>([]);
+  const [calloutMenuPosition, setCalloutMenuPosition] = useState<SlashMenuPosition | null>(null);
+  const [activeCalloutType, setActiveCalloutType] = useState<CalloutType>('informative');
   const [videoMenuPosition, setVideoMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [videoProvider, setVideoProvider] = useState<VideoProvider>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
@@ -1003,6 +1108,47 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setActiveSelectionMenuActions([]);
   };
 
+  const closeCalloutMenu = () => {
+    calloutMenuBlockRef.current = null;
+    setCalloutMenuPosition(null);
+  };
+
+  const openCalloutMenu = (block: HTMLElement) => {
+    const rect = block.getBoundingClientRect();
+    const calloutType = block.dataset.calloutType;
+
+    calloutMenuBlockRef.current = block;
+    setActiveCalloutType(
+      calloutType === 'warning' ||
+      calloutType === 'error' ||
+      calloutType === 'informative' ||
+      calloutType === 'caution'
+        ? calloutType
+        : 'informative'
+    );
+    setCalloutMenuPosition({
+      top: rect.bottom + 8,
+      left: Math.min(rect.left, window.innerWidth - 296),
+    });
+    closeSelectionMenu();
+    closeSlashMenu();
+  };
+
+  const handleCalloutTypeChange = (calloutType: CalloutType) => {
+    const block = calloutMenuBlockRef.current;
+
+    if (!block) {
+      return;
+    }
+
+    setCalloutBlockType(block, calloutType);
+    setActiveCalloutType(calloutType);
+
+    if (contentRef.current) {
+      setContent(getEditorText(contentRef.current));
+    }
+  };
+
   const closeVideoMenu = () => {
     slashMenuRangeRef.current = null;
     setVideoMenuPosition(null);
@@ -1035,6 +1181,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     selectionMenuRangeRef.current = range.cloneRange();
     setSelectionMenuPosition(position);
     setActiveSelectionMenuActions(getSelectionMenuActiveActions(contentEditor, range));
+    closeCalloutMenu();
     closeSlashMenu();
   };
 
@@ -1065,6 +1212,30 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     if (!liveRange) {
       closeSelectionMenu();
+      return;
+    }
+
+    if (action === 'h2' || action === 'h3' || action === 'paragraph') {
+      selectionMenuRangeRef.current = replaceSelectionBlock(
+        contentEditor,
+        liveRange,
+        action === 'paragraph' ? 'p' : action
+      );
+      syncContentAfterFormat();
+      updateSelectionMenuAfterSelectionMove();
+      return;
+    }
+
+    if (action === 'callout') {
+      selectionMenuRangeRef.current = replaceSelectionBlock(
+        contentEditor,
+        liveRange,
+        'callout',
+        'informative'
+      );
+      setActiveCalloutType('informative');
+      syncContentAfterFormat();
+      updateSelectionMenuAfterSelectionMove();
       return;
     }
 
@@ -1111,7 +1282,11 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       return;
     }
 
-    const tagNameByAction: Record<Exclude<EditorMenuAction, 'highlight' | 'link'>, string> = {
+    if (action !== 'bold' && action !== 'italic' && action !== 'underline') {
+      return;
+    }
+
+    const tagNameByAction: Record<typeof action, string> = {
       bold: 'strong',
       italic: 'em',
       underline: 'u',
@@ -1134,6 +1309,40 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
   });
+
+  useEffect(() => {
+    if (!calloutMenuPosition) {
+      return;
+    }
+
+    const closeCalloutMenuOnOutsideClick = (event: MouseEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        (
+          event.target.closest('[data-callout-menu]') ||
+          event.target.closest('aside[data-callout-type]')
+        )
+      ) {
+        return;
+      }
+
+      closeCalloutMenu();
+    };
+
+    const closeCalloutMenuOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeCalloutMenu();
+      }
+    };
+
+    document.addEventListener('mousedown', closeCalloutMenuOnOutsideClick);
+    document.addEventListener('keydown', closeCalloutMenuOnEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', closeCalloutMenuOnOutsideClick);
+      document.removeEventListener('keydown', closeCalloutMenuOnEscape);
+    };
+  }, [calloutMenuPosition]);
 
   useEffect(() => {
     if (!selectionMenuPosition) {
@@ -1446,6 +1655,17 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               document.execCommand('defaultParagraphSeparator', false, 'p');
               ensureEditorParagraph(e.currentTarget);
             }}
+            onClick={(e) => {
+              const target = e.target instanceof HTMLElement ? e.target : null;
+              const calloutBlock = target?.closest('aside[data-callout-type]');
+
+              if (
+                calloutBlock instanceof HTMLElement &&
+                e.currentTarget.contains(calloutBlock)
+              ) {
+                openCalloutMenu(calloutBlock);
+              }
+            }}
             onInput={(e) => syncContentAfterInput(e.currentTarget)}
             onKeyDown={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
@@ -1593,6 +1813,14 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             activeActions={activeSelectionMenuActions}
             position={selectionMenuPosition}
             onAction={applySelectionFormat}
+          />
+        )}
+
+        {calloutMenuPosition && (
+          <CalloutMenu
+            activeType={activeCalloutType}
+            position={calloutMenuPosition}
+            onTypeChange={handleCalloutTypeChange}
           />
         )}
 

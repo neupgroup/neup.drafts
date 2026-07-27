@@ -1,10 +1,20 @@
 import {
   BaseMenu,
   BaseMenuButton,
+  BaseMenuSeparator,
   type BaseMenuPosition,
 } from './baseMenu';
 
-export type EditorMenuAction = 'bold' | 'italic' | 'underline' | 'highlight' | 'link';
+export type EditorMenuAction =
+  | 'h2'
+  | 'h3'
+  | 'paragraph'
+  | 'callout'
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'highlight'
+  | 'link';
 
 interface EditorMenuProps {
   activeActions?: EditorMenuAction[];
@@ -23,6 +33,38 @@ export function EditorMenu({
       dataAttribute="data-selection-menu"
       position={position}
     >
+      <BaseMenuButton
+        active={activeActions.includes('h2')}
+        aria-label="Heading 2"
+        title="Heading 2"
+        onClick={() => onAction('h2')}
+        className="text-sm font-bold"
+      >
+        H2
+      </BaseMenuButton>
+
+      <BaseMenuButton
+        active={activeActions.includes('h3')}
+        aria-label="Heading 3"
+        title="Heading 3"
+        onClick={() => onAction('h3')}
+        className="text-sm font-bold"
+      >
+        H3
+      </BaseMenuButton>
+
+      <BaseMenuButton
+        active={activeActions.includes('paragraph')}
+        aria-label="Paragraph"
+        title="Paragraph"
+        onClick={() => onAction('paragraph')}
+        className="text-sm font-bold"
+      >
+        P
+      </BaseMenuButton>
+
+      <BaseMenuSeparator />
+
       <BaseMenuButton
         active={activeActions.includes('bold')}
         aria-label="Bold"
@@ -71,6 +113,18 @@ export function EditorMenu({
         className="text-lg font-bold"
       >
         &#8599;
+      </BaseMenuButton>
+
+      <BaseMenuSeparator />
+
+      <BaseMenuButton
+        active={activeActions.includes('callout')}
+        aria-label="Callout"
+        title="Callout"
+        onClick={() => onAction('callout')}
+        className="text-sm font-bold"
+      >
+        C
       </BaseMenuButton>
     </BaseMenu>
   );
