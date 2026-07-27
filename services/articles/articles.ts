@@ -83,6 +83,41 @@ export async function getManagedArticlePosts(authorId: string) {
   });
 }
 
+export async function getManagedArticleBySlug(authorId: string, slug: string) {
+  const articleLookup = getArticleLookupFromSlug(slug);
+
+  return prisma.article.findFirst({
+    where: {
+      authorId,
+      OR: [
+        { id: articleLookup.id },
+        { slug: articleLookup.slug },
+      ],
+    },
+    include: {
+      author: {
+        select: { id: true, username: true, email: true, role: true },
+      },
+      comments: {
+        include: {
+          author: {
+            select: { id: true, username: true, email: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+      reactions: {
+        include: {
+          user: {
+            select: { id: true, username: true, email: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
+}
+
 export async function getArticleOwnershipBySlugOrId(slug: string) {
   const articleLookup = getArticleLookupFromSlug(slug);
 
