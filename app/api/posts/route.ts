@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
 import { prisma } from '@/inapp/lib/prisma';
+import { getArticleFeed } from '@/services/articles';
 
 const ARTICLE_ID_PATTERN = /^[a-z0-9]{8,32}$/;
 
@@ -35,20 +36,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 // PUBLIC: Anyone can send a GET request here to read posts feed
 export async function GET() {
   try {
-    const posts = await prisma.article.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        author: {
-          select: { id: true, username: true, email: true, role: true }, // Select 'id' for routing
-        },
-        _count: {
-          select: {
-            comments: true,
-            reactions: true,
-          },
-        },
-      },
-    });
+    const posts = await getArticleFeed();
 
     return NextResponse.json({ posts });
   } catch (error) {

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
+import { getArticleFeed } from '@/services/articles';
 import HeaderV1S1 from '@/components/header.v1s1';
 
 // Post interface matching the real DB structure and fallback types
@@ -36,13 +37,9 @@ function getArticlePath(post: Post): string {
 
 async function getAllPosts(): Promise<Post[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/posts`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.posts || [];
+    return await getArticleFeed();
   } catch (error) {
-    console.error("Failed to fetch posts:", error);
+    console.error("Failed to load posts:", error);
     return [];
   }
 }
@@ -106,8 +103,8 @@ export default async function HomePage() {
                     : post.author || 'Anonymous';
 
                 const likesCount =
-                  post.likes ??
                   post._count?.reactions ??
+                  post.likes ??
                   post.reactions?.length ??
                   0;
 
