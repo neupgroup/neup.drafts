@@ -70,9 +70,9 @@ export function BaseMenuButton({
         event.preventDefault();
         onMouseDown?.(event);
       }}
-      className={`grid size-8 place-items-center rounded leading-none transition-colors ${
+      className={`grid size-8 place-items-center rounded leading-none transition-colors duration-200 ${
         active
-          ? 'bg-white text-slate-950 shadow-sm'
+          ? 'bg-white text-slate-950 shadow-sm hover:bg-slate-200'
           : 'text-white hover:bg-white/10'
       } ${className}`}
     >
@@ -111,9 +111,9 @@ export function BaseMenuOption({
         event.preventDefault();
         onMouseDown?.(event);
       }}
-      className={`flex w-full items-start gap-3 rounded px-3 py-2 text-left transition-colors ${
+      className={`flex w-full items-start gap-3 rounded px-3 py-2 text-left transition-colors duration-200 ${
         active
-          ? 'bg-white text-slate-950 shadow-sm'
+          ? 'bg-white text-slate-950 shadow-sm hover:bg-slate-200'
           : 'text-white hover:bg-white/10'
       }`}
     >

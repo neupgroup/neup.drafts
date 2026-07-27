@@ -108,6 +108,8 @@ function getEditorHtml(value: string): string {
 }
 
 function getEditorText(element: HTMLDivElement): string {
+  normalizeEditorContent(element);
+
   const htmlContent = element.innerHTML.trim();
 
   if (
@@ -279,6 +281,26 @@ function getSelectionTextRange(editor: HTMLDivElement): Range | null {
 
 function getElementForNode(node: Node): HTMLElement | null {
   return node instanceof HTMLElement ? node : node.parentElement;
+}
+
+function normalizeEditorContent(element: HTMLElement) {
+  element.normalize();
+  Array.from(element.children).forEach((child) => {
+    if (child instanceof HTMLElement) {
+      normalizeEditorContent(child);
+    }
+  });
+}
+
+function normalizeInlineMutationRange(range: Range): Range {
+  const commonElement = getElementForNode(range.commonAncestorContainer);
+  const editorBlock = commonElement?.closest('p, h2, h3, aside');
+
+  if (editorBlock) {
+    editorBlock.normalize();
+  }
+
+  return range;
 }
 
 function nodeHasAncestorMatching(
@@ -609,7 +631,9 @@ function unwrapMarkFromRange(range: Range): Range {
 
   unwrapInlineElements(selectedContent, 'mark');
 
-  const nextRange = insertFragmentAtSplitInlineBoundary(range, selectedContent, 'mark');
+  const nextRange = normalizeInlineMutationRange(
+    insertFragmentAtSplitInlineBoundary(range, selectedContent, 'mark')
+  );
   restoreSelectionRange(nextRange);
 
   return nextRange;
@@ -620,7 +644,9 @@ function unwrapInlineFormatFromRange(range: Range, selector: string): Range {
 
   unwrapInlineElements(selectedContent, selector);
 
-  const nextRange = insertFragmentAtSplitInlineBoundary(range, selectedContent, selector);
+  const nextRange = normalizeInlineMutationRange(
+    insertFragmentAtSplitInlineBoundary(range, selectedContent, selector)
+  );
   restoreSelectionRange(nextRange);
 
   return nextRange;
