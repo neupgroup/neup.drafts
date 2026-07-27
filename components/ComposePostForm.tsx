@@ -392,6 +392,14 @@ function getSelectionMenuActiveActions(
   return activeActions;
 }
 
+function getWordCount(value: string): number {
+  return value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .length;
+}
+
 function unwrapInlineElements(root: ParentNode, selector: string) {
   Array.from(root.querySelectorAll(selector)).forEach((element) => {
     element.replaceWith(...Array.from(element.childNodes));
@@ -600,10 +608,20 @@ function getSelectionMenuPosition(range: Range): SelectionMenuPosition | null {
   }
 
   return {
-    top: Math.max(8, visibleRect.top - 58),
-    left: visibleRect.left + visibleRect.width / 2,
+    top: window.scrollY + Math.max(8, visibleRect.top - 58),
+    left: window.scrollX + visibleRect.left + visibleRect.width / 2,
     transform: 'translateX(-50%)',
   };
+}
+
+function isMenuPositionVisible(position: SlashMenuPosition): boolean {
+  const viewportTop = position.top - window.scrollY;
+  const viewportLeft = position.left - window.scrollX;
+
+  return viewportTop >= 0 &&
+    viewportTop <= window.innerHeight &&
+    viewportLeft >= 0 &&
+    viewportLeft <= window.innerWidth;
 }
 
 function restoreSelectionRange(range: Range) {
@@ -932,6 +950,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [activeSlashMenuOptionIndex, setActiveSlashMenuOptionIndex] = useState(0);
   const [selectionMenuPosition, setSelectionMenuPosition] = useState<SelectionMenuPosition | null>(null);
   const [activeSelectionMenuActions, setActiveSelectionMenuActions] = useState<EditorMenuAction[]>([]);
+  const [showSelectionHeadingActions, setShowSelectionHeadingActions] = useState(true);
   const [calloutMenuPosition, setCalloutMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [activeCalloutType, setActiveCalloutType] = useState<CalloutType>('informative');
   const [videoMenuPosition, setVideoMenuPosition] = useState<SlashMenuPosition | null>(null);
@@ -1070,6 +1089,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     selectionMenuRangeRef.current = null;
     setSelectionMenuPosition(null);
     setActiveSelectionMenuActions([]);
+    setShowSelectionHeadingActions(true);
   };
 
   const closeCalloutMenu = () => {
@@ -1088,8 +1108,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         : 'informative'
     );
     setCalloutMenuPosition({
-      top: rect.bottom + 8,
-      left: Math.min(rect.left, window.innerWidth - 296),
+      top: window.scrollY + rect.bottom + 8,
+      left: window.scrollX + Math.min(rect.left, window.innerWidth - 296),
     });
     closeSelectionMenu();
     closeSlashMenu();
@@ -1142,6 +1162,9 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     selectionMenuRangeRef.current = range.cloneRange();
     setSelectionMenuPosition(position);
     setActiveSelectionMenuActions(getSelectionMenuActiveActions(contentEditor, range));
+    setShowSelectionHeadingActions(
+      getWordCount(getEditorBlockForNode(contentEditor, range.startContainer).innerText) <= 15
+    );
     closeCalloutMenu();
     closeSlashMenu();
   };
@@ -1296,12 +1319,22 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       }
     };
 
+    const closeCalloutMenuWhenHidden = () => {
+      if (!isMenuPositionVisible(calloutMenuPosition)) {
+        closeCalloutMenu();
+      }
+    };
+
     document.addEventListener('mousedown', closeCalloutMenuOnOutsideClick);
     document.addEventListener('keydown', closeCalloutMenuOnEscape);
+    window.addEventListener('scroll', closeCalloutMenuWhenHidden, true);
+    window.addEventListener('resize', closeCalloutMenuWhenHidden);
 
     return () => {
       document.removeEventListener('mousedown', closeCalloutMenuOnOutsideClick);
       document.removeEventListener('keydown', closeCalloutMenuOnEscape);
+      window.removeEventListener('scroll', closeCalloutMenuWhenHidden, true);
+      window.removeEventListener('resize', closeCalloutMenuWhenHidden);
     };
   }, [calloutMenuPosition]);
 
@@ -1329,12 +1362,22 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       }
     };
 
+    const closeSelectionMenuWhenHidden = () => {
+      if (!isMenuPositionVisible(selectionMenuPosition)) {
+        closeSelectionMenu();
+      }
+    };
+
     document.addEventListener('mousedown', closeSelectionMenuOnPointerDown);
     document.addEventListener('keydown', closeSelectionMenuOnEscape);
+    window.addEventListener('scroll', closeSelectionMenuWhenHidden, true);
+    window.addEventListener('resize', closeSelectionMenuWhenHidden);
 
     return () => {
       document.removeEventListener('mousedown', closeSelectionMenuOnPointerDown);
       document.removeEventListener('keydown', closeSelectionMenuOnEscape);
+      window.removeEventListener('scroll', closeSelectionMenuWhenHidden, true);
+      window.removeEventListener('resize', closeSelectionMenuWhenHidden);
     };
   });
 
@@ -1773,6 +1816,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
           <EditorMenu
             activeActions={activeSelectionMenuActions}
             position={selectionMenuPosition}
+            showHeadingActions={showSelectionHeadingActions}
             onAction={applySelectionFormat}
           />
         )}

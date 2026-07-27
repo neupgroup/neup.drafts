@@ -20,12 +20,14 @@ interface EditorMenuProps {
   activeActions?: EditorMenuAction[];
   onAction: (action: EditorMenuAction) => void;
   position: BaseMenuPosition;
+  showHeadingActions?: boolean;
 }
 
 export function EditorMenu({
   activeActions = [],
   onAction,
   position,
+  showHeadingActions = true,
 }: EditorMenuProps) {
   return (
     <BaseMenu
@@ -33,25 +35,29 @@ export function EditorMenu({
       dataAttribute="data-selection-menu"
       position={position}
     >
-      <BaseMenuButton
-        active={activeActions.includes('h2')}
-        aria-label="Heading 2"
-        title="Heading 2"
-        onClick={() => onAction('h2')}
-        className="text-sm font-bold"
-      >
-        H2
-      </BaseMenuButton>
+      {showHeadingActions && (
+        <>
+          <BaseMenuButton
+            active={activeActions.includes('h2')}
+            aria-label="Heading 2"
+            title="Heading 2"
+            onClick={() => onAction('h2')}
+            className="text-sm font-bold"
+          >
+            H2
+          </BaseMenuButton>
 
-      <BaseMenuButton
-        active={activeActions.includes('h3')}
-        aria-label="Heading 3"
-        title="Heading 3"
-        onClick={() => onAction('h3')}
-        className="text-sm font-bold"
-      >
-        H3
-      </BaseMenuButton>
+          <BaseMenuButton
+            active={activeActions.includes('h3')}
+            aria-label="Heading 3"
+            title="Heading 3"
+            onClick={() => onAction('h3')}
+            className="text-sm font-bold"
+          >
+            H3
+          </BaseMenuButton>
+        </>
+      )}
 
       <BaseMenuButton
         active={activeActions.includes('paragraph')}

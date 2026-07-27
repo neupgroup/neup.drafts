@@ -40,7 +40,7 @@ export function BaseMenu({
       role="toolbar"
       aria-label={ariaLabel}
       style={style}
-      className={`fixed z-50 flex max-w-[calc(100vw-1rem)] rounded-md bg-slate-950 text-white shadow-xl ${
+      className={`absolute z-50 flex max-w-[calc(100vw-1rem)] rounded-md bg-slate-950 text-white shadow-xl ${
         orientation === 'horizontal'
           ? 'h-11 items-center gap-1 overflow-x-auto px-2'
           : 'w-72 flex-col gap-1 p-2'
