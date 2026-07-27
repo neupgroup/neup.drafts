@@ -13,6 +13,10 @@ function getArticleLookupFromUrl(req: NextRequest): { id: string; slug: string }
   return getArticleLookupFromSlug(pathSegments[pathSegments.length - 1] || '');
 }
 
+function normalizeArticleContent(content: string): string {
+  return content.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
+}
+
 // PROTECTED: Only authenticated users can view a single post
 export const GET = withAuth(
   async (req: NextRequest) => {
@@ -56,7 +60,7 @@ export const PATCH = withAuth(
       }
 
       const nextTitle = title.trim();
-      const nextContent = content.trim();
+      const nextContent = normalizeArticleContent(content).trim();
 
       if (!nextTitle || !nextContent) {
         return NextResponse.json({ error: "Title and content are required" }, { status: 400 });

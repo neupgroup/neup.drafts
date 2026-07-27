@@ -24,6 +24,10 @@ function buildArticleSlug(slug: string, id: string): string {
   return baseSlug ? `${baseSlug}-${id}` : '';
 }
 
+function normalizeArticleContent(content: string): string {
+  return content.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
+}
+
 function isUniqueConstraintError(error: unknown): boolean {
   return (
     typeof error === 'object' &&
@@ -50,15 +54,22 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
     const { title, content, slug, articleId } = await req.json();
 
-    if (!title || !content) {
+    if (typeof title !== 'string' || typeof content !== 'string') {
       return NextResponse.json({ error: 'Missing title or content' }, { status: 400 });
+    }
+
+    const nextTitle = title.trim();
+    const normalizedContent = normalizeArticleContent(content).trim();
+
+    if (!nextTitle || !normalizedContent) {
+      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }
 
     const id =
       typeof articleId === 'string' && ARTICLE_ID_PATTERN.test(articleId)
         ? articleId
         : createArticleId();
-    const finalSlug = buildArticleSlug(slug || title, id);
+    const finalSlug = buildArticleSlug(typeof slug === 'string' ? slug : nextTitle, id);
 
     if (!finalSlug) {
       return NextResponse.json({ error: 'Title must contain letters or numbers' }, { status: 400 });
@@ -68,8 +79,8 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
     const newPost = await prisma.article.create({
       data: {
         id,
-        title,
-        content,
+        title: nextTitle,
+        content: normalizedContent,
         slug: finalSlug,
         authorId: context.user.id, // Connects directly via unique CUID
       },

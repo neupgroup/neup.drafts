@@ -95,6 +95,10 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function normalizeEditorSpaces(value: string): string {
+  return value.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
+}
+
 function hasEditorHtml(value: string): boolean {
   return /<\/?(a|aside|audio|b|br|details|div|em|figcaption|figure|h1|h2|h3|i|iframe|img|li|mark|ol|p|strong|summary|table|tbody|td|track|tr|u|ul|video)(\s|>|\/)/i.test(value);
 }
@@ -121,7 +125,7 @@ function getEditorHtml(value: string): string {
 function getEditorText(element: HTMLDivElement): string {
   normalizeEditorContent(element);
 
-  const htmlContent = element.innerHTML.trim();
+  const htmlContent = normalizeEditorSpaces(element.innerHTML.trim());
 
   if (
     htmlContent.includes('data-editor-block=') ||
@@ -132,14 +136,14 @@ function getEditorText(element: HTMLDivElement): string {
 
   const blocks = Array.from(element.children)
     .filter((child) => child instanceof HTMLElement)
-    .map((child) => child.textContent?.replace(/\u00a0/g, ' ').trim() ?? '')
+    .map((child) => normalizeEditorSpaces(child.textContent ?? '').trim())
     .filter(Boolean);
 
   if (blocks.length > 0) {
     return blocks.join('\n\n');
   }
 
-  return element.innerText.replace(/\u00a0/g, ' ').trim();
+  return normalizeEditorSpaces(element.innerText).trim();
 }
 
 function getCaretOffset(element: HTMLElement): number | null {
@@ -254,7 +258,7 @@ function wrapClipboardInlineNodes(tagName: 'strong' | 'em' | 'u' | 'mark', nodes
 
 function sanitizeClipboardInlineNode(node: Node): Node[] {
   if (node.nodeType === Node.TEXT_NODE) {
-    return [document.createTextNode(node.textContent ?? '')];
+    return [document.createTextNode(normalizeEditorSpaces(node.textContent ?? ''))];
   }
 
   if (!(node instanceof HTMLElement)) {
@@ -531,13 +535,14 @@ function isEditorBlockEmpty(block: HTMLElement): boolean {
 
 function createEditorFragmentFromPlainText(text: string): DocumentFragment {
   const fragment = document.createDocumentFragment();
-  const paragraphs = text
+  const normalizedText = normalizeEditorSpaces(text);
+  const paragraphs = normalizedText
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean);
 
   if (paragraphs.length <= 1) {
-    fragment.append(createEditorParagraph(text));
+    fragment.append(createEditorParagraph(normalizedText));
     return fragment;
   }
 
@@ -2258,8 +2263,11 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const nextContent = contentRef.current
+      ? getEditorText(contentRef.current)
+      : normalizeEditorSpaces(content);
 
-    if (!title.trim() || !content.trim()) {
+    if (!title.trim() || !nextContent.trim()) {
       setError('Title and content are required.');
       return;
     }
@@ -2271,6 +2279,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
 
     setLoading(true);
     setError('');
+    setContent(nextContent);
 
     try {
       const res = await fetch(isEditing ? `/api/posts/${articleId}` : '/api/posts', {
@@ -2278,8 +2287,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           isEditing
-            ? { title, content }
-            : { title, slug: slugBase, content, articleId }
+            ? { title, content: nextContent }
+            : { title, slug: slugBase, content: nextContent, articleId }
         ),
       });
 
@@ -2495,7 +2504,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             }
 
             e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
+            const text = normalizeEditorSpaces(e.clipboardData.getData('text/plain'));
             const paragraphs = text
               .split(/\n{2,}/)
               .map((block) => block.trim())

@@ -21,7 +21,21 @@
 }
 
 .compose-content-editor > * + * {
-  margin-top: 1.5rem;
+  margin-top: 0.9rem;
+}
+
+.compose-content-editor > * + h2 {
+  margin-top: 2rem;
+}
+
+.compose-content-editor > * + h3 {
+  margin-top: 1.45rem;
+}
+
+.compose-content-editor > * + ol,
+.compose-content-editor > * + ul,
+.compose-content-editor > * + [data-editor-block="list"] {
+  margin-top: 1.2rem;
 }
 
 .compose-content-editor a,
@@ -81,7 +95,7 @@
 
 .compose-content-editor li + li,
 .article-content-html li + li {
-  margin-top: 0.4rem;
+  margin-top: 0.2rem;
 }
 
 .compose-content-editor aside[data-callout-type],
@@ -403,7 +417,21 @@
 }
 
 .article-content-html > * + * {
-  margin-top: 1.5rem;
+  margin-top: 0.9rem;
+}
+
+.article-content-html > * + h2 {
+  margin-top: 2rem;
+}
+
+.article-content-html > * + h3 {
+  margin-top: 1.45rem;
+}
+
+.article-content-html > * + ol,
+.article-content-html > * + ul,
+.article-content-html > * + [data-editor-block="list"] {
+  margin-top: 1.2rem;
 }
 
 .article-content-html p {
