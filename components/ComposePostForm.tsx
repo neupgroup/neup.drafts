@@ -304,6 +304,32 @@ function rangeHasElementMatching(
   );
 }
 
+function getRangeTextFormatCounts(range: Range, selector: string): {
+  formatted: number;
+  unformatted: number;
+} {
+  const selectedContent = range.cloneContents();
+  const walker = document.createTreeWalker(selectedContent, NodeFilter.SHOW_TEXT);
+  let formatted = 0;
+  let unformatted = 0;
+  let node = walker.nextNode();
+
+  while (node) {
+    const textLength = node.textContent?.length ?? 0;
+    const element = getElementForNode(node);
+
+    if (element?.closest(selector)) {
+      formatted += textLength;
+    } else {
+      unformatted += textLength;
+    }
+
+    node = walker.nextNode();
+  }
+
+  return { formatted, unformatted };
+}
+
 function getSelectionMenuActiveActions(
   editor: HTMLDivElement,
   range: Range
@@ -322,7 +348,9 @@ function getSelectionMenuActiveActions(
     activeActions.push('underline');
   }
 
-  if (rangeHasElementMatching(range, 'mark', editor)) {
+  const highlightCounts = getRangeTextFormatCounts(range, 'mark');
+
+  if (highlightCounts.formatted > highlightCounts.unformatted) {
     activeActions.push('highlight');
   }
 
@@ -331,6 +359,168 @@ function getSelectionMenuActiveActions(
   }
 
   return activeActions;
+}
+
+function unwrapInlineElements(root: ParentNode, selector: string) {
+  Array.from(root.querySelectorAll(selector)).forEach((element) => {
+    element.replaceWith(...Array.from(element.childNodes));
+  });
+}
+
+function hasContent(node: Node): boolean {
+  return Boolean(node.textContent || (node instanceof HTMLElement && node.children.length));
+}
+
+function splitClosestElementAtMarker(marker: HTMLElement, selector: string) {
+  let target = marker.parentElement?.closest(selector);
+
+  while (target instanceof HTMLElement) {
+    const beforeRange = document.createRange();
+    const afterRange = document.createRange();
+    const before = target.cloneNode(false) as HTMLElement;
+    const after = target.cloneNode(false) as HTMLElement;
+
+    beforeRange.selectNodeContents(target);
+    beforeRange.setEndBefore(marker);
+    afterRange.selectNodeContents(target);
+    afterRange.setStartAfter(marker);
+    before.append(beforeRange.cloneContents());
+    after.append(afterRange.cloneContents());
+
+    const replacements: Node[] = [];
+
+    if (hasContent(before)) {
+      replacements.push(before);
+    }
+
+    replacements.push(marker);
+
+    if (hasContent(after)) {
+      replacements.push(after);
+    }
+
+    target.replaceWith(...replacements);
+    target = marker.parentElement?.closest(selector);
+  }
+}
+
+function insertAtSplitMarkBoundary(range: Range, node: Node): Range {
+  const marker = document.createElement('span');
+
+  marker.dataset.selectionBoundary = 'true';
+  range.insertNode(marker);
+  splitClosestElementAtMarker(marker, 'mark');
+  marker.before(node);
+
+  const nextRange = document.createRange();
+  nextRange.selectNode(node);
+  marker.remove();
+  nextRange.selectNodeContents(node);
+
+  return nextRange;
+}
+
+function insertFragmentAtSplitMarkBoundary(range: Range, fragment: DocumentFragment): Range {
+  const marker = document.createElement('span');
+  const nodes = Array.from(fragment.childNodes);
+
+  marker.dataset.selectionBoundary = 'true';
+  range.insertNode(marker);
+  splitClosestElementAtMarker(marker, 'mark');
+
+  if (nodes.length === 0) {
+    const nextRange = document.createRange();
+
+    nextRange.setStartBefore(marker);
+    nextRange.collapse(true);
+    marker.remove();
+
+    return nextRange;
+  }
+
+  marker.before(fragment);
+
+  const nextRange = document.createRange();
+  const firstNode = nodes[0];
+  const lastNode = nodes[nodes.length - 1];
+
+  nextRange.setStartBefore(firstNode);
+  nextRange.setEndAfter(lastNode);
+  marker.remove();
+
+  return nextRange;
+}
+
+function getSiblingMark(
+  element: HTMLElement,
+  direction: 'previous' | 'next'
+): HTMLElement | null {
+  let sibling = direction === 'previous'
+    ? element.previousSibling
+    : element.nextSibling;
+
+  while (sibling?.nodeType === Node.TEXT_NODE && !sibling.textContent) {
+    const emptySibling = sibling;
+    sibling = direction === 'previous'
+      ? sibling.previousSibling
+      : sibling.nextSibling;
+    emptySibling.remove();
+  }
+
+  return sibling instanceof HTMLElement && sibling.tagName === 'MARK'
+    ? sibling
+    : null;
+}
+
+function mergeAdjacentMarks(mark: HTMLElement): HTMLElement {
+  let current = mark;
+  let previousMark = getSiblingMark(current, 'previous');
+
+  while (previousMark) {
+    previousMark.append(...Array.from(current.childNodes));
+    current.remove();
+    current = previousMark;
+    previousMark = getSiblingMark(current, 'previous');
+  }
+
+  let nextMark = getSiblingMark(current, 'next');
+
+  while (nextMark) {
+    current.append(...Array.from(nextMark.childNodes));
+    nextMark.remove();
+    nextMark = getSiblingMark(current, 'next');
+  }
+
+  current.parentNode?.normalize();
+
+  return current;
+}
+
+function wrapRangeWithMark(range: Range): Range {
+  const selectedContent = range.extractContents();
+  const mark = document.createElement('mark');
+
+  unwrapInlineElements(selectedContent, 'mark');
+  mark.append(selectedContent);
+
+  const nextRange = insertAtSplitMarkBoundary(range, mark);
+  const mergedMark = mergeAdjacentMarks(mark);
+
+  nextRange.selectNodeContents(mergedMark);
+  restoreSelectionRange(nextRange);
+
+  return nextRange;
+}
+
+function unwrapMarkFromRange(range: Range): Range {
+  const selectedContent = range.extractContents();
+
+  unwrapInlineElements(selectedContent, 'mark');
+
+  const nextRange = insertFragmentAtSplitMarkBoundary(range, selectedContent);
+  restoreSelectionRange(nextRange);
+
+  return nextRange;
 }
 
 function getSelectionMenuPosition(range: Range): SelectionMenuPosition | null {
@@ -909,11 +1099,22 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       return;
     }
 
-    const tagNameByAction: Record<Exclude<EditorMenuAction, 'link'>, string> = {
+    if (action === 'highlight') {
+      const highlightCounts = getRangeTextFormatCounts(liveRange, 'mark');
+      const nextRange = highlightCounts.formatted > highlightCounts.unformatted
+        ? unwrapMarkFromRange(liveRange)
+        : wrapRangeWithMark(liveRange);
+
+      selectionMenuRangeRef.current = nextRange;
+      syncContentAfterFormat();
+      updateSelectionMenuAfterSelectionMove();
+      return;
+    }
+
+    const tagNameByAction: Record<Exclude<EditorMenuAction, 'highlight' | 'link'>, string> = {
       bold: 'strong',
       italic: 'em',
       underline: 'u',
-      highlight: 'mark',
     };
     const wrapper = document.createElement(tagNameByAction[action]);
 
