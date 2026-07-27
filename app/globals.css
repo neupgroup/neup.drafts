@@ -24,6 +24,23 @@
   margin-top: 1.5rem;
 }
 
+.compose-content-editor a,
+.article-content-html a {
+  color: rgb(37 99 235);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.compose-content-editor mark,
+.article-content-html mark {
+  border-radius: 0.18em;
+  background: rgb(254 240 138);
+  color: inherit;
+  box-decoration-break: clone;
+  padding: 0.08em 0.1em 0.12em;
+  -webkit-box-decoration-break: clone;
+}
+
 .compose-content-editor [data-editor-block="image"],
 .compose-content-editor [data-editor-block="media"],
 .compose-content-editor [data-editor-block="audio"],

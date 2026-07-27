@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
+import { EditorMenu, type EditorMenuAction } from './editorMenu';
 
 interface ComposeArticle {
   id: string;
@@ -20,6 +21,10 @@ type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'table';
 interface SlashMenuPosition {
   top: number;
   left: number;
+}
+
+interface SelectionMenuPosition extends SlashMenuPosition {
+  transform: string;
 }
 
 type VideoProvider = 'youtube' | 'vimeo';
@@ -69,8 +74,12 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function hasEditorHtml(value: string): boolean {
+  return /<\/?(a|audio|b|br|details|div|em|figcaption|figure|i|iframe|img|mark|p|strong|summary|table|tbody|td|track|tr|u|video)(\s|>|\/)/i.test(value);
+}
+
 function getEditorHtml(value: string): string {
-  if (value.includes('data-editor-block=')) {
+  if (hasEditorHtml(value)) {
     return value;
   }
 
@@ -85,7 +94,10 @@ function getEditorHtml(value: string): string {
 function getEditorText(element: HTMLDivElement): string {
   const htmlContent = element.innerHTML.trim();
 
-  if (htmlContent.includes('data-editor-block=')) {
+  if (
+    htmlContent.includes('data-editor-block=') ||
+    element.querySelector('a, b, em, i, mark, strong, u')
+  ) {
     return htmlContent;
   }
 
@@ -217,6 +229,175 @@ function getSelectionRect(): DOMRect | null {
   marker.remove();
 
   return markerRect;
+}
+
+function getSelectionTextRange(editor: HTMLDivElement): Range | null {
+  const selection = window.getSelection();
+
+  if (
+    !selection ||
+    selection.isCollapsed ||
+    !selection.rangeCount ||
+    !selection.anchorNode ||
+    !selection.focusNode ||
+    !editor.contains(selection.anchorNode) ||
+    !editor.contains(selection.focusNode)
+  ) {
+    return null;
+  }
+
+  const range = selection.getRangeAt(0);
+  const startBlock = getEditorBlockForNode(editor, range.startContainer);
+  const endBlock = getEditorBlockForNode(editor, range.endContainer);
+
+  if (
+    startBlock !== endBlock ||
+    startBlock.dataset.editorBlock ||
+    !range.toString().trim()
+  ) {
+    return null;
+  }
+
+  return range;
+}
+
+function getElementForNode(node: Node): HTMLElement | null {
+  return node instanceof HTMLElement ? node : node.parentElement;
+}
+
+function nodeHasAncestorMatching(
+  node: Node,
+  selector: string,
+  editor: HTMLDivElement
+): boolean {
+  const element = getElementForNode(node);
+  const matchingElement = element?.closest(selector);
+
+  return Boolean(matchingElement && editor.contains(matchingElement));
+}
+
+function rangeHasElementMatching(
+  range: Range,
+  selector: string,
+  editor: HTMLDivElement
+): boolean {
+  const commonElement = getElementForNode(range.commonAncestorContainer);
+
+  if (commonElement?.matches(selector)) {
+    return true;
+  }
+
+  if (nodeHasAncestorMatching(range.startContainer, selector, editor)) {
+    return true;
+  }
+
+  if (nodeHasAncestorMatching(range.endContainer, selector, editor)) {
+    return true;
+  }
+
+  const selectedContent = range.cloneContents();
+
+  return Boolean(
+    Array.from(selectedContent.querySelectorAll(selector)).find((node) =>
+      node.textContent?.trim()
+    )
+  );
+}
+
+function getSelectionMenuActiveActions(
+  editor: HTMLDivElement,
+  range: Range
+): EditorMenuAction[] {
+  const activeActions: EditorMenuAction[] = [];
+
+  if (rangeHasElementMatching(range, 'strong, b', editor)) {
+    activeActions.push('bold');
+  }
+
+  if (rangeHasElementMatching(range, 'em, i', editor)) {
+    activeActions.push('italic');
+  }
+
+  if (rangeHasElementMatching(range, 'u', editor)) {
+    activeActions.push('underline');
+  }
+
+  if (rangeHasElementMatching(range, 'mark', editor)) {
+    activeActions.push('highlight');
+  }
+
+  if (rangeHasElementMatching(range, 'a', editor)) {
+    activeActions.push('link');
+  }
+
+  return activeActions;
+}
+
+function getSelectionMenuPosition(range: Range): SelectionMenuPosition | null {
+  const rect = range.getBoundingClientRect();
+  const visibleRect = rect.width || rect.height
+    ? rect
+    : Array.from(range.getClientRects()).find((clientRect) => clientRect.width || clientRect.height);
+
+  if (!visibleRect) {
+    return null;
+  }
+
+  return {
+    top: Math.max(8, visibleRect.top - 58),
+    left: visibleRect.left + visibleRect.width / 2,
+    transform: 'translateX(-50%)',
+  };
+}
+
+function restoreSelectionRange(range: Range) {
+  const selection = window.getSelection();
+
+  if (!selection) {
+    return;
+  }
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function wrapRangeWithInlineElement(range: Range, element: HTMLElement): Range {
+  const selectedContent = range.extractContents();
+
+  element.append(selectedContent);
+  range.insertNode(element);
+
+  const nextRange = document.createRange();
+  nextRange.selectNodeContents(element);
+  restoreSelectionRange(nextRange);
+
+  return nextRange;
+}
+
+function getSafeEditorLinkUrl(value: string): string | null {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  if (trimmedValue.startsWith('/') && !trimmedValue.startsWith('//')) {
+    return trimmedValue;
+  }
+
+  try {
+    const url = new URL(
+      /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmedValue)
+        ? trimmedValue
+        : `https://${trimmedValue}`
+    );
+
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function getYouTubeEmbedUrl(value: string): string | null {
@@ -481,6 +662,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const editorFrameRef = useRef<HTMLDivElement>(null);
   const videoFileInputRef = useRef<HTMLInputElement>(null);
   const slashMenuRangeRef = useRef<Range | null>(null);
+  const selectionMenuRangeRef = useRef<Range | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
   const [articleId] = useState(() => article?.id ?? createDraftArticleId());
@@ -491,6 +673,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const [slashMenuPosition, setSlashMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [slashMenuQuery, setSlashMenuQuery] = useState('');
   const [activeSlashMenuOptionIndex, setActiveSlashMenuOptionIndex] = useState(0);
+  const [selectionMenuPosition, setSelectionMenuPosition] = useState<SelectionMenuPosition | null>(null);
+  const [activeSelectionMenuActions, setActiveSelectionMenuActions] = useState<EditorMenuAction[]>([]);
   const [videoMenuPosition, setVideoMenuPosition] = useState<SlashMenuPosition | null>(null);
   const [videoProvider, setVideoProvider] = useState<VideoProvider>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
@@ -623,12 +807,165 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setActiveSlashMenuOptionIndex(0);
   };
 
+  const closeSelectionMenu = () => {
+    selectionMenuRangeRef.current = null;
+    setSelectionMenuPosition(null);
+    setActiveSelectionMenuActions([]);
+  };
+
   const closeVideoMenu = () => {
     slashMenuRangeRef.current = null;
     setVideoMenuPosition(null);
     setVideoUrl('');
     setVideoProvider('youtube');
   };
+
+  const updateSelectionMenuFromSelection = () => {
+    const contentEditor = contentRef.current;
+
+    if (!contentEditor) {
+      closeSelectionMenu();
+      return;
+    }
+
+    const range = getSelectionTextRange(contentEditor);
+
+    if (!range) {
+      closeSelectionMenu();
+      return;
+    }
+
+    const position = getSelectionMenuPosition(range);
+
+    if (!position) {
+      closeSelectionMenu();
+      return;
+    }
+
+    selectionMenuRangeRef.current = range.cloneRange();
+    setSelectionMenuPosition(position);
+    setActiveSelectionMenuActions(getSelectionMenuActiveActions(contentEditor, range));
+    closeSlashMenu();
+  };
+
+  const updateSelectionMenuAfterSelectionMove = () => {
+    requestAnimationFrame(() => {
+      updateSelectionMenuFromSelection();
+    });
+  };
+
+  const syncContentAfterFormat = () => {
+    if (contentRef.current) {
+      setContent(getEditorText(contentRef.current));
+    }
+  };
+
+  const applySelectionFormat = (action: EditorMenuAction) => {
+    const contentEditor = contentRef.current;
+    const storedRange = selectionMenuRangeRef.current;
+
+    if (!contentEditor || !storedRange) {
+      return;
+    }
+
+    contentEditor.focus();
+    restoreSelectionRange(storedRange);
+
+    const liveRange = getSelectionTextRange(contentEditor);
+
+    if (!liveRange) {
+      closeSelectionMenu();
+      return;
+    }
+
+    if (action === 'link') {
+      const rawUrl = window.prompt('Link URL');
+
+      if (rawUrl === null) {
+        updateSelectionMenuAfterSelectionMove();
+        return;
+      }
+
+      const safeUrl = getSafeEditorLinkUrl(rawUrl);
+
+      if (!safeUrl) {
+        setError('Enter a valid link URL.');
+        updateSelectionMenuAfterSelectionMove();
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.href = safeUrl;
+
+      if (safeUrl.startsWith('http://') || safeUrl.startsWith('https://')) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      }
+
+      selectionMenuRangeRef.current = wrapRangeWithInlineElement(liveRange, link);
+      setError('');
+      syncContentAfterFormat();
+      updateSelectionMenuAfterSelectionMove();
+      return;
+    }
+
+    const tagNameByAction: Record<Exclude<EditorMenuAction, 'link'>, string> = {
+      bold: 'strong',
+      italic: 'em',
+      underline: 'u',
+      highlight: 'mark',
+    };
+    const wrapper = document.createElement(tagNameByAction[action]);
+
+    selectionMenuRangeRef.current = wrapRangeWithInlineElement(liveRange, wrapper);
+    syncContentAfterFormat();
+    updateSelectionMenuAfterSelectionMove();
+  };
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      updateSelectionMenuFromSelection();
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  });
+
+  useEffect(() => {
+    if (!selectionMenuPosition) {
+      return;
+    }
+
+    const closeSelectionMenuOnPointerDown = (event: MouseEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest('[data-selection-menu]')
+      ) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        updateSelectionMenuFromSelection();
+      });
+    };
+
+    const closeSelectionMenuOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeSelectionMenu();
+      }
+    };
+
+    document.addEventListener('mousedown', closeSelectionMenuOnPointerDown);
+    document.addEventListener('keydown', closeSelectionMenuOnEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', closeSelectionMenuOnPointerDown);
+      document.removeEventListener('keydown', closeSelectionMenuOnEscape);
+    };
+  });
 
   useEffect(() => {
     if (!videoMenuPosition) {
@@ -1049,6 +1386,14 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             onContentChange={setContent}
           />
         </div>
+
+        {selectionMenuPosition && (
+          <EditorMenu
+            activeActions={activeSelectionMenuActions}
+            position={selectionMenuPosition}
+            onAction={applySelectionFormat}
+          />
+        )}
 
         {slashMenuPosition && (
           <div

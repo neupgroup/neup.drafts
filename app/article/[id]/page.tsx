@@ -67,6 +67,26 @@ function sanitizeEmbedUrl(value: string): string {
   return '';
 }
 
+function sanitizeLinkUrl(value: string): string {
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.startsWith('/') && !trimmedValue.startsWith('//')) {
+    return trimmedValue;
+  }
+
+  try {
+    const url = new URL(trimmedValue);
+
+    if (['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) {
+      return url.toString();
+    }
+  } catch {
+    return '';
+  }
+
+  return '';
+}
+
 function sanitizeAttributeValue(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -146,6 +166,26 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
+    if (attributeName === 'href' && tagName === 'a') {
+      const safeUrl = sanitizeLinkUrl(attributeValue);
+
+      if (safeUrl) {
+        allowedAttributes.push(`href="${sanitizeAttributeValue(safeUrl)}"`);
+      }
+
+      continue;
+    }
+
+    if (attributeName === 'target' && tagName === 'a' && attributeValue === '_blank') {
+      allowedAttributes.push('target="_blank"');
+      continue;
+    }
+
+    if (attributeName === 'rel' && tagName === 'a') {
+      allowedAttributes.push('rel="noopener noreferrer"');
+      continue;
+    }
+
     if (attributeName === 'kind' && tagName === 'track') {
       allowedAttributes.push(`kind="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
@@ -191,21 +231,28 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
 
 function sanitizeArticleHtml(content: string): string {
   const allowedTags = new Set([
-    'br',
+    'a',
     'audio',
+    'b',
+    'br',
     'details',
     'div',
+    'em',
     'figcaption',
     'figure',
+    'i',
     'iframe',
     'img',
+    'mark',
     'p',
+    'strong',
     'table',
     'tbody',
     'td',
     'summary',
     'track',
     'tr',
+    'u',
     'video',
   ]);
 
