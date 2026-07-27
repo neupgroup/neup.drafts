@@ -624,6 +624,21 @@ function isMenuPositionVisible(position: SlashMenuPosition): boolean {
     viewportLeft <= window.innerWidth;
 }
 
+function isMenuElementVisible(selector: string): boolean {
+  const menu = document.querySelector(selector);
+
+  if (!(menu instanceof HTMLElement)) {
+    return false;
+  }
+
+  const rect = menu.getBoundingClientRect();
+
+  return rect.bottom >= 0 &&
+    rect.top <= window.innerHeight &&
+    rect.right >= 0 &&
+    rect.left <= window.innerWidth;
+}
+
 function restoreSelectionRange(range: Range) {
   const selection = window.getSelection();
 
@@ -1320,7 +1335,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     };
 
     const closeCalloutMenuWhenHidden = () => {
-      if (!isMenuPositionVisible(calloutMenuPosition)) {
+      if (!isMenuElementVisible('[data-callout-menu]')) {
         closeCalloutMenu();
       }
     };
