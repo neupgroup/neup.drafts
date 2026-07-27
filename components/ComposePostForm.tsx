@@ -1719,6 +1719,47 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const getEditorHistorySnapshot = (editor: HTMLDivElement): string =>
     normalizeEditorSpaces(editor.innerHTML.trim());
 
+  const getEditorSnapshotBlockHtml = (snapshot: string): string[] => {
+    const template = document.createElement('template');
+
+    template.innerHTML = getEditorHtml(snapshot);
+
+    return Array.from(template.content.children).map((child) =>
+      normalizeEditorSpaces(child.outerHTML.trim())
+    );
+  };
+
+  const getFirstChangedEditorBlockIndex = (
+    currentSnapshot: string,
+    nextSnapshot: string
+  ): number => {
+    const currentBlocks = getEditorSnapshotBlockHtml(currentSnapshot);
+    const nextBlocks = getEditorSnapshotBlockHtml(nextSnapshot);
+    const blockCount = Math.max(currentBlocks.length, nextBlocks.length);
+
+    for (let index = 0; index < blockCount; index += 1) {
+      if (currentBlocks[index] !== nextBlocks[index]) {
+        return Math.min(index, Math.max(0, nextBlocks.length - 1));
+      }
+    }
+
+    return Math.max(0, nextBlocks.length - 1);
+  };
+
+  const focusEditorHistoryBlock = (editor: HTMLDivElement, blockIndex: number) => {
+    const block = Array.from(editor.children).filter(
+      (child) => child instanceof HTMLElement
+    )[blockIndex];
+
+    if (block instanceof HTMLElement) {
+      block.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      setCaretPosition(block, 'start');
+      return;
+    }
+
+    placeCaretAtEditorEnd(editor);
+  };
+
   const pushEditorHistorySnapshot = (editor: HTMLDivElement) => {
     const snapshot = getEditorHistorySnapshot(editor);
     const undoStack = editorUndoStackRef.current;
@@ -1737,10 +1778,15 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   };
 
   const restoreEditorHistorySnapshot = (editor: HTMLDivElement, snapshot: string) => {
+    const changedBlockIndex = getFirstChangedEditorBlockIndex(
+      getEditorHistorySnapshot(editor),
+      snapshot
+    );
+
     editor.innerHTML = getEditorHtml(snapshot);
     ensureEditorParagraph(editor);
     setContent(getEditorText(editor));
-    placeCaretAtEditorEnd(editor);
+    focusEditorHistoryBlock(editor, changedBlockIndex);
     closeSlashMenu();
     closeSelectionMenu();
   };
