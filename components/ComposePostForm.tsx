@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -1042,6 +1043,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const slashMenuRangeRef = useRef<Range | null>(null);
   const selectionMenuRangeRef = useRef<Range | null>(null);
   const calloutMenuBlockRef = useRef<HTMLElement | null>(null);
+  const pendingCalloutMenuBlockRef = useRef<HTMLElement | null>(null);
   const initializedTitleArticleIdRef = useRef<string | null>(null);
   const initializedEditorArticleIdRef = useRef<string | null>(null);
   const [articleId] = useState(() => article?.id ?? createDraftArticleId());
@@ -1220,6 +1222,52 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       transform: 'translateX(-50%)',
     });
     closeSlashMenu();
+  };
+
+  const rememberSelectedCalloutPointerDown = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const contentEditor = contentRef.current;
+    const storedRange = selectionMenuRangeRef.current;
+
+    pendingCalloutMenuBlockRef.current = null;
+
+    if (!contentEditor || !storedRange || !(event.target instanceof Node)) {
+      return;
+    }
+
+    const clickedElement = getElementForNode(event.target);
+    const clickedCallout = clickedElement?.closest('aside[data-callout-type]');
+
+    if (!(clickedCallout instanceof HTMLElement) || !isCalloutElement(clickedCallout)) {
+      return;
+    }
+
+    const selectedBlock = getEditorBlockForNode(contentEditor, storedRange.startContainer);
+
+    if (selectedBlock === clickedCallout && isCalloutElement(selectedBlock)) {
+      pendingCalloutMenuBlockRef.current = clickedCallout;
+    }
+  };
+
+  const openSelectedCalloutMenuAfterClick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const contentEditor = contentRef.current;
+    const pendingCallout = pendingCalloutMenuBlockRef.current;
+
+    pendingCalloutMenuBlockRef.current = null;
+
+    if (!contentEditor || !pendingCallout || !(event.target instanceof Node)) {
+      return;
+    }
+
+    const clickedElement = getElementForNode(event.target);
+    const clickedCallout = clickedElement?.closest('aside[data-callout-type]');
+
+    if (clickedCallout !== pendingCallout || !contentEditor.contains(pendingCallout)) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      openCalloutSelectionMenu(pendingCallout);
+    });
   };
 
   const showDefaultSelectionMenu = () => {
@@ -1821,6 +1869,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               ensureEditorParagraph(e.currentTarget);
             }}
             onInput={(e) => syncContentAfterInput(e.currentTarget)}
+            onMouseDown={rememberSelectedCalloutPointerDown}
+            onClick={openSelectedCalloutMenuAfterClick}
             onKeyDown={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
 
