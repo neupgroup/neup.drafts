@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "setup": "git clone https://github.com/neupgroup/neup.core && git clone https://github.com/neupgroup/neup.logica && mv neup.core core && mv neup.logica logica",
+    "predev": "npm run setup",
+    "prebuild": "npm run setup",
     "dev": "next dev --port 3723",
     "build": "next build",
     "start": "next start --port 3723",
