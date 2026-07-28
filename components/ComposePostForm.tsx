@@ -15,6 +15,11 @@ import {
   setCalloutBlockType,
   type CalloutBlockType,
 } from './calloutBlock';
+import {
+  businessBlockOptions,
+  createBusinessBlock,
+  type BusinessBlockType,
+} from './businessBlocks';
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 import { EditorMenu, type EditorMenuAction } from './editorMenu';
 import { snapSelectionRange } from './SmartSelectionBehavior';
@@ -30,7 +35,15 @@ interface ComposePostFormProps {
   article?: ComposeArticle;
 }
 
-type SlashMenuOption = 'image' | 'audio' | 'video' | 'carousel' | 'numbered-list' | 'unnumbered-list' | 'table';
+type SlashMenuOption =
+  | 'image'
+  | 'audio'
+  | 'video'
+  | 'carousel'
+  | 'numbered-list'
+  | 'unnumbered-list'
+  | 'table'
+  | BusinessBlockType;
 
 type CalloutType = CalloutBlockType;
 type SemanticBlockType = 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
@@ -51,6 +64,7 @@ type SelectionMenuMode = 'default' | 'callout';
 const slashMenuOptions: Array<{
   id: SlashMenuOption;
   label: string;
+  searchText?: string;
 }> = [
   { id: 'image', label: 'Add an image block' },
   { id: 'audio', label: 'Add an audio block' },
@@ -59,6 +73,10 @@ const slashMenuOptions: Array<{
   { id: 'numbered-list', label: 'Add a numbered list' },
   { id: 'unnumbered-list', label: 'Add an unnumbered list' },
   { id: 'table', label: 'Add a table' },
+  ...businessBlockOptions.map((option) => ({
+    ...option,
+    searchText: `business blocks businessblocks /businessblocks ${option.id}`,
+  })),
 ];
 
 const EDITOR_HISTORY_LIMIT = 100;
@@ -1711,7 +1729,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   const isEditing = Boolean(article);
   const slugBase = slugify(title);
   const filteredSlashMenuOptions = slashMenuOptions.filter((option) =>
-    option.label.toLowerCase().includes(slashMenuQuery.toLowerCase())
+    `${option.label} ${option.searchText ?? ''}`.toLowerCase().includes(slashMenuQuery.toLowerCase())
   );
 
   const normalizeTitle = (value: string): string => value.replace(/\s*\r?\n\s*/g, ' ');
@@ -2487,6 +2505,11 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
   };
 
   const handleSlashMenuOption = (option: SlashMenuOption) => {
+    if (businessBlockOptions.some((businessBlockOption) => businessBlockOption.id === option)) {
+      insertEditorBlock(createBusinessBlock(option as BusinessBlockType));
+      return;
+    }
+
     if (option === 'image') {
       insertEditorBlock(createImageBlock());
       return;
