@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
-import { Prisma } from '@/app/generated/prisma/client';
+import { Prisma } from '@/prisma/client';
 import HeaderV1S1 from '@/components/header.v1s1';
 import SidebarNav, { getSharedSidebarSections } from '@/components/SidebarNav';
 

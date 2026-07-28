@@ -23,43 +23,7 @@ The delegate guard rebuilds the cached client when the generated Prisma client s
 ::end
 */
 
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@/app/generated/prisma/client' //modified
-
-const connectionString = process.env.DATABASE_URL
-
-const pool = new Pool({ connectionString })
-const adapter = new PrismaPg(pool)
-
-const prismaClientSingleton = () => {
-  return new PrismaClient({ adapter })
-}
-
-function hasRequiredDelegates(client: ReturnType<typeof prismaClientSingleton> | undefined): boolean {
-  if (!client) return false
-
-  const candidate = client as any
-  return Boolean(
-    candidate.portfolio &&
-    candidate.portfolioAsset &&
-    candidate.member &&
-    (candidate.authnSession || candidate.authSession) &&
-    (candidate.authnRequest || candidate.authRequest) &&
-    (candidate.authnMethod || candidate.authMethod) &&
-    (candidate.member || candidate.portfolioRole) &&
-    candidate.systemConfig,
-  )
-}
-
-declare global {
-  var prisma: undefined | ReturnType<typeof prismaClientSingleton>
-}
-
-export const prisma = hasRequiredDelegates(globalThis.prisma)
-  ? globalThis.prisma!
-  : prismaClientSingleton()
-
-export default prisma
-
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma
+export { prisma } from '@/core/database/prisma'
+export { default } from '@/core/database/prisma'
+export { Prisma } from '@/core/database/prisma'
+export type * from '@/core/database/prisma'
