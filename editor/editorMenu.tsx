@@ -3,7 +3,7 @@ import {
   BaseMenuButton,
   BaseMenuSeparator,
   type BaseMenuPosition,
-} from './baseMenu';
+} from '@/components/baseMenu';
 import {
   calloutBlockMetadata,
   calloutBlockTypes,

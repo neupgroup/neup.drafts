@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import ComposePostForm from '@/components/ComposePostForm';
+import ComposePostForm from '@/editor/ComposePostForm';
 import HeaderV1S1 from '@/components/header.v1s1';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma';
