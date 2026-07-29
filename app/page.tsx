@@ -7,9 +7,9 @@ import HeaderV1S1 from '@/components/header.v1s1';
 // Post interface matching the real DB structure and fallback types
 interface Author {
   id: string;
-  username?: string | null;
-  email?: string;
-  role?: string;
+  displayName?: string | null;
+  neupId?: string | null;
+  status?: string;
 }
 
 interface Post {
@@ -99,7 +99,7 @@ export default async function HomePage() {
               {posts.map((post) => {
                 const authorName =
                   typeof post.author === 'object' && post.author !== null
-                    ? post.author.username || post.author.email?.split('@')[0]
+                    ? post.author.neupId || post.author.displayName
                     : post.author || 'Anonymous';
 
                 const likesCount =

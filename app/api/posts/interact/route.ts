@@ -12,7 +12,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
       return NextResponse.json({ error: 'Missing postId or invalid action' }, { status: 400 });
     }
 
-    const userId = context.user.id; // Unique DB User ID
+    const accountId = context.user.id;
 
     // 1. Verify the article exists in the database
     const article = await prisma.article.findUnique({
@@ -23,11 +23,11 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // 2. Check if this specific user already liked the post
+    // 2. Check if this specific account already liked the post
     const existingReaction = await prisma.reaction.findFirst({
       where: {
         articleId: postId,
-        userId: userId,
+        accountId,
         type: 'LIKE',
       },
     });
@@ -38,12 +38,11 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
         where: { id: existingReaction.id },
       });
     } else {
-      // User hasn't liked it yet -> Create new reaction using userId CUID
       await prisma.reaction.create({
         data: {
           type: 'LIKE',
           articleId: postId,
-          userId: userId,
+          accountId,
         },
       });
     }

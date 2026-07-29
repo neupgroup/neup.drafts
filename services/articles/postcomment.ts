@@ -28,7 +28,7 @@ export async function postArticleComment(articleId: string, authorId: string, co
     where: { articleId },
     include: {
       author: {
-        select: { id: true, username: true, role: true },
+        select: { id: true, displayName: true, neupId: true, status: true },
       },
     },
     orderBy: { createdAt: 'desc' },

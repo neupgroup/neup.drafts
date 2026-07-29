@@ -2,9 +2,12 @@ import { prisma } from '@/inapp/lib/prisma';
 
 export interface BridgeUser {
   id: string;
-  username: string;
-  role: string;
-  email: string; // <--- Strictly required! No optional `?`
+  connectionId: string;
+  displayName: string;
+  displayImage: string | null;
+  neupId: string;
+  status: string;
+  isVerified: boolean;
 }
 
 //Generates the token (currently using user.id)
@@ -22,21 +25,23 @@ export const verifyTokenWithBridge = async (
   // 1. DEV / TEST BRIDGE: If using mock token, pull a REAL user from DB
   if (mockSecret && token === mockSecret) {
     try {
-      const dbUser = await prisma.user.findFirst({
+      const dbAccount = await prisma.account.findFirst({
         select: {
           id: true,
-          username: true,
-          role: true,
-          email: true,
+          connectionId: true,
+          displayName: true,
+          displayImage: true,
+          neupId: true,
+          status: true,
+          isVerified: true,
         },
       });
 
-      // dbUser can be null if DB is empty, so we check if it exists:
-      if (dbUser) {
-        return dbUser; // TypeScript knows email is 100% a string here!
+      if (dbAccount) {
+        return dbAccount;
       }
 
-      console.warn("⚠️ No users found in DB. Seed or create at least 1 user first!");
+      console.warn("No accounts found in DB. Seed or create at least 1 account first!");
       return null;
     } catch (error) {
       console.error("❌ Failed to query live DB user during auth:", error);
@@ -46,17 +51,20 @@ export const verifyTokenWithBridge = async (
 
   // 2. REAL AUTH LOOKUP
   try {
-    const user = await prisma.user.findUnique({
+    const account = await prisma.account.findUnique({
       where: { id: token },
       select: {
         id: true,
-        username: true,
-        role: true,
-        email: true,
+        connectionId: true,
+        displayName: true,
+        displayImage: true,
+        neupId: true,
+        status: true,
+        isVerified: true,
       },
     });
 
-    return user; // Returns BridgeUser | null cleanly
+    return account;
   } catch (error) {
     console.error("Auth token verification error:", error);
     return null;

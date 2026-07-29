@@ -28,7 +28,7 @@ export type ReactionMinAggregateOutputType = {
   id: string | null
   type: string | null
   createdAt: Date | null
-  userId: string | null
+  accountId: string | null
   articleId: string | null
 }
 
@@ -36,7 +36,7 @@ export type ReactionMaxAggregateOutputType = {
   id: string | null
   type: string | null
   createdAt: Date | null
-  userId: string | null
+  accountId: string | null
   articleId: string | null
 }
 
@@ -44,7 +44,7 @@ export type ReactionCountAggregateOutputType = {
   id: number
   type: number
   createdAt: number
-  userId: number
+  accountId: number
   articleId: number
   _all: number
 }
@@ -54,7 +54,7 @@ export type ReactionMinAggregateInputType = {
   id?: true
   type?: true
   createdAt?: true
-  userId?: true
+  accountId?: true
   articleId?: true
 }
 
@@ -62,7 +62,7 @@ export type ReactionMaxAggregateInputType = {
   id?: true
   type?: true
   createdAt?: true
-  userId?: true
+  accountId?: true
   articleId?: true
 }
 
@@ -70,7 +70,7 @@ export type ReactionCountAggregateInputType = {
   id?: true
   type?: true
   createdAt?: true
-  userId?: true
+  accountId?: true
   articleId?: true
   _all?: true
 }
@@ -151,7 +151,7 @@ export type ReactionGroupByOutputType = {
   id: string
   type: string
   createdAt: Date
-  userId: string
+  accountId: string
   articleId: string
   _count: ReactionCountAggregateOutputType | null
   _min: ReactionMinAggregateOutputType | null
@@ -180,9 +180,9 @@ export type ReactionWhereInput = {
   id?: Prisma.StringFilter<"Reaction"> | string
   type?: Prisma.StringFilter<"Reaction"> | string
   createdAt?: Prisma.DateTimeFilter<"Reaction"> | Date | string
-  userId?: Prisma.StringFilter<"Reaction"> | string
+  accountId?: Prisma.StringFilter<"Reaction"> | string
   articleId?: Prisma.StringFilter<"Reaction"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   article?: Prisma.XOR<Prisma.ArticleScalarRelationFilter, Prisma.ArticleWhereInput>
 }
 
@@ -190,31 +190,31 @@ export type ReactionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountId?: Prisma.SortOrder
   articleId?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
+  account?: Prisma.AccountOrderByWithRelationInput
   article?: Prisma.ArticleOrderByWithRelationInput
 }
 
 export type ReactionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId_articleId_type?: Prisma.ReactionUserIdArticleIdTypeCompoundUniqueInput
+  accountId_articleId_type?: Prisma.ReactionAccountIdArticleIdTypeCompoundUniqueInput
   AND?: Prisma.ReactionWhereInput | Prisma.ReactionWhereInput[]
   OR?: Prisma.ReactionWhereInput[]
   NOT?: Prisma.ReactionWhereInput | Prisma.ReactionWhereInput[]
   type?: Prisma.StringFilter<"Reaction"> | string
   createdAt?: Prisma.DateTimeFilter<"Reaction"> | Date | string
-  userId?: Prisma.StringFilter<"Reaction"> | string
+  accountId?: Prisma.StringFilter<"Reaction"> | string
   articleId?: Prisma.StringFilter<"Reaction"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   article?: Prisma.XOR<Prisma.ArticleScalarRelationFilter, Prisma.ArticleWhereInput>
-}, "id" | "userId_articleId_type">
+}, "id" | "accountId_articleId_type">
 
 export type ReactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountId?: Prisma.SortOrder
   articleId?: Prisma.SortOrder
   _count?: Prisma.ReactionCountOrderByAggregateInput
   _max?: Prisma.ReactionMaxOrderByAggregateInput
@@ -228,7 +228,7 @@ export type ReactionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Reaction"> | string
   type?: Prisma.StringWithAggregatesFilter<"Reaction"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Reaction"> | Date | string
-  userId?: Prisma.StringWithAggregatesFilter<"Reaction"> | string
+  accountId?: Prisma.StringWithAggregatesFilter<"Reaction"> | string
   articleId?: Prisma.StringWithAggregatesFilter<"Reaction"> | string
 }
 
@@ -236,7 +236,7 @@ export type ReactionCreateInput = {
   id?: string
   type?: string
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutReactionsInput
+  account: Prisma.AccountCreateNestedOneWithoutReactionsInput
   article: Prisma.ArticleCreateNestedOneWithoutReactionsInput
 }
 
@@ -244,7 +244,7 @@ export type ReactionUncheckedCreateInput = {
   id?: string
   type?: string
   createdAt?: Date | string
-  userId: string
+  accountId: string
   articleId: string
 }
 
@@ -252,7 +252,7 @@ export type ReactionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutReactionsNestedInput
+  account?: Prisma.AccountUpdateOneRequiredWithoutReactionsNestedInput
   article?: Prisma.ArticleUpdateOneRequiredWithoutReactionsNestedInput
 }
 
@@ -260,7 +260,7 @@ export type ReactionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
   articleId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -268,7 +268,7 @@ export type ReactionCreateManyInput = {
   id?: string
   type?: string
   createdAt?: Date | string
-  userId: string
+  accountId: string
   articleId: string
 }
 
@@ -282,7 +282,7 @@ export type ReactionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
   articleId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -296,8 +296,8 @@ export type ReactionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type ReactionUserIdArticleIdTypeCompoundUniqueInput = {
-  userId: string
+export type ReactionAccountIdArticleIdTypeCompoundUniqueInput = {
+  accountId: string
   articleId: string
   type: string
 }
@@ -306,7 +306,7 @@ export type ReactionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountId?: Prisma.SortOrder
   articleId?: Prisma.SortOrder
 }
 
@@ -314,7 +314,7 @@ export type ReactionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountId?: Prisma.SortOrder
   articleId?: Prisma.SortOrder
 }
 
@@ -322,49 +322,49 @@ export type ReactionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountId?: Prisma.SortOrder
   articleId?: Prisma.SortOrder
 }
 
-export type ReactionCreateNestedManyWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.ReactionCreateWithoutUserInput, Prisma.ReactionUncheckedCreateWithoutUserInput> | Prisma.ReactionCreateWithoutUserInput[] | Prisma.ReactionUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutUserInput | Prisma.ReactionCreateOrConnectWithoutUserInput[]
-  createMany?: Prisma.ReactionCreateManyUserInputEnvelope
+export type ReactionCreateNestedManyWithoutAccountInput = {
+  create?: Prisma.XOR<Prisma.ReactionCreateWithoutAccountInput, Prisma.ReactionUncheckedCreateWithoutAccountInput> | Prisma.ReactionCreateWithoutAccountInput[] | Prisma.ReactionUncheckedCreateWithoutAccountInput[]
+  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutAccountInput | Prisma.ReactionCreateOrConnectWithoutAccountInput[]
+  createMany?: Prisma.ReactionCreateManyAccountInputEnvelope
   connect?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
 }
 
-export type ReactionUncheckedCreateNestedManyWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.ReactionCreateWithoutUserInput, Prisma.ReactionUncheckedCreateWithoutUserInput> | Prisma.ReactionCreateWithoutUserInput[] | Prisma.ReactionUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutUserInput | Prisma.ReactionCreateOrConnectWithoutUserInput[]
-  createMany?: Prisma.ReactionCreateManyUserInputEnvelope
+export type ReactionUncheckedCreateNestedManyWithoutAccountInput = {
+  create?: Prisma.XOR<Prisma.ReactionCreateWithoutAccountInput, Prisma.ReactionUncheckedCreateWithoutAccountInput> | Prisma.ReactionCreateWithoutAccountInput[] | Prisma.ReactionUncheckedCreateWithoutAccountInput[]
+  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutAccountInput | Prisma.ReactionCreateOrConnectWithoutAccountInput[]
+  createMany?: Prisma.ReactionCreateManyAccountInputEnvelope
   connect?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
 }
 
-export type ReactionUpdateManyWithoutUserNestedInput = {
-  create?: Prisma.XOR<Prisma.ReactionCreateWithoutUserInput, Prisma.ReactionUncheckedCreateWithoutUserInput> | Prisma.ReactionCreateWithoutUserInput[] | Prisma.ReactionUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutUserInput | Prisma.ReactionCreateOrConnectWithoutUserInput[]
-  upsert?: Prisma.ReactionUpsertWithWhereUniqueWithoutUserInput | Prisma.ReactionUpsertWithWhereUniqueWithoutUserInput[]
-  createMany?: Prisma.ReactionCreateManyUserInputEnvelope
+export type ReactionUpdateManyWithoutAccountNestedInput = {
+  create?: Prisma.XOR<Prisma.ReactionCreateWithoutAccountInput, Prisma.ReactionUncheckedCreateWithoutAccountInput> | Prisma.ReactionCreateWithoutAccountInput[] | Prisma.ReactionUncheckedCreateWithoutAccountInput[]
+  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutAccountInput | Prisma.ReactionCreateOrConnectWithoutAccountInput[]
+  upsert?: Prisma.ReactionUpsertWithWhereUniqueWithoutAccountInput | Prisma.ReactionUpsertWithWhereUniqueWithoutAccountInput[]
+  createMany?: Prisma.ReactionCreateManyAccountInputEnvelope
   set?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
   disconnect?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
   delete?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
   connect?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
-  update?: Prisma.ReactionUpdateWithWhereUniqueWithoutUserInput | Prisma.ReactionUpdateWithWhereUniqueWithoutUserInput[]
-  updateMany?: Prisma.ReactionUpdateManyWithWhereWithoutUserInput | Prisma.ReactionUpdateManyWithWhereWithoutUserInput[]
+  update?: Prisma.ReactionUpdateWithWhereUniqueWithoutAccountInput | Prisma.ReactionUpdateWithWhereUniqueWithoutAccountInput[]
+  updateMany?: Prisma.ReactionUpdateManyWithWhereWithoutAccountInput | Prisma.ReactionUpdateManyWithWhereWithoutAccountInput[]
   deleteMany?: Prisma.ReactionScalarWhereInput | Prisma.ReactionScalarWhereInput[]
 }
 
-export type ReactionUncheckedUpdateManyWithoutUserNestedInput = {
-  create?: Prisma.XOR<Prisma.ReactionCreateWithoutUserInput, Prisma.ReactionUncheckedCreateWithoutUserInput> | Prisma.ReactionCreateWithoutUserInput[] | Prisma.ReactionUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutUserInput | Prisma.ReactionCreateOrConnectWithoutUserInput[]
-  upsert?: Prisma.ReactionUpsertWithWhereUniqueWithoutUserInput | Prisma.ReactionUpsertWithWhereUniqueWithoutUserInput[]
-  createMany?: Prisma.ReactionCreateManyUserInputEnvelope
+export type ReactionUncheckedUpdateManyWithoutAccountNestedInput = {
+  create?: Prisma.XOR<Prisma.ReactionCreateWithoutAccountInput, Prisma.ReactionUncheckedCreateWithoutAccountInput> | Prisma.ReactionCreateWithoutAccountInput[] | Prisma.ReactionUncheckedCreateWithoutAccountInput[]
+  connectOrCreate?: Prisma.ReactionCreateOrConnectWithoutAccountInput | Prisma.ReactionCreateOrConnectWithoutAccountInput[]
+  upsert?: Prisma.ReactionUpsertWithWhereUniqueWithoutAccountInput | Prisma.ReactionUpsertWithWhereUniqueWithoutAccountInput[]
+  createMany?: Prisma.ReactionCreateManyAccountInputEnvelope
   set?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
   disconnect?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
   delete?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
   connect?: Prisma.ReactionWhereUniqueInput | Prisma.ReactionWhereUniqueInput[]
-  update?: Prisma.ReactionUpdateWithWhereUniqueWithoutUserInput | Prisma.ReactionUpdateWithWhereUniqueWithoutUserInput[]
-  updateMany?: Prisma.ReactionUpdateManyWithWhereWithoutUserInput | Prisma.ReactionUpdateManyWithWhereWithoutUserInput[]
+  update?: Prisma.ReactionUpdateWithWhereUniqueWithoutAccountInput | Prisma.ReactionUpdateWithWhereUniqueWithoutAccountInput[]
+  updateMany?: Prisma.ReactionUpdateManyWithWhereWithoutAccountInput | Prisma.ReactionUpdateManyWithWhereWithoutAccountInput[]
   deleteMany?: Prisma.ReactionScalarWhereInput | Prisma.ReactionScalarWhereInput[]
 }
 
@@ -410,44 +410,44 @@ export type ReactionUncheckedUpdateManyWithoutArticleNestedInput = {
   deleteMany?: Prisma.ReactionScalarWhereInput | Prisma.ReactionScalarWhereInput[]
 }
 
-export type ReactionCreateWithoutUserInput = {
+export type ReactionCreateWithoutAccountInput = {
   id?: string
   type?: string
   createdAt?: Date | string
   article: Prisma.ArticleCreateNestedOneWithoutReactionsInput
 }
 
-export type ReactionUncheckedCreateWithoutUserInput = {
+export type ReactionUncheckedCreateWithoutAccountInput = {
   id?: string
   type?: string
   createdAt?: Date | string
   articleId: string
 }
 
-export type ReactionCreateOrConnectWithoutUserInput = {
+export type ReactionCreateOrConnectWithoutAccountInput = {
   where: Prisma.ReactionWhereUniqueInput
-  create: Prisma.XOR<Prisma.ReactionCreateWithoutUserInput, Prisma.ReactionUncheckedCreateWithoutUserInput>
+  create: Prisma.XOR<Prisma.ReactionCreateWithoutAccountInput, Prisma.ReactionUncheckedCreateWithoutAccountInput>
 }
 
-export type ReactionCreateManyUserInputEnvelope = {
-  data: Prisma.ReactionCreateManyUserInput | Prisma.ReactionCreateManyUserInput[]
+export type ReactionCreateManyAccountInputEnvelope = {
+  data: Prisma.ReactionCreateManyAccountInput | Prisma.ReactionCreateManyAccountInput[]
   skipDuplicates?: boolean
 }
 
-export type ReactionUpsertWithWhereUniqueWithoutUserInput = {
+export type ReactionUpsertWithWhereUniqueWithoutAccountInput = {
   where: Prisma.ReactionWhereUniqueInput
-  update: Prisma.XOR<Prisma.ReactionUpdateWithoutUserInput, Prisma.ReactionUncheckedUpdateWithoutUserInput>
-  create: Prisma.XOR<Prisma.ReactionCreateWithoutUserInput, Prisma.ReactionUncheckedCreateWithoutUserInput>
+  update: Prisma.XOR<Prisma.ReactionUpdateWithoutAccountInput, Prisma.ReactionUncheckedUpdateWithoutAccountInput>
+  create: Prisma.XOR<Prisma.ReactionCreateWithoutAccountInput, Prisma.ReactionUncheckedCreateWithoutAccountInput>
 }
 
-export type ReactionUpdateWithWhereUniqueWithoutUserInput = {
+export type ReactionUpdateWithWhereUniqueWithoutAccountInput = {
   where: Prisma.ReactionWhereUniqueInput
-  data: Prisma.XOR<Prisma.ReactionUpdateWithoutUserInput, Prisma.ReactionUncheckedUpdateWithoutUserInput>
+  data: Prisma.XOR<Prisma.ReactionUpdateWithoutAccountInput, Prisma.ReactionUncheckedUpdateWithoutAccountInput>
 }
 
-export type ReactionUpdateManyWithWhereWithoutUserInput = {
+export type ReactionUpdateManyWithWhereWithoutAccountInput = {
   where: Prisma.ReactionScalarWhereInput
-  data: Prisma.XOR<Prisma.ReactionUpdateManyMutationInput, Prisma.ReactionUncheckedUpdateManyWithoutUserInput>
+  data: Prisma.XOR<Prisma.ReactionUpdateManyMutationInput, Prisma.ReactionUncheckedUpdateManyWithoutAccountInput>
 }
 
 export type ReactionScalarWhereInput = {
@@ -457,7 +457,7 @@ export type ReactionScalarWhereInput = {
   id?: Prisma.StringFilter<"Reaction"> | string
   type?: Prisma.StringFilter<"Reaction"> | string
   createdAt?: Prisma.DateTimeFilter<"Reaction"> | Date | string
-  userId?: Prisma.StringFilter<"Reaction"> | string
+  accountId?: Prisma.StringFilter<"Reaction"> | string
   articleId?: Prisma.StringFilter<"Reaction"> | string
 }
 
@@ -465,14 +465,14 @@ export type ReactionCreateWithoutArticleInput = {
   id?: string
   type?: string
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutReactionsInput
+  account: Prisma.AccountCreateNestedOneWithoutReactionsInput
 }
 
 export type ReactionUncheckedCreateWithoutArticleInput = {
   id?: string
   type?: string
   createdAt?: Date | string
-  userId: string
+  accountId: string
 }
 
 export type ReactionCreateOrConnectWithoutArticleInput = {
@@ -501,28 +501,28 @@ export type ReactionUpdateManyWithWhereWithoutArticleInput = {
   data: Prisma.XOR<Prisma.ReactionUpdateManyMutationInput, Prisma.ReactionUncheckedUpdateManyWithoutArticleInput>
 }
 
-export type ReactionCreateManyUserInput = {
+export type ReactionCreateManyAccountInput = {
   id?: string
   type?: string
   createdAt?: Date | string
   articleId: string
 }
 
-export type ReactionUpdateWithoutUserInput = {
+export type ReactionUpdateWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   article?: Prisma.ArticleUpdateOneRequiredWithoutReactionsNestedInput
 }
 
-export type ReactionUncheckedUpdateWithoutUserInput = {
+export type ReactionUncheckedUpdateWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   articleId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
-export type ReactionUncheckedUpdateManyWithoutUserInput = {
+export type ReactionUncheckedUpdateManyWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -533,28 +533,28 @@ export type ReactionCreateManyArticleInput = {
   id?: string
   type?: string
   createdAt?: Date | string
-  userId: string
+  accountId: string
 }
 
 export type ReactionUpdateWithoutArticleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutReactionsNestedInput
+  account?: Prisma.AccountUpdateOneRequiredWithoutReactionsNestedInput
 }
 
 export type ReactionUncheckedUpdateWithoutArticleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ReactionUncheckedUpdateManyWithoutArticleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -563,9 +563,9 @@ export type ReactionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   type?: boolean
   createdAt?: boolean
-  userId?: boolean
+  accountId?: boolean
   articleId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   article?: boolean | Prisma.ArticleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reaction"]>
 
@@ -573,9 +573,9 @@ export type ReactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   type?: boolean
   createdAt?: boolean
-  userId?: boolean
+  accountId?: boolean
   articleId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   article?: boolean | Prisma.ArticleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reaction"]>
 
@@ -583,9 +583,9 @@ export type ReactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   type?: boolean
   createdAt?: boolean
-  userId?: boolean
+  accountId?: boolean
   articleId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   article?: boolean | Prisma.ArticleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reaction"]>
 
@@ -593,35 +593,35 @@ export type ReactionSelectScalar = {
   id?: boolean
   type?: boolean
   createdAt?: boolean
-  userId?: boolean
+  accountId?: boolean
   articleId?: boolean
 }
 
-export type ReactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "createdAt" | "userId" | "articleId", ExtArgs["result"]["reaction"]>
+export type ReactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "createdAt" | "accountId" | "articleId", ExtArgs["result"]["reaction"]>
 export type ReactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   article?: boolean | Prisma.ArticleDefaultArgs<ExtArgs>
 }
 export type ReactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   article?: boolean | Prisma.ArticleDefaultArgs<ExtArgs>
 }
 export type ReactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   article?: boolean | Prisma.ArticleDefaultArgs<ExtArgs>
 }
 
 export type $ReactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Reaction"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
+    account: Prisma.$AccountPayload<ExtArgs>
     article: Prisma.$ArticlePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     type: string
     createdAt: Date
-    userId: string
+    accountId: string
     articleId: string
   }, ExtArgs["result"]["reaction"]>
   composites: {}
@@ -1017,7 +1017,7 @@ readonly fields: ReactionFieldRefs;
  */
 export interface Prisma__ReactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   article<T extends Prisma.ArticleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ArticleDefaultArgs<ExtArgs>>): Prisma.Prisma__ArticleClient<runtime.Types.Result.GetResult<Prisma.$ArticlePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1051,7 +1051,7 @@ export interface ReactionFieldRefs {
   readonly id: Prisma.FieldRef<"Reaction", 'String'>
   readonly type: Prisma.FieldRef<"Reaction", 'String'>
   readonly createdAt: Prisma.FieldRef<"Reaction", 'DateTime'>
-  readonly userId: Prisma.FieldRef<"Reaction", 'String'>
+  readonly accountId: Prisma.FieldRef<"Reaction", 'String'>
   readonly articleId: Prisma.FieldRef<"Reaction", 'String'>
 }
     

@@ -69,7 +69,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
     redirect('/compose');
   }
 
-  const canEdit = article.authorId === user.id || user.role === 'ADMIN';
+  const canEdit = article.authorId === user.id || user.status === 'ADMIN';
 
   if (!canEdit) {
     redirect('/unauthorized');

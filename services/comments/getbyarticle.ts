@@ -20,7 +20,7 @@ export async function getCommentsByArticle(articleId: string) {
     where: { articleId },
     include: {
       author: {
-        select: { id: true, username: true, email: true, role: true },
+        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
       },
     },
     orderBy: { createdAt: 'desc' },

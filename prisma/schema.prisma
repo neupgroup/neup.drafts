@@ -13,18 +13,22 @@ datasource db {
 }
 
 //Core data models 
-model User {
-  id        String   @id @default(cuid())
-  username  String                        // Display Name (can be non-unique)
-  email     String   @unique              // Unique key used for logins/auth
-  password  String
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Account {
+  id           String   @id @default(cuid())
+  connectionId String   @unique
+  displayName  String
+  displayImage String?
+  neupId       String   @unique
+  status       String   @default("ACTIVE")
+  isVerified   Boolean  @default(false)
+  details      Json?
+  createdAt    DateTime @default(now())
 
   articles  Article[]
   comments  Comment[]
   reactions Reaction[]
+
+  @@map("account")
 }
 
 model Article {
@@ -38,7 +42,7 @@ model Article {
 
   // Relationships
   authorId  String
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    Account   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   comments  Comment[] // Maps to post.comments in <CommentSection />
   reactions Reaction[]
 }
@@ -51,7 +55,7 @@ model Comment {
 
   // Relationships
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    Account  @relation(fields: [authorId], references: [id], onDelete: Cascade)
   articleId String
   article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
@@ -62,12 +66,10 @@ model Reaction {
   createdAt DateTime @default(now())
 
   // Relationships
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
   articleId String
   article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, articleId, type])
+  @@unique([accountId, articleId, type])
 }
-
-

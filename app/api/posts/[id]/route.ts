@@ -73,7 +73,7 @@ export const PATCH = withAuth(
       }
 
       const isOwner = post.authorId === context.user.id;
-      const isAdmin = context.user.role === 'ADMIN';
+      const isAdmin = context.user.status === 'ADMIN';
 
       if (!isOwner && !isAdmin) {
         return NextResponse.json(
@@ -119,7 +119,7 @@ export const DELETE = withAuth(
 
       // 2. Ownership check using unique user IDs (not display names)
       const isOwner = post.authorId === context.user.id;
-      const isAdmin = context.user.role === 'ADMIN';
+      const isAdmin = context.user.status === 'ADMIN';
 
       if (!isOwner && !isAdmin) {
         return NextResponse.json(
@@ -136,7 +136,7 @@ export const DELETE = withAuth(
       return NextResponse.json(
         {
           message: "Post deleted successfully",
-          deletedBy: context.user.username,
+          deletedBy: context.user.neupId,
         },
         { status: 200 }
       );

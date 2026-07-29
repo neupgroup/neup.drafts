@@ -4,18 +4,12 @@ import HeaderV1S1 from '@/components/header.v1s1';
 import TranslationWidget from '@/components/TranslationWidget';
 
 // Define the shape of the user object returned by your mock auth
-interface BridgeUser {
-  username: string;
-  id: string;
-  email?: string;
-}
-
 export default async function TranslationPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
   
   // Trigger your mock auth check on the server
-  const user: BridgeUser | null = token ? await verifyTokenWithBridge(token) : null;
+  const user = token ? await verifyTokenWithBridge(token) : null;
 
   // Security Gatekeeper: Block users who aren't logged in
   if (!user) {
@@ -43,7 +37,7 @@ export default async function TranslationPage() {
           </p>
           <h1 className="mt-3 text-3xl font-medium tracking-tight text-slate-950">Translation Tools</h1>
           <p className="mt-2 text-sm text-slate-600">
-            Authenticated as <span className="font-medium text-slate-950">@{user.username}</span>
+            Authenticated as <span className="font-medium text-slate-950">@{user.neupId}</span>
           </p>
         </div>
 

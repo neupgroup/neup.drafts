@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/inapp/lib/prisma';
 import { createTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
+import { Prisma } from '@/inapp/lib/prisma';
+
+function getStoredPassword(details: Prisma.JsonValue): string | null {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return null;
+  }
+
+  const password = details.password;
+  return typeof password === 'string' ? password : null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,50 +26,40 @@ export async function POST(req: NextRequest) {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Fetch user from PostgreSQL
-    const user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
+    const account = await prisma.account.findUnique({
+      where: { connectionId: cleanEmail },
       select: {
         id: true,
-        email: true,
-        username: true,
-        role: true,
-        password: true,
+        connectionId: true,
+        displayName: true,
+        displayImage: true,
+        neupId: true,
+        status: true,
+        isVerified: true,
+        details: true,
       },
     });
 
-    if (!user) {
+    if (!account) {
       return NextResponse.json(
         { error: 'Invalid email or password.' },
         { status: 401 }
       );
     }
 
-    // 2. Dev Password Check (Switch to bcrypt before production)
-    if (user.password !== password) {
+    if (getStoredPassword(account.details) !== password) {
       return NextResponse.json(
         { error: 'Invalid email or password.' },
         { status: 401 }
       );
     }
 
-    // 3. Generate token via Bridge Auth Service
-    const token = await createTokenWithBridge({
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      role: user.role || 'user',
-    });
+    const { details, ...safeAccount } = account;
+    const token = await createTokenWithBridge(safeAccount);
 
-    // 4. Attach cookie & return JSON response
     const response = NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-      },
+      user: safeAccount,
     });
 
     response.cookies.set('auth_token', token, {

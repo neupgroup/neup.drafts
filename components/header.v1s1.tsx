@@ -7,17 +7,17 @@ interface HeaderV1S1Props {
   user: {
     displayImage?: string | null;
     name?: string | null;
-    username?: string | null;
-    email?: string | null;
+    displayName?: string | null;
+    neupId?: string | null;
   } | null;
 }
 
 export default function HeaderV1S1({ user }: HeaderV1S1Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const userName = user
-    ? user.name || user.username || user.email?.split('@')[0] || 'User'
+    ? user.name || user.displayName || user.neupId || 'User'
     : '';
-  const username = user?.username || user?.email?.split('@')[0] || 'user';
+  const neupId = user?.neupId || 'user';
   const userInitial = userName.charAt(0).toUpperCase();
   const navLinkClassName =
     'rounded-xl px-4 py-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950';
@@ -61,7 +61,7 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                     {userName}
                   </span>
                   <span className="max-w-[11rem] truncate pt-0.5 text-[13px] font-medium text-slate-400">
-                    @{username}
+                    @{neupId}
                   </span>
                 </div>
                 {user?.displayImage ? (
@@ -158,7 +158,7 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                 )}
                 <div className="min-w-0">
                   <p className="truncate text-base font-medium text-slate-950">{userName}</p>
-                  <p className="truncate pt-1 text-sm font-medium text-slate-400">@{username}</p>
+                  <p className="truncate pt-1 text-sm font-medium text-slate-400">@{neupId}</p>
                 </div>
               </Link>
             ) : null}

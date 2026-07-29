@@ -66,7 +66,7 @@ export default async function ManageOverviewPage() {
   const posts = await getManagedArticlePosts(user.id);
   const totalReactions = posts.reduce((sum, post) => sum + post.reactions.length, 0);
   const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
-  const displayName = user.username || user.email.split('@')[0];
+  const displayName = user.displayName || user.neupId;
   const recentPosts = posts.slice(0, 5);
 
   return (

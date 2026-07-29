@@ -127,7 +127,7 @@ export default async function ManageArticleDetailPage(
                     <article key={comment.id} className="px-5 py-4">
                       <div className="flex items-center justify-between gap-4 text-sm">
                         <span className="font-medium text-slate-900">
-                          @{comment.author.username || comment.author.email?.split('@')[0] || 'anonymous'}
+                          @{comment.author.neupId || comment.author.displayName || 'anonymous'}
                         </span>
                         <span className="text-slate-400">{formatDate(comment.createdAt)}</span>
                       </div>
@@ -160,7 +160,7 @@ export default async function ManageArticleDetailPage(
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-slate-500">Author</dt>
                   <dd className="text-slate-700">
-                    @{post.author.username || post.author.email?.split('@')[0] || 'anonymous'}
+                    @{post.author.neupId || post.author.displayName || 'anonymous'}
                   </dd>
                 </div>
               </dl>
@@ -181,7 +181,7 @@ export default async function ManageArticleDetailPage(
                     <article key={reaction.id} className="flex items-center justify-between gap-4 px-5 py-4 text-sm">
                       <div>
                         <p className="font-medium text-slate-900">
-                          @{reaction.user.username || reaction.user.email?.split('@')[0] || 'anonymous'}
+                          @{reaction.account.neupId || reaction.account.displayName || 'anonymous'}
                         </p>
                         <p className="mt-1 uppercase tracking-[0.14em] text-slate-400">
                           {reaction.type}

@@ -31,7 +31,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
       where: { articleId: articleId },
       include: {
         author: {
-          select: { id: true, username: true, role: true }, // <--- Included 'id' here for safe UI profile routing
+          select: { id: true, displayName: true, neupId: true, status: true }, // <--- Included 'id' here for safe UI profile routing
         },
       },
       orderBy: { createdAt: 'desc' }, // Displays newest comments first

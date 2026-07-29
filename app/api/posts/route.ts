@@ -86,7 +86,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
       },
       include: {
         author: {
-          select: { id: true, username: true, role: true },
+          select: { id: true, displayName: true, neupId: true, status: true },
         },
       },
     });

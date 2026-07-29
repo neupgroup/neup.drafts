@@ -351,10 +351,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     redirect(`/article/${canonicalSlug}`);
   }
 
-  // Format author display name safely (handles strings, objects, and email fallbacks)
   const authorDisplayName =
     typeof post.author === 'object' && post.author !== null
-      ? post.author.username || post.author.email?.split('@')[0]
+      ? post.author.neupId || post.author.displayName
       : post.author;
 
   const commentsCount = post.comments?.length ?? 0;

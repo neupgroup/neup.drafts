@@ -36,12 +36,12 @@ export async function getArticleBySlugOrId(slug: string) {
     },
     include: {
       author: {
-        select: { id: true, username: true, email: true, role: true },
+        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
       },
       comments: {
         include: {
           author: {
-            select: { id: true, username: true, email: true },
+            select: { id: true, displayName: true, displayImage: true, neupId: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -60,7 +60,7 @@ export async function getArticleFeed() {
     orderBy: { createdAt: 'desc' },
     include: {
       author: {
-        select: { id: true, username: true, email: true, role: true },
+        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
       },
       _count: {
         select: {
@@ -96,20 +96,20 @@ export async function getManagedArticleBySlug(authorId: string, slug: string) {
     },
     include: {
       author: {
-        select: { id: true, username: true, email: true, role: true },
+        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
       },
       comments: {
         include: {
           author: {
-            select: { id: true, username: true, email: true },
+            select: { id: true, displayName: true, displayImage: true, neupId: true },
           },
         },
         orderBy: { createdAt: 'desc' },
       },
       reactions: {
         include: {
-          user: {
-            select: { id: true, username: true, email: true },
+          account: {
+            select: { id: true, displayName: true, displayImage: true, neupId: true },
           },
         },
         orderBy: { createdAt: 'desc' },

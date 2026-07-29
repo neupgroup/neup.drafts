@@ -8,9 +8,9 @@ interface ReactionButtonProps {
   initialLikes: number;
   currentUser?: {
     id: string;
-    username: string;
-    email: string;
-    role: string;
+    displayName: string;
+    neupId: string;
+    status: string;
   } | null;
 }
 

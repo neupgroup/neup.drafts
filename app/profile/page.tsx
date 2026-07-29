@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma'; 
-import { Prisma } from '@/prisma/client';
+import { Prisma } from '@/prisma/client/client';
 import HeaderV1S1 from '@/components/header.v1s1';
 import SidebarNav, { getSharedSidebarSections } from '@/components/SidebarNav';
 
@@ -54,12 +54,11 @@ function getPostExcerpt(content: string): string {
   return `${normalizedContent.slice(0, 157)}...`;
 }
 
-// 1. Fetch user articles directly from PostgreSQL via user ID (from verified Token)
-async function getUserPosts(userId: string): Promise<ArticleWithRelations[]> {
+async function getAccountPosts(accountId: string): Promise<ArticleWithRelations[]> {
   try {
-    const userPosts = await prisma.article.findMany({
+    const accountPosts = await prisma.article.findMany({
       where: {
-        authorId: userId, // Match using the ID extracted directly from the verified token
+        authorId: accountId,
       },
       include: {
         comments: true,
@@ -70,7 +69,7 @@ async function getUserPosts(userId: string): Promise<ArticleWithRelations[]> {
       },
     });
 
-    return userPosts;
+    return accountPosts;
   } catch (error) {
     console.error("Failed loading user publications:", error);
     return [];
@@ -81,7 +80,6 @@ export default async function AccountPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
 
-  // 2. Decode & verify token to get logged-in user details
   const user = token ? await verifyTokenWithBridge(token) : null;
 
   if (!user) {
@@ -100,9 +98,8 @@ export default async function AccountPage() {
     );
   }
 
-  // 3. Fetch posts safely using the ID embedded in the decoded token
-  const myPosts = await getUserPosts(user.id);
-  const displayName = user.username || user.email.split('@')[0];
+  const myPosts = await getAccountPosts(user.id);
+  const displayName = user.displayName || user.neupId;
   const totalReactions = myPosts.reduce((sum, post) => sum + post.reactions.length, 0);
   const totalComments = myPosts.reduce((sum, post) => sum + post.comments.length, 0);
 

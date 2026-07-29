@@ -6,7 +6,7 @@ import Link from 'next/link';
 import HeaderV1S1 from '@/components/header.v1s1';
 
 export default function SignUpPage() {
-  const [username, setUsername] = useState('');
+  const [neupId, setNeupId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +22,7 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ neupId, email, password }),
       });
 
       const data = await res.json();
@@ -69,13 +69,13 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-blue-600">
-                Username
+                Neup ID
               </label>
               <input
                 type="text"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={neupId}
+                onChange={(e) => setNeupId(e.target.value)}
                 placeholder="johndoe"
                 className="h-11 w-full border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500"
               />
