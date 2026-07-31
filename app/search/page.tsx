@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma';
-import { Prisma } from '@/app/generated/prisma/client';
+import { Prisma } from '@/core/database/prisma';
 import HeaderV1S1 from '@/components/header.v1s1';
 
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -189,7 +189,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             ) : (
               <div className="divide-y divide-slate-200">
                 {searchResults.map((post) => {
-                  const authorName = post.author?.username || 'Anonymous';
+                  const authorName = post.author?.neupId || post.author?.displayName || 'Anonymous';
                   return (
                     <article key={post.id} className="py-8">
                       <div className="flex items-center gap-3 text-sm text-slate-500 mb-3">

@@ -17,10 +17,10 @@ import type * as Prisma from "./prismaNamespace"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.8.0",
-  "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
+  "clientVersion": "7.9.1",
+  "engineVersion": "e922089b7d7502aff4249d5da3420f6fa55fc6ad",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Get a free hosted Postgres database in seconds: `npx create-db`\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\n//Core data models \nmodel Account {\n  id           String   @id @default(cuid())\n  connectionId String   @unique\n  displayName  String\n  displayImage String?\n  neupId       String   @unique\n  status       String   @default(\"ACTIVE\")\n  isVerified   Boolean  @default(false)\n  details      Json?\n  createdAt    DateTime @default(now())\n\n  articles  Article[]\n  comments  Comment[]\n  reactions Reaction[]\n\n  @@map(\"account\")\n}\n\nmodel Article {\n  id        String   @id @default(cuid()) // Maps to post.id\n  title     String // Maps to post.title\n  slug      String   @unique\n  content   String   @db.Text\n  likes     Int      @default(0) // Maps to post.likes / initialLikes\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relationships\n  authorId  String\n  author    Account    @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  comments  Comment[] // Maps to post.comments in <CommentSection />\n  reactions Reaction[]\n}\n\nmodel Comment {\n  id        String   @id @default(cuid())\n  content   String   @db.Text\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relationships\n  authorId  String\n  author    Account @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  articleId String\n  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)\n}\n\nmodel Reaction {\n  id        String   @id @default(cuid())\n  type      String   @default(\"LIKE\")\n  createdAt DateTime @default(now())\n\n  // Relationships\n  accountId String\n  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)\n  articleId String\n  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)\n\n  @@unique([accountId, articleId, type])\n}\n",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Get a free hosted Postgres database in seconds: `npx create-db`\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"./client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\n//Core data models \nmodel Account {\n  id           String   @id @default(cuid())\n  connectionId String   @unique\n  displayName  String\n  displayImage String?\n  neupId       String   @unique\n  status       String   @default(\"ACTIVE\")\n  isVerified   Boolean  @default(false)\n  details      Json?\n  createdAt    DateTime @default(now())\n\n  articles  Article[]\n  comments  Comment[]\n  reactions Reaction[]\n\n  @@map(\"account\")\n}\n\nmodel Article {\n  id        String   @id @default(cuid()) // Maps to post.id\n  title     String // Maps to post.title\n  slug      String   @unique\n  content   String   @db.Text\n  likes     Int      @default(0) // Maps to post.likes / initialLikes\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relationships\n  authorId  String\n  author    Account    @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  comments  Comment[] // Maps to post.comments in <CommentSection />\n  reactions Reaction[]\n}\n\nmodel Comment {\n  id        String   @id @default(cuid())\n  content   String   @db.Text\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relationships\n  authorId  String\n  author    Account @relation(fields: [authorId], references: [id], onDelete: Cascade)\n  articleId String\n  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)\n}\n\nmodel Reaction {\n  id        String   @id @default(cuid())\n  type      String   @default(\"LIKE\")\n  createdAt DateTime @default(now())\n\n  // Relationships\n  accountId String\n  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)\n  articleId String\n  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)\n\n  @@unique([accountId, articleId, type])\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -82,7 +82,7 @@ export interface PrismaClientConstructor {
     LogOpts extends LogOptions<Options> = LogOptions<Options>,
     OmitOpts extends Prisma.PrismaClientOptions['omit'] = Options extends { omit: infer U } ? U : Prisma.PrismaClientOptions['omit'],
     ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
-  >(options: Prisma.Subset<Options, Prisma.PrismaClientOptions> ): PrismaClient<LogOpts, OmitOpts, ExtArgs>
+  >(options: Prisma.PrismaClientConstructorArgs<Options>): PrismaClient<LogOpts, OmitOpts, ExtArgs>
 }
 
 /**
@@ -103,7 +103,7 @@ export interface PrismaClientConstructor {
 
 export interface PrismaClient<
   in LogOpts extends Prisma.LogLevel = never,
-  in out OmitOpts extends Prisma.PrismaClientOptions['omit'] = undefined,
+  in out OmitOpts extends Prisma.PrismaClientOptions['omit'] = Prisma.PrismaClientOptions['omit'],
   in out ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
