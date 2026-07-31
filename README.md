@@ -122,7 +122,7 @@ Run the local server with hot module reloading (HMR):
 
 ```bash
 npm run dev
-Open http://localhost:3000 in your browser to view the application.
+Open http://localhost:3723 in your browser to view the application.
 
 ### 4. Database Management (Prisma Studio)
 To visually inspect or edit records directly in your database:
