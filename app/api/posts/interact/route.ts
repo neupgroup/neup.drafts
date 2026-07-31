@@ -1,4 +1,3 @@
-// app/api/posts/interact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
 import { prisma } from '@/inapp/lib/prisma';

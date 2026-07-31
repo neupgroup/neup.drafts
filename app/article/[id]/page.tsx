@@ -292,7 +292,7 @@ function sanitizeArticleHtml(content: string): string {
 // 1. Fetch data from internal API route
 async function getPostFromApi(id: string, token: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3723';
     const res = await fetch(`${baseUrl}/api/posts/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
