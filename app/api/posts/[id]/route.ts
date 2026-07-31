@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
 import { prisma } from '@/inapp/lib/prisma';
+import {
+  getArticleBySlugOrId,
+  getArticleLookupFromSlug,
+  getArticleOwnershipBySlugOrId,
+} from '@/services/articles/articles';
 
 function getArticleLookupFromUrl(req: NextRequest): { id: string; slug: string } {
   const url = new URL(req.url);
   const pathSegments = url.pathname.split('/');
-  const articleSegment = pathSegments[pathSegments.length - 1];
-  const articleSegmentParts = articleSegment.split('-');
-  return {
-    id: articleSegmentParts[articleSegmentParts.length - 1] || articleSegment,
-    slug: articleSegment,
-  };
+  return getArticleLookupFromSlug(pathSegments[pathSegments.length - 1] || '');
+}
+
+function normalizeArticleContent(content: string): string {
+  return content.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
 }
 
 // PROTECTED: Only authenticated users can view a single post
@@ -19,28 +23,7 @@ export const GET = withAuth(
     try {
       const articleLookup = getArticleLookupFromUrl(req);
 
-      // Fetch article from Prisma by CUID String
-      const post = await prisma.article.findFirst({
-        where: {
-          OR: [
-            { id: articleLookup.id },
-            { slug: articleLookup.slug },
-          ],
-        },
-        include: {
-          author: {
-            select: { id: true, username: true, role: true }, // Include unique 'id' for profile links!
-          },
-          comments: {
-            include: {
-              author: {
-                select: { id: true, username: true },
-              },
-            },
-            orderBy: { createdAt: 'desc' },
-          },
-        },
-      });
+      const post = await getArticleBySlugOrId(articleLookup.slug);
 
       if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -77,28 +60,20 @@ export const PATCH = withAuth(
       }
 
       const nextTitle = title.trim();
-      const nextContent = content.trim();
+      const nextContent = normalizeArticleContent(content).trim();
 
       if (!nextTitle || !nextContent) {
         return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
       }
 
-      const post = await prisma.article.findFirst({
-        where: {
-          OR: [
-            { id: articleLookup.id },
-            { slug: articleLookup.slug },
-          ],
-        },
-        select: { id: true, authorId: true },
-      });
+      const post = await getArticleOwnershipBySlugOrId(articleLookup.slug);
 
       if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
       }
 
       const isOwner = post.authorId === context.user.id;
-      const isAdmin = context.user.role === 'ADMIN';
+      const isAdmin = context.user.status === 'ADMIN';
 
       if (!isOwner && !isAdmin) {
         return NextResponse.json(
@@ -136,15 +111,7 @@ export const DELETE = withAuth(
       const articleLookup = getArticleLookupFromUrl(req);
 
       // 1. Find the target article first to check ownership
-      const post = await prisma.article.findFirst({
-        where: {
-          OR: [
-            { id: articleLookup.id },
-            { slug: articleLookup.slug },
-          ],
-        },
-        select: { id: true, authorId: true },
-      });
+      const post = await getArticleOwnershipBySlugOrId(articleLookup.slug);
 
       if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -152,7 +119,7 @@ export const DELETE = withAuth(
 
       // 2. Ownership check using unique user IDs (not display names)
       const isOwner = post.authorId === context.user.id;
-      const isAdmin = context.user.role === 'ADMIN';
+      const isAdmin = context.user.status === 'ADMIN';
 
       if (!isOwner && !isAdmin) {
         return NextResponse.json(
@@ -169,7 +136,7 @@ export const DELETE = withAuth(
       return NextResponse.json(
         {
           message: "Post deleted successfully",
-          deletedBy: context.user.username,
+          deletedBy: context.user.neupId,
         },
         { status: 200 }
       );

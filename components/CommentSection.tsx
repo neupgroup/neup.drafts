@@ -4,9 +4,9 @@ import { useState, SyntheticEvent } from 'react';
 
 interface CommentAuthor {
   id: string;
-  username?: string | null;
-  email?: string | null;
-  role?: string;
+  displayName?: string | null;
+  neupId?: string | null;
+  status?: string;
 }
 
 interface Comment {
@@ -21,9 +21,9 @@ interface CommentSectionProps {
   comments: Comment[];
   currentUser?: {
     id: string;
-    username: string;
-    email: string;
-    role: string;
+    displayName: string;
+    neupId: string;
+    status: string;
   } | null;
 }
 
@@ -38,7 +38,7 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
     setError('');
 
     // Check if user is logged in before allowing the post
-    if (!currentUser || !currentUser.username) {
+    if (!currentUser || !currentUser.neupId) {
       setError('Could not post comment: are you logged in?');
       return;
     }
@@ -70,7 +70,7 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
 
   const getAuthorName = (comment: Comment) => {
     if (typeof comment.author === 'string') return comment.author;
-    return comment.author?.username || comment.author?.email?.split('@')[0] || 'Anonymous';
+    return comment.author?.neupId || comment.author?.displayName || 'Anonymous';
   };
 
   const getCommentBody = (comment: Comment) => {
@@ -95,7 +95,7 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
         <form onSubmit={handlePostComment} className="mb-8 grid gap-3 sm:grid-cols-[1fr_auto]">
           <input
             type="text"
-            placeholder={`Comment as @${currentUser.username}...`}
+            placeholder={`Comment as @${currentUser.neupId}...`}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             className="h-11 min-w-0 border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 placeholder:text-slate-400 outline-none transition-colors focus:border-blue-400"

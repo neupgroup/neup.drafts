@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
 import { prisma } from '@/inapp/lib/prisma';
+import { getArticleFeed } from '@/services/articles/articles';
 
 const ARTICLE_ID_PATTERN = /^[a-z0-9]{8,32}$/;
 
@@ -23,6 +24,10 @@ function buildArticleSlug(slug: string, id: string): string {
   return baseSlug ? `${baseSlug}-${id}` : '';
 }
 
+function normalizeArticleContent(content: string): string {
+  return content.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
+}
+
 function isUniqueConstraintError(error: unknown): boolean {
   return (
     typeof error === 'object' &&
@@ -35,20 +40,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 // PUBLIC: Anyone can send a GET request here to read posts feed
 export async function GET() {
   try {
-    const posts = await prisma.article.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        author: {
-          select: { id: true, username: true, email: true, role: true }, // Select 'id' for routing
-        },
-        _count: {
-          select: {
-            comments: true,
-            reactions: true,
-          },
-        },
-      },
-    });
+    const posts = await getArticleFeed();
 
     return NextResponse.json({ posts });
   } catch (error) {
@@ -62,15 +54,22 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
     const { title, content, slug, articleId } = await req.json();
 
-    if (!title || !content) {
+    if (typeof title !== 'string' || typeof content !== 'string') {
       return NextResponse.json({ error: 'Missing title or content' }, { status: 400 });
+    }
+
+    const nextTitle = title.trim();
+    const normalizedContent = normalizeArticleContent(content).trim();
+
+    if (!nextTitle || !normalizedContent) {
+      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }
 
     const id =
       typeof articleId === 'string' && ARTICLE_ID_PATTERN.test(articleId)
         ? articleId
         : createArticleId();
-    const finalSlug = buildArticleSlug(slug || title, id);
+    const finalSlug = buildArticleSlug(typeof slug === 'string' ? slug : nextTitle, id);
 
     if (!finalSlug) {
       return NextResponse.json({ error: 'Title must contain letters or numbers' }, { status: 400 });
@@ -80,14 +79,14 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
     const newPost = await prisma.article.create({
       data: {
         id,
-        title,
-        content,
+        title: nextTitle,
+        content: normalizedContent,
         slug: finalSlug,
         authorId: context.user.id, // Connects directly via unique CUID
       },
       include: {
         author: {
-          select: { id: true, username: true, role: true },
+          select: { id: true, displayName: true, neupId: true, status: true },
         },
       },
     });

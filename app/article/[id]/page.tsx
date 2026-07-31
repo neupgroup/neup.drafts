@@ -2,14 +2,10 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
+import { getArticleBySlugOrId } from '@/services/articles/articles';
 import { ReactionButton } from '@/components/ReactionButton';
 import { CommentSection } from '@/components/CommentSection';
 import HeaderV1S1 from '@/components/header.v1s1';
-
-function getArticleIdFromSlug(slug: string): string {
-  const slugParts = slug.split('-');
-  return slugParts[slugParts.length - 1] || slug;
-}
 
 function getCanonicalArticleSlug(post: { id: string; slug?: string | null }): string {
   if (!post.slug) {
@@ -108,14 +104,14 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'data-editor-block' && ['aside', 'figure', 'div'].includes(tagName)) {
+    if (attributeName === 'data-editor-block' && ['aside', 'div', 'figure', 'ol', 'ul'].includes(tagName)) {
       allowedAttributes.push(`data-editor-block="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
     }
 
     if (
       attributeName.startsWith('data-') &&
-      ['aside', 'div', 'figure', 'h2', 'h3', 'p'].includes(tagName)
+      ['aside', 'div', 'figure', 'h2', 'h3', 'li', 'ol', 'p', 'ul'].includes(tagName)
     ) {
       allowedAttributes.push(`${attributeName}="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
@@ -251,7 +247,9 @@ function sanitizeArticleHtml(content: string): string {
     'i',
     'iframe',
     'img',
+    'li',
     'mark',
+    'ol',
     'p',
     'strong',
     'table',
@@ -261,10 +259,13 @@ function sanitizeArticleHtml(content: string): string {
     'track',
     'tr',
     'u',
+    'ul',
     'video',
   ]);
 
   return content
+    .replace(/<h1(\s[^>]*)?>/gi, '<h2$1>')
+    .replace(/<\/h1\s*>/gi, '</h2>')
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     .replace(/<style\b[\s\S]*?<\/style>/gi, '')
     .replace(/<button\b[\s\S]*?<\/button>/gi, '')
@@ -289,30 +290,17 @@ function sanitizeArticleHtml(content: string): string {
     });
 }
 
-// 1. Fetch data from internal API route
-async function getPostFromApi(id: string, token: string) {
+async function getPost(id: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3723';
-    const res = await fetch(`${baseUrl}/api/posts/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: 'no-store', // Always get fresh reactions & comments
-    });
-
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    return data.post;
+    return await getArticleBySlugOrId(id);
   } catch (error) {
-    console.error("API fetch failed for article:", error);
+    console.error("Article fetch failed:", error);
     return null;
   }
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: slug } = await params;
-  const articleId = getArticleIdFromSlug(slug);
 
   // Native Server-side Auth verification via Cookie Token
   const cookieStore = await cookies();
@@ -328,8 +316,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     redirect('/unauthorized'); // Kicks unauthenticated users out
   }
 
-  // 2. Fetch post payload from API
-  const post = await getPostFromApi(articleId, token);
+  const post = await getPost(slug);
 
   // Fallback if article is not found
   if (!post) {
@@ -364,14 +351,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     redirect(`/article/${canonicalSlug}`);
   }
 
-  // Format author display name safely (handles strings, objects, and email fallbacks)
   const authorDisplayName =
     typeof post.author === 'object' && post.author !== null
-      ? post.author.username || post.author.email?.split('@')[0]
+      ? post.author.neupId || post.author.displayName
       : post.author;
 
   const commentsCount = post.comments?.length ?? 0;
-  const likesCount = post.likes ?? post.reactions?.length ?? 0;
+  const likesCount = post._count?.reactions ?? post.likes ?? 0;
   const hasHtmlContent = isHtmlContent(post.content);
   const contentBlocks = getContentBlocks(post.content);
   const articleHtml = hasHtmlContent ? sanitizeArticleHtml(post.content) : '';

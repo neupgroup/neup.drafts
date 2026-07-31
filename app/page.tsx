@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
+import { getArticleFeed } from '@/services/articles/articles';
 import HeaderV1S1 from '@/components/header.v1s1';
 
 interface Author {
   id: string;
-  username?: string | null;
-  email?: string;
-  role?: string;
+  displayName?: string | null;
+  neupId?: string | null;
+  status?: string;
 }
 
 interface Post {
@@ -38,13 +39,9 @@ function stripHtml(html: string): string {
 
 async function getAllPosts(): Promise<Post[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3723';
-    const res = await fetch(`${baseUrl}/api/posts`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.posts || [];
+    return await getArticleFeed();
   } catch (error) {
-    console.error("Failed to fetch posts:", error);
+    console.error("Failed to load posts:", error);
     return [];
   }
 }
@@ -82,23 +79,23 @@ export default async function HomePage() {
             {posts.length === 0 ? (
               <p className="text-slate-500 italic py-8">No articles found in the database.</p>
             ) : (
-              <div className="space-y-12">
-                {posts.map((post) => {
-                  const authorName =
-                    typeof post.author === 'object' && post.author !== null
-                      ? post.author.username || post.author.email?.split('@')[0]
-                      : post.author || 'Anonymous';
+            <div className="space-y-12">
+            {posts.map((post) => {
+              const authorName =
+              typeof post.author === 'object' && post.author !== null
+              ? post.author.neupId || post.author.displayName || 'Anonymous'
+              : post.author || 'Anonymous';
 
-                  const likesCount =
-                    post.likes ??
-                    post._count?.reactions ??
-                    post.reactions?.length ??
-                    0;
+                const likesCount =
+                  post._count?.reactions ??
+                  post.likes ??
+                  post.reactions?.length ??
+                  0;
 
-                  const commentsCount =
-                    post._count?.comments ??
-                    post.comments?.length ??
-                    0;
+                const commentsCount =
+                  post._count?.comments ??
+                  post.comments?.length ??
+                  0;
 
                   return (
                     <article key={post.id} className="group relative space-y-3">
@@ -174,7 +171,7 @@ export default async function HomePage() {
               /* Quick Profile/Welcome Card for Logged-In Users */
               <div className="border border-slate-200 bg-slate-50 p-6 rounded-lg space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium text-slate-950">Hello, {user.username || 'Writer'}</h3>
+                  <h3 className="text-lg font-medium text-slate-950">Hello, {user.displayName || user.neupId || 'Writer'}</h3>
                   <p className="text-xs text-slate-600 mt-1">
                     Ready to share your next idea with the community?
                   </p>

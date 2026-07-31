@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import ComposePostForm from '@/components/ComposePostForm';
+import ComposePostForm from '@/components/editor/ComposePostForm';
 import HeaderV1S1 from '@/components/header.v1s1';
 import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 import { prisma } from '@/inapp/lib/prisma';
@@ -69,7 +69,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
     redirect('/compose');
   }
 
-  const canEdit = article.authorId === user.id || user.role === 'ADMIN';
+  const canEdit = article.authorId === user.id || user.status === 'ADMIN';
 
   if (!canEdit) {
     redirect('/unauthorized');

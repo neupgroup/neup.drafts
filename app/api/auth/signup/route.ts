@@ -5,62 +5,61 @@ import { createTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { username, email, password } = body;
+    const rawNeupId = body.neupId ?? body.username;
+    const { email, password } = body;
 
-    // 1. Basic Validation
-    if (!username || !email || !password) {
+    if (!rawNeupId || !email || !password) {
       return NextResponse.json(
-        { error: 'Username, email, and password are required.' },
+        { error: 'Neup ID, email, and password are required.' },
         { status: 400 }
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanUsername = username.trim();
+    const cleanConnectionId = email.trim().toLowerCase();
+    const cleanNeupId = rawNeupId.trim();
 
-    // 2. Check if user already exists
-    const existingUser = await prisma.user.findFirst({
+    const existingAccount = await prisma.account.findFirst({
       where: {
-        OR: [{ email: cleanEmail }, { username: cleanUsername }],
+        OR: [{ connectionId: cleanConnectionId }, { neupId: cleanNeupId }],
       },
     });
 
-    if (existingUser) {
-      const field = existingUser.email === cleanEmail ? 'Email' : 'Username';
+    if (existingAccount) {
+      const field = existingAccount.connectionId === cleanConnectionId ? 'Email' : 'Neup ID';
       return NextResponse.json(
         { error: `${field} is already in use.` },
         { status: 400 }
       );
     }
 
-    // 3. Create User in PostgreSQL
-    const newUser = await prisma.user.create({
+    const newAccount = await prisma.account.create({
       data: {
-        username: cleanUsername,
-        email: cleanEmail,
-        password: password, // Note: Hash with bcrypt before production!
-        role: 'user',
+        connectionId: cleanConnectionId,
+        displayName: cleanNeupId,
+        neupId: cleanNeupId,
+        status: 'ACTIVE',
+        isVerified: false,
+        details: {
+          email: cleanConnectionId,
+          password,
+        },
       },
       select: {
         id: true,
-        email: true,
-        username: true,
-        role: true,
+        connectionId: true,
+        displayName: true,
+        displayImage: true,
+        neupId: true,
+        status: true,
+        isVerified: true,
       },
     });
 
-    // 4. Generate Auth Token via Bridge Auth Service
-    const token = await createTokenWithBridge({
-      id: newUser.id,
-      email: newUser.email,
-      username: newUser.username,
-      role: newUser.role || 'user',
-    });
+    const token = await createTokenWithBridge(newAccount);
 
-    // 5. Prepare Response and Set Auth Cookie
     const response = NextResponse.json({
       success: true,
-      user: newUser,
+      user: newAccount,
     });
 
     response.cookies.set('auth_token', token, {

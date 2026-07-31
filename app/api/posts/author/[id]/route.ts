@@ -14,7 +14,7 @@ export async function GET(
       },
       include: {
         author: {
-          select: { id: true, username: true, role: true },
+          select: { id: true, displayName: true, neupId: true, status: true },
         },
       },
       orderBy: { createdAt: 'desc' },
