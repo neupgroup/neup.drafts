@@ -39,7 +39,7 @@ const prismaClientSingleton = () => {
 function hasRequiredDelegates(client: ReturnType<typeof prismaClientSingleton> | undefined): boolean {
   if (!client) return false
 
-  const candidate = client as any
+  const candidate = client as unknown as Record<string, unknown>
   return Boolean(
     candidate.portfolio &&
     candidate.portfolioAsset &&
