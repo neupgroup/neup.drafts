@@ -33,7 +33,7 @@ export default function LoginPage() {
       router.refresh();
       
       // 2. Redirect straight to the account page
-      router.push('/account');
+      router.push('/profile');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
