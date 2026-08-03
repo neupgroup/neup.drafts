@@ -28,7 +28,7 @@ model Account {
   comments  Comment[]
   reactions Reaction[]
 
-  @@map("account")
+  @@map("Account")
 }
 
 model Article {

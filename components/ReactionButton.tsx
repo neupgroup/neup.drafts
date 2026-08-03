@@ -15,7 +15,7 @@ interface ReactionButtonProps {
 }
 
 export function ReactionButton({ postId, initialLikes, currentUser }: ReactionButtonProps) {
-  const [likes, setLikes] = useState(initialLikes || 0);
+  const [likes, setLikes] = useState(initialLikes);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -53,7 +53,8 @@ export function ReactionButton({ postId, initialLikes, currentUser }: ReactionBu
             : 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400'
         }`}
       >
-        Like · {likes}
+        Like : {likes}
+        
       </button>
       {error && <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>}
     </div>
