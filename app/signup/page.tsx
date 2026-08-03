@@ -35,7 +35,7 @@ export default function SignUpPage() {
       router.refresh();
 
       // Redirect straight to account page
-      router.push('/account');
+      router.push('/profile');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

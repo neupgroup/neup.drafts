@@ -88,8 +88,8 @@ export default async function HomePage() {
 
                 const likesCount =
                   post._count?.reactions ??
-                  post.likes ??
                   post.reactions?.length ??
+                  post.likes ??
                   0;
 
                 const commentsCount =
