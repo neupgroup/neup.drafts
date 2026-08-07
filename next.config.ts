@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
 
   //basepath
-  basePath:'/drafts',
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
 
   // 2. Prevent Next.js from bundling Prisma binaries natively
   serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg'],
