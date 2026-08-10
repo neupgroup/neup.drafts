@@ -18,8 +18,10 @@ export default function SignUpPage() {
     setError('');
     setLoading(true);
 
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch(`${basePath}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ neupId, email, password }),

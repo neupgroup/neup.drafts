@@ -54,6 +54,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const queryParam = Array.isArray(queryParams.q) ? queryParams.q[0] : queryParams.q || '';
   const sortParam = Array.isArray(queryParams.sort) ? queryParams.sort[0] : queryParams.sort || 'latest';
 
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
   let searchResults: ArticleWithRelations[] = [];
   
   // Only query the database if the user has actually typed something in the search bar
@@ -93,7 +95,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl mb-6">
             Search Articles
           </h1>
-          <form method="GET" action="/search" className="w-full max-w-2xl relative">
+          <form method="GET" action={`${basePath}/search`} className="w-full max-w-2xl relative">
             <input
               type="text"
               name="q"
@@ -132,7 +134,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <h2 className="font-semibold text-slate-950 mb-4 pb-2 border-b border-slate-200">
               Filters
             </h2>
-            <form method="GET" action="/search" className="space-y-4">
+            <form method="GET" action={`${basePath}/search`} className="space-y-4">
               <input type="hidden" name="q" value={queryParam} />
               <div>
                 <label htmlFor="sort" className="block text-sm font-medium text-slate-600 mb-2">

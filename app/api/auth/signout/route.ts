@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
   cookieStore.delete('auth_token');
 
   // Redirect user to the login page after clearing cookie
-  const loginUrl = new URL('/login', request.url);
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const loginUrl = new URL(`${basePath}/login`, request.url);
   return NextResponse.redirect(loginUrl);
 }

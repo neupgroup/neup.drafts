@@ -13,10 +13,12 @@ export default function TranslationWidget() {
     
     setIsLoading(true);
     setError('');
+
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     
     try {
       // Hits your local Next.js API route
-      const res = await fetch('/api/translate', {
+      const res = await fetch(`${basePath}/api/translate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

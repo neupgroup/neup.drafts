@@ -138,6 +138,9 @@ export default function SidebarNav({
   sections,
   signOutLabel = 'Sign Out',
 }: SidebarNavProps) {
+
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  
   return (
     <>
       <nav className="flex gap-4 overflow-x-auto text-sm lg:block lg:overflow-visible lg:text-base">
@@ -170,7 +173,7 @@ export default function SidebarNav({
           </div>
         ))}
 
-        <form action="/api/auth/signout" method="POST" className="mt-6 border-t border-slate-100 pt-4">
+        <form action={`${basePath}/api/auth/signout`} method="POST" className="mt-6 border-t border-slate-100 pt-4">
           <button
             type="submit"
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700 lg:px-3"

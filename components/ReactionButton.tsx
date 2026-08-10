@@ -28,7 +28,9 @@ export function ReactionButton({ postId, initialLikes, currentUser }: ReactionBu
       return;
     }
 
-    const res = await fetch('/api/posts/interact', {
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+    const res = await fetch(`${basePath}/api/posts/interact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ postId, action: 'like' }),

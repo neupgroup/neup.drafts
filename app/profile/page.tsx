@@ -98,6 +98,8 @@ export default async function AccountPage() {
     );
   }
 
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
   const myPosts = await getAccountPosts(user.id);
   const displayName = user.displayName || user.neupId;
   const totalReactions = myPosts.reduce((sum, post) => sum + post.reactions.length, 0);
@@ -129,7 +131,7 @@ export default async function AccountPage() {
                   </p>
                 </div>
 
-                <form action="/api/auth/signout" method="POST" className="lg:hidden">
+                <form action={`${basePath}/api/auth/signout`} method="POST" className="lg:hidden">
                   <button
                     type="submit"
                     className="cursor-pointer border border-red-500/30 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"

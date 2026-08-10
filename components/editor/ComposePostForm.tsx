@@ -2623,8 +2623,12 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setError('');
     setContent(nextContent);
 
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const apiPath = isEditing ? `/api/posts/${articleId}` : '/api/posts';
+
+
     try {
-      const res = await fetch(isEditing ? `/api/posts/${articleId}` : '/api/posts', {
+      const res = await fetch(`${basePath}${apiPath}`, {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
