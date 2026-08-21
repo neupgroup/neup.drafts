@@ -1,72 +1,48 @@
-import { prisma } from '@/inapp/lib/prisma';
+import { auth } from "@/logica/account/auth";
+import { current } from "@/logica/account/current";
+import { createAccountAccess } from "@/logica/account/access";
 
-export interface BridgeUser {
-  id: string;
-  connectionId: string;
-  displayName: string;
-  displayImage: string | null;
-  neupId: string;
-  status: string;
-  isVerified: boolean;
+const appId = process.env.NEUP_APP_ID;
+const appSecret = process.env.NEUP_APP_SECRET;
+
+if (!appId || !appSecret) {
+  throw new Error("Central Auth application credentials are not configured.");
 }
 
-//Generates the token (currently using user.id)
-export const createTokenWithBridge = async (user: BridgeUser): Promise<string> => {
-  return user.id;
-};
+const REQUIRED_PERMISSION = "replacement_for_now";
 
-export const verifyTokenWithBridge = async (
-  token: string | undefined | null
-): Promise<BridgeUser | null> => {
-  if (!token) return null;
+export const bridgeAuth = {
+  async checkAuthentication(authAccountToken?: string | null) {
+    return auth.check({
+      authAccountToken,
+    });
+  },
 
-  const mockSecret = process.env.AUTH_MOCK_TOKEN;
-
-  // 1. DEV / TEST BRIDGE: If using mock token, pull a REAL user from DB
-  if (mockSecret && token === mockSecret) {
-    try {
-      const dbAccount = await prisma.account.findFirst({
-        select: {
-          id: true,
-          connectionId: true,
-          displayName: true,
-          displayImage: true,
-          neupId: true,
-          status: true,
-          isVerified: true,
-        },
-      });
-
-      if (dbAccount) {
-        return dbAccount;
-      }
-
-      console.warn("No accounts found in DB. Seed or create at least 1 account first!");
-      return null;
-    } catch (error) {
-      console.error("❌ Failed to query live DB user during auth:", error);
+  async getAccountId(authAccountToken: string | null) {
+    if (!authAccountToken) {
       return null;
     }
-  }
 
-  // 2. REAL AUTH LOOKUP
-  try {
-    const account = await prisma.account.findUnique({
-      where: { id: token },
-      select: {
-        id: true,
-        connectionId: true,
-        displayName: true,
-        displayImage: true,
-        neupId: true,
-        status: true,
-        isVerified: true,
-      },
-    });
+    try {
+      return await current.id.get(authAccountToken);
+    } catch {
+      return null;
+    }
+  },
 
-    return account;
-  } catch (error) {
-    console.error("Auth token verification error:", error);
-    return null;
-  }
+  async checkAuthorization(accountId: string) {
+    if (!accountId) {
+      return false;
+    }
+
+    const access = createAccountAccess(accountId);
+
+    const result = await access
+      .permission(REQUIRED_PERMISSION)
+      .check(appId, accountId, {
+        appSecret,
+      });
+
+    return result.ok && result.body.allowed === true;
+  },
 };

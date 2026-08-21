@@ -1,41 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyTokenWithBridge, BridgeUser } from "@/inapp/lib/bridge-auth.service";
-
-export interface AuthContext {
-  user: BridgeUser;
-}
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 
 export const withAuth = (
-  handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>,
+  handler: (req: NextRequest) => Promise<NextResponse>,
 ) => {
   return async (req: NextRequest) => {
-    const authHeader = req.headers.get("authorization");
-    const tokenFromStorage = authHeader?.startsWith("Bearer ")
-      ? authHeader.split(" ")[1]
-      : null;
-    const tokenFromCookies = req.cookies.get("auth_token")?.value;
+    const authAccountToken = req.cookies.get("auth_account")?.value ?? null;
 
-    const { searchParams } = new URL(req.url);
-    const tokenFromCallback = searchParams.get("token");
+    // 1. Authentication
+    const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 
-    const activeToken =
-      tokenFromStorage || tokenFromCookies || tokenFromCallback;
-
-    if (!activeToken) {
-      return NextResponse.json(
-        { error: "Unauthorized: No token found." },
-        { status: 401 },
-      );
+    if (!authResult.authenticated) {
+      return new NextResponse("Unauthorized", {
+        status: 401,
+      });
     }
 
-    const user = await verifyTokenWithBridge(activeToken);
-    if (!user) {
-      return NextResponse.json(
-        { error: "Forbidden: Bridge rejected grant." },
-        { status: 403 },
-      );
+    // 2. Identity
+    const accountId = await bridgeAuth.getAccountId(authAccountToken);
+
+    if (!accountId) {
+      return new NextResponse("Unauthorized", {
+        status: 401,
+      });
     }
 
-    return handler(req, { user });
+    // 3. Authorization
+    const authorized = await bridgeAuth.checkAuthorization(accountId);
+
+    if (!authorized) {
+      return new NextResponse("Forbidden", {
+        status: 403,
+      });
+    }
+
+    // 4. Authenticated + authorized
+    return handler(req);
   };
 };
