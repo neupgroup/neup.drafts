@@ -27,35 +27,32 @@ export type AggregateAccount = {
 export type AccountMinAggregateOutputType = {
   id: string | null
   connectionId: string | null
+  type: string | null
   displayName: string | null
   displayImage: string | null
-  neupId: string | null
+  createdOn: Date | null
   status: string | null
-  isVerified: boolean | null
-  createdAt: Date | null
 }
 
 export type AccountMaxAggregateOutputType = {
   id: string | null
   connectionId: string | null
+  type: string | null
   displayName: string | null
   displayImage: string | null
-  neupId: string | null
+  createdOn: Date | null
   status: string | null
-  isVerified: boolean | null
-  createdAt: Date | null
 }
 
 export type AccountCountAggregateOutputType = {
   id: number
   connectionId: number
+  type: number
   displayName: number
   displayImage: number
-  neupId: number
+  createdOn: number
   status: number
-  isVerified: number
-  details: number
-  createdAt: number
+  moreDetails: number
   _all: number
 }
 
@@ -63,35 +60,32 @@ export type AccountCountAggregateOutputType = {
 export type AccountMinAggregateInputType = {
   id?: true
   connectionId?: true
+  type?: true
   displayName?: true
   displayImage?: true
-  neupId?: true
+  createdOn?: true
   status?: true
-  isVerified?: true
-  createdAt?: true
 }
 
 export type AccountMaxAggregateInputType = {
   id?: true
   connectionId?: true
+  type?: true
   displayName?: true
   displayImage?: true
-  neupId?: true
+  createdOn?: true
   status?: true
-  isVerified?: true
-  createdAt?: true
 }
 
 export type AccountCountAggregateInputType = {
   id?: true
   connectionId?: true
+  type?: true
   displayName?: true
   displayImage?: true
-  neupId?: true
+  createdOn?: true
   status?: true
-  isVerified?: true
-  details?: true
-  createdAt?: true
+  moreDetails?: true
   _all?: true
 }
 
@@ -170,13 +164,12 @@ export type AccountGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type AccountGroupByOutputType = {
   id: string
   connectionId: string
+  type: string
   displayName: string
   displayImage: string | null
-  neupId: string
+  createdOn: Date
   status: string
-  isVerified: boolean
-  details: runtime.JsonValue | null
-  createdAt: Date
+  moreDetails: runtime.JsonValue | null
   _count: AccountCountAggregateOutputType | null
   _min: AccountMinAggregateOutputType | null
   _max: AccountMaxAggregateOutputType | null
@@ -203,13 +196,12 @@ export type AccountWhereInput = {
   NOT?: Prisma.AccountWhereInput | Prisma.AccountWhereInput[]
   id?: Prisma.StringFilter<"Account"> | string
   connectionId?: Prisma.StringFilter<"Account"> | string
+  type?: Prisma.StringFilter<"Account"> | string
   displayName?: Prisma.StringFilter<"Account"> | string
   displayImage?: Prisma.StringNullableFilter<"Account"> | string | null
-  neupId?: Prisma.StringFilter<"Account"> | string
+  createdOn?: Prisma.DateTimeFilter<"Account"> | Date | string
   status?: Prisma.StringFilter<"Account"> | string
-  isVerified?: Prisma.BoolFilter<"Account"> | boolean
-  details?: Prisma.JsonNullableFilter<"Account">
-  createdAt?: Prisma.DateTimeFilter<"Account"> | Date | string
+  moreDetails?: Prisma.JsonNullableFilter<"Account">
   articles?: Prisma.ArticleListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
@@ -218,13 +210,12 @@ export type AccountWhereInput = {
 export type AccountOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayImage?: Prisma.SortOrderInput | Prisma.SortOrder
-  neupId?: Prisma.SortOrder
+  createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  details?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
+  moreDetails?: Prisma.SortOrderInput | Prisma.SortOrder
   articles?: Prisma.ArticleOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   reactions?: Prisma.ReactionOrderByRelationAggregateInput
@@ -233,31 +224,29 @@ export type AccountOrderByWithRelationInput = {
 export type AccountWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   connectionId?: string
-  neupId?: string
   AND?: Prisma.AccountWhereInput | Prisma.AccountWhereInput[]
   OR?: Prisma.AccountWhereInput[]
   NOT?: Prisma.AccountWhereInput | Prisma.AccountWhereInput[]
+  type?: Prisma.StringFilter<"Account"> | string
   displayName?: Prisma.StringFilter<"Account"> | string
   displayImage?: Prisma.StringNullableFilter<"Account"> | string | null
+  createdOn?: Prisma.DateTimeFilter<"Account"> | Date | string
   status?: Prisma.StringFilter<"Account"> | string
-  isVerified?: Prisma.BoolFilter<"Account"> | boolean
-  details?: Prisma.JsonNullableFilter<"Account">
-  createdAt?: Prisma.DateTimeFilter<"Account"> | Date | string
+  moreDetails?: Prisma.JsonNullableFilter<"Account">
   articles?: Prisma.ArticleListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
-}, "id" | "connectionId" | "neupId">
+}, "id" | "connectionId">
 
 export type AccountOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayImage?: Prisma.SortOrderInput | Prisma.SortOrder
-  neupId?: Prisma.SortOrder
+  createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  details?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
+  moreDetails?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AccountCountOrderByAggregateInput
   _max?: Prisma.AccountMaxOrderByAggregateInput
   _min?: Prisma.AccountMinOrderByAggregateInput
@@ -269,25 +258,23 @@ export type AccountScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AccountScalarWhereWithAggregatesInput | Prisma.AccountScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Account"> | string
   connectionId?: Prisma.StringWithAggregatesFilter<"Account"> | string
+  type?: Prisma.StringWithAggregatesFilter<"Account"> | string
   displayName?: Prisma.StringWithAggregatesFilter<"Account"> | string
   displayImage?: Prisma.StringNullableWithAggregatesFilter<"Account"> | string | null
-  neupId?: Prisma.StringWithAggregatesFilter<"Account"> | string
+  createdOn?: Prisma.DateTimeWithAggregatesFilter<"Account"> | Date | string
   status?: Prisma.StringWithAggregatesFilter<"Account"> | string
-  isVerified?: Prisma.BoolWithAggregatesFilter<"Account"> | boolean
-  details?: Prisma.JsonNullableWithAggregatesFilter<"Account">
-  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Account"> | Date | string
+  moreDetails?: Prisma.JsonNullableWithAggregatesFilter<"Account">
 }
 
 export type AccountCreateInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
@@ -296,13 +283,12 @@ export type AccountCreateInput = {
 export type AccountUncheckedCreateInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
@@ -311,13 +297,12 @@ export type AccountUncheckedCreateInput = {
 export type AccountUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
@@ -326,13 +311,12 @@ export type AccountUpdateInput = {
 export type AccountUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
@@ -341,71 +325,65 @@ export type AccountUncheckedUpdateInput = {
 export type AccountCreateManyInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type AccountUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type AccountUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type AccountCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayImage?: Prisma.SortOrder
-  neupId?: Prisma.SortOrder
+  createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  details?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
+  moreDetails?: Prisma.SortOrder
 }
 
 export type AccountMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayImage?: Prisma.SortOrder
-  neupId?: Prisma.SortOrder
+  createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
 }
 
 export type AccountMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   displayImage?: Prisma.SortOrder
-  neupId?: Prisma.SortOrder
+  createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
 }
 
 export type AccountScalarRelationFilter = {
@@ -419,10 +397,6 @@ export type StringFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -474,13 +448,12 @@ export type AccountUpdateOneRequiredWithoutReactionsNestedInput = {
 export type AccountCreateWithoutArticlesInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
 }
@@ -488,13 +461,12 @@ export type AccountCreateWithoutArticlesInput = {
 export type AccountUncheckedCreateWithoutArticlesInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
 }
@@ -518,13 +490,12 @@ export type AccountUpdateToOneWithWhereWithoutArticlesInput = {
 export type AccountUpdateWithoutArticlesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
 }
@@ -532,13 +503,12 @@ export type AccountUpdateWithoutArticlesInput = {
 export type AccountUncheckedUpdateWithoutArticlesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
 }
@@ -546,13 +516,12 @@ export type AccountUncheckedUpdateWithoutArticlesInput = {
 export type AccountCreateWithoutCommentsInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
 }
@@ -560,13 +529,12 @@ export type AccountCreateWithoutCommentsInput = {
 export type AccountUncheckedCreateWithoutCommentsInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
 }
@@ -590,13 +558,12 @@ export type AccountUpdateToOneWithWhereWithoutCommentsInput = {
 export type AccountUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
 }
@@ -604,13 +571,12 @@ export type AccountUpdateWithoutCommentsInput = {
 export type AccountUncheckedUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
 }
@@ -618,13 +584,12 @@ export type AccountUncheckedUpdateWithoutCommentsInput = {
 export type AccountCreateWithoutReactionsInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
 }
@@ -632,13 +597,12 @@ export type AccountCreateWithoutReactionsInput = {
 export type AccountUncheckedCreateWithoutReactionsInput = {
   id?: string
   connectionId: string
+  type: string
   displayName: string
   displayImage?: string | null
-  neupId: string
+  createdOn?: Date | string
   status?: string
-  isVerified?: boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
 }
@@ -662,13 +626,12 @@ export type AccountUpdateToOneWithWhereWithoutReactionsInput = {
 export type AccountUpdateWithoutReactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
 }
@@ -676,13 +639,12 @@ export type AccountUpdateWithoutReactionsInput = {
 export type AccountUncheckedUpdateWithoutReactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  neupId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
 }
@@ -739,13 +701,12 @@ export type AccountCountOutputTypeCountReactionsArgs<ExtArgs extends runtime.Typ
 export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   connectionId?: boolean
+  type?: boolean
   displayName?: boolean
   displayImage?: boolean
-  neupId?: boolean
+  createdOn?: boolean
   status?: boolean
-  isVerified?: boolean
-  details?: boolean
-  createdAt?: boolean
+  moreDetails?: boolean
   articles?: boolean | Prisma.Account$articlesArgs<ExtArgs>
   comments?: boolean | Prisma.Account$commentsArgs<ExtArgs>
   reactions?: boolean | Prisma.Account$reactionsArgs<ExtArgs>
@@ -755,40 +716,37 @@ export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type AccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   connectionId?: boolean
+  type?: boolean
   displayName?: boolean
   displayImage?: boolean
-  neupId?: boolean
+  createdOn?: boolean
   status?: boolean
-  isVerified?: boolean
-  details?: boolean
-  createdAt?: boolean
+  moreDetails?: boolean
 }, ExtArgs["result"]["account"]>
 
 export type AccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   connectionId?: boolean
+  type?: boolean
   displayName?: boolean
   displayImage?: boolean
-  neupId?: boolean
+  createdOn?: boolean
   status?: boolean
-  isVerified?: boolean
-  details?: boolean
-  createdAt?: boolean
+  moreDetails?: boolean
 }, ExtArgs["result"]["account"]>
 
 export type AccountSelectScalar = {
   id?: boolean
   connectionId?: boolean
+  type?: boolean
   displayName?: boolean
   displayImage?: boolean
-  neupId?: boolean
+  createdOn?: boolean
   status?: boolean
-  isVerified?: boolean
-  details?: boolean
-  createdAt?: boolean
+  moreDetails?: boolean
 }
 
-export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "connectionId" | "displayName" | "displayImage" | "neupId" | "status" | "isVerified" | "details" | "createdAt", ExtArgs["result"]["account"]>
+export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "connectionId" | "type" | "displayName" | "displayImage" | "createdOn" | "status" | "moreDetails", ExtArgs["result"]["account"]>
 export type AccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   articles?: boolean | Prisma.Account$articlesArgs<ExtArgs>
   comments?: boolean | Prisma.Account$commentsArgs<ExtArgs>
@@ -808,13 +766,12 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     connectionId: string
+    type: string
     displayName: string
     displayImage: string | null
-    neupId: string
+    createdOn: Date
     status: string
-    isVerified: boolean
-    details: runtime.JsonValue | null
-    createdAt: Date
+    moreDetails: runtime.JsonValue | null
   }, ExtArgs["result"]["account"]>
   composites: {}
 }
@@ -1243,13 +1200,12 @@ export interface Prisma__AccountClient<T, Null = never, ExtArgs extends runtime.
 export interface AccountFieldRefs {
   readonly id: Prisma.FieldRef<"Account", 'String'>
   readonly connectionId: Prisma.FieldRef<"Account", 'String'>
+  readonly type: Prisma.FieldRef<"Account", 'String'>
   readonly displayName: Prisma.FieldRef<"Account", 'String'>
   readonly displayImage: Prisma.FieldRef<"Account", 'String'>
-  readonly neupId: Prisma.FieldRef<"Account", 'String'>
+  readonly createdOn: Prisma.FieldRef<"Account", 'DateTime'>
   readonly status: Prisma.FieldRef<"Account", 'String'>
-  readonly isVerified: Prisma.FieldRef<"Account", 'Boolean'>
-  readonly details: Prisma.FieldRef<"Account", 'Json'>
-  readonly createdAt: Prisma.FieldRef<"Account", 'DateTime'>
+  readonly moreDetails: Prisma.FieldRef<"Account", 'Json'>
 }
     
 

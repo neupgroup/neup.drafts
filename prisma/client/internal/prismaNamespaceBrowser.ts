@@ -76,13 +76,12 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const AccountScalarFieldEnum = {
   id: 'id',
   connectionId: 'connectionId',
+  type: 'type',
   displayName: 'displayName',
   displayImage: 'displayImage',
-  neupId: 'neupId',
+  createdOn: 'createdOn',
   status: 'status',
-  isVerified: 'isVerified',
-  details: 'details',
-  createdAt: 'createdAt'
+  moreDetails: 'moreDetails'
 } as const
 
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
