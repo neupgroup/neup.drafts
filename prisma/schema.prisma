@@ -14,21 +14,20 @@ datasource db {
 
 //Core data models 
 model Account {
-  id           String   @id @default(cuid())
-  connectionId String   @unique
-  displayName  String
-  displayImage String?
-  neupId       String   @unique
-  status       String   @default("ACTIVE")
-  isVerified   Boolean  @default(false)
-  details      Json?
-  createdAt    DateTime @default(now())
+  id            String    @id @default(cuid()) @db.VarChar(255)
+  connectionId  String    @unique @db.VarChar(255)
+  type          String    @db.VarChar(255)
+  displayName   String    @db.VarChar(255)
+  displayImage  String?   @db.VarChar(255)
+  createdOn     DateTime  @default(now())
+  status        String    @default("ACTIVE") @db.VarChar(255)
+  moreDetails   Json?
 
   articles  Article[]
   comments  Comment[]
   reactions Reaction[]
 
-  @@map("Account")
+  @@map("account")
 }
 
 model Article {
