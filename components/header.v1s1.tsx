@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
+import Link from "next/link";
+import { useState } from "react";
 
 interface HeaderV1S1Props {
   user: {
@@ -15,14 +15,14 @@ interface HeaderV1S1Props {
 export default function HeaderV1S1({ user }: HeaderV1S1Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const userName = user
-    ? user.name || user.displayName || user.neupId || 'User'
-    : '';
-  const neupId = user?.neupId || 'user';
+    ? user.name || user.displayName || user.neupId || "User"
+    : "";
+  const neupId = user?.neupId || "user";
   const userInitial = userName.charAt(0).toUpperCase();
   const navLinkClassName =
-    'rounded-xl px-4 py-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950';
+    "rounded-xl px-4 py-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950";
   const mobileNavLinkClassName =
-    'block rounded-2xl bg-slate-50 px-4 py-4 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950';
+    "block rounded-2xl bg-slate-50 px-4 py-4 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-md shadow-slate-200/80">
@@ -79,19 +79,19 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
               <button
                 type="button"
                 aria-expanded={isMenuOpen}
-                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-all hover:bg-slate-100 md:hidden"
                 onClick={() => setIsMenuOpen((open) => !open)}
               >
                 <span className="flex w-4 flex-col gap-1.5">
                   <span
-                    className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? 'translate-y-2 rotate-45' : ''}`}
+                    className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? "translate-y-2 rotate-45" : ""}`}
                   />
                   <span
-                    className={`block h-0.5 w-full bg-current transition-opacity duration-200 ${isMenuOpen ? 'opacity-0' : ''}`}
+                    className={`block h-0.5 w-full bg-current transition-opacity duration-200 ${isMenuOpen ? "opacity-0" : ""}`}
                   />
                   <span
-                    className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? '-translate-y-2 -rotate-45' : ''}`}
+                    className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
                   />
                 </span>
               </button>
@@ -116,19 +116,19 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
             <button
               type="button"
               aria-expanded={isMenuOpen}
-              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-all hover:bg-slate-100 md:hidden"
               onClick={() => setIsMenuOpen((open) => !open)}
             >
               <span className="flex w-4 flex-col gap-1.5">
                 <span
-                  className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? 'translate-y-2 rotate-45' : ''}`}
+                  className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? "translate-y-2 rotate-45" : ""}`}
                 />
                 <span
-                  className={`block h-0.5 w-full bg-current transition-opacity duration-200 ${isMenuOpen ? 'opacity-0' : ''}`}
+                  className={`block h-0.5 w-full bg-current transition-opacity duration-200 ${isMenuOpen ? "opacity-0" : ""}`}
                 />
                 <span
-                  className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? '-translate-y-2 -rotate-45' : ''}`}
+                  className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
                 />
               </span>
             </button>
@@ -157,8 +157,12 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-base font-medium text-slate-950">{userName}</p>
-                  <p className="truncate pt-1 text-sm font-medium text-slate-400">@{neupId}</p>
+                  <p className="truncate text-base font-medium text-slate-950">
+                    {userName}
+                  </p>
+                  <p className="truncate pt-1 text-sm font-medium text-slate-400">
+                    @{neupId}
+                  </p>
                 </div>
               </Link>
             ) : null}
@@ -166,13 +170,25 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
             <div className="space-y-2 pt-6">
               {user ? (
                 <>
-                  <Link href="/compose" className={mobileNavLinkClassName} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    href="/compose"
+                    className={mobileNavLinkClassName}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Create Post
                   </Link>
-                  <Link href="/translation" className={mobileNavLinkClassName} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    href="/translation"
+                    className={mobileNavLinkClassName}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Translate
                   </Link>
-                  <Link href="/manage" className={mobileNavLinkClassName} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    href="/manage"
+                    className={mobileNavLinkClassName}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Manage
                   </Link>
                 </>

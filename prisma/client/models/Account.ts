@@ -26,6 +26,7 @@ export type AggregateAccount = {
 
 export type AccountMinAggregateOutputType = {
   id: string | null
+  neupId: string | null
   connectionId: string | null
   type: string | null
   displayName: string | null
@@ -36,6 +37,7 @@ export type AccountMinAggregateOutputType = {
 
 export type AccountMaxAggregateOutputType = {
   id: string | null
+  neupId: string | null
   connectionId: string | null
   type: string | null
   displayName: string | null
@@ -46,6 +48,7 @@ export type AccountMaxAggregateOutputType = {
 
 export type AccountCountAggregateOutputType = {
   id: number
+  neupId: number
   connectionId: number
   type: number
   displayName: number
@@ -59,6 +62,7 @@ export type AccountCountAggregateOutputType = {
 
 export type AccountMinAggregateInputType = {
   id?: true
+  neupId?: true
   connectionId?: true
   type?: true
   displayName?: true
@@ -69,6 +73,7 @@ export type AccountMinAggregateInputType = {
 
 export type AccountMaxAggregateInputType = {
   id?: true
+  neupId?: true
   connectionId?: true
   type?: true
   displayName?: true
@@ -79,6 +84,7 @@ export type AccountMaxAggregateInputType = {
 
 export type AccountCountAggregateInputType = {
   id?: true
+  neupId?: true
   connectionId?: true
   type?: true
   displayName?: true
@@ -163,6 +169,7 @@ export type AccountGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 
 export type AccountGroupByOutputType = {
   id: string
+  neupId: string | null
   connectionId: string
   type: string
   displayName: string
@@ -195,6 +202,7 @@ export type AccountWhereInput = {
   OR?: Prisma.AccountWhereInput[]
   NOT?: Prisma.AccountWhereInput | Prisma.AccountWhereInput[]
   id?: Prisma.StringFilter<"Account"> | string
+  neupId?: Prisma.StringNullableFilter<"Account"> | string | null
   connectionId?: Prisma.StringFilter<"Account"> | string
   type?: Prisma.StringFilter<"Account"> | string
   displayName?: Prisma.StringFilter<"Account"> | string
@@ -209,6 +217,7 @@ export type AccountWhereInput = {
 
 export type AccountOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  neupId?: Prisma.SortOrderInput | Prisma.SortOrder
   connectionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
@@ -223,6 +232,7 @@ export type AccountOrderByWithRelationInput = {
 
 export type AccountWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  neupId?: string
   connectionId?: string
   AND?: Prisma.AccountWhereInput | Prisma.AccountWhereInput[]
   OR?: Prisma.AccountWhereInput[]
@@ -236,10 +246,11 @@ export type AccountWhereUniqueInput = Prisma.AtLeast<{
   articles?: Prisma.ArticleListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
-}, "id" | "connectionId">
+}, "id" | "neupId" | "connectionId">
 
 export type AccountOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  neupId?: Prisma.SortOrderInput | Prisma.SortOrder
   connectionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
@@ -257,6 +268,7 @@ export type AccountScalarWhereWithAggregatesInput = {
   OR?: Prisma.AccountScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AccountScalarWhereWithAggregatesInput | Prisma.AccountScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Account"> | string
+  neupId?: Prisma.StringNullableWithAggregatesFilter<"Account"> | string | null
   connectionId?: Prisma.StringWithAggregatesFilter<"Account"> | string
   type?: Prisma.StringWithAggregatesFilter<"Account"> | string
   displayName?: Prisma.StringWithAggregatesFilter<"Account"> | string
@@ -268,6 +280,7 @@ export type AccountScalarWhereWithAggregatesInput = {
 
 export type AccountCreateInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -282,6 +295,7 @@ export type AccountCreateInput = {
 
 export type AccountUncheckedCreateInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -296,6 +310,7 @@ export type AccountUncheckedCreateInput = {
 
 export type AccountUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -310,6 +325,7 @@ export type AccountUpdateInput = {
 
 export type AccountUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -324,6 +340,7 @@ export type AccountUncheckedUpdateInput = {
 
 export type AccountCreateManyInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -335,6 +352,7 @@ export type AccountCreateManyInput = {
 
 export type AccountUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -346,6 +364,7 @@ export type AccountUpdateManyMutationInput = {
 
 export type AccountUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -357,6 +376,7 @@ export type AccountUncheckedUpdateManyInput = {
 
 export type AccountCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  neupId?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
@@ -368,6 +388,7 @@ export type AccountCountOrderByAggregateInput = {
 
 export type AccountMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  neupId?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
@@ -378,6 +399,7 @@ export type AccountMaxOrderByAggregateInput = {
 
 export type AccountMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  neupId?: Prisma.SortOrder
   connectionId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
@@ -447,6 +469,7 @@ export type AccountUpdateOneRequiredWithoutReactionsNestedInput = {
 
 export type AccountCreateWithoutArticlesInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -460,6 +483,7 @@ export type AccountCreateWithoutArticlesInput = {
 
 export type AccountUncheckedCreateWithoutArticlesInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -489,6 +513,7 @@ export type AccountUpdateToOneWithWhereWithoutArticlesInput = {
 
 export type AccountUpdateWithoutArticlesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -502,6 +527,7 @@ export type AccountUpdateWithoutArticlesInput = {
 
 export type AccountUncheckedUpdateWithoutArticlesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -515,6 +541,7 @@ export type AccountUncheckedUpdateWithoutArticlesInput = {
 
 export type AccountCreateWithoutCommentsInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -528,6 +555,7 @@ export type AccountCreateWithoutCommentsInput = {
 
 export type AccountUncheckedCreateWithoutCommentsInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -557,6 +585,7 @@ export type AccountUpdateToOneWithWhereWithoutCommentsInput = {
 
 export type AccountUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -570,6 +599,7 @@ export type AccountUpdateWithoutCommentsInput = {
 
 export type AccountUncheckedUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -583,6 +613,7 @@ export type AccountUncheckedUpdateWithoutCommentsInput = {
 
 export type AccountCreateWithoutReactionsInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -596,6 +627,7 @@ export type AccountCreateWithoutReactionsInput = {
 
 export type AccountUncheckedCreateWithoutReactionsInput = {
   id?: string
+  neupId?: string | null
   connectionId: string
   type: string
   displayName: string
@@ -625,6 +657,7 @@ export type AccountUpdateToOneWithWhereWithoutReactionsInput = {
 
 export type AccountUpdateWithoutReactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -638,6 +671,7 @@ export type AccountUpdateWithoutReactionsInput = {
 
 export type AccountUncheckedUpdateWithoutReactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -700,6 +734,7 @@ export type AccountCountOutputTypeCountReactionsArgs<ExtArgs extends runtime.Typ
 
 export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  neupId?: boolean
   connectionId?: boolean
   type?: boolean
   displayName?: boolean
@@ -715,6 +750,7 @@ export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 
 export type AccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  neupId?: boolean
   connectionId?: boolean
   type?: boolean
   displayName?: boolean
@@ -726,6 +762,7 @@ export type AccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
 
 export type AccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  neupId?: boolean
   connectionId?: boolean
   type?: boolean
   displayName?: boolean
@@ -737,6 +774,7 @@ export type AccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 
 export type AccountSelectScalar = {
   id?: boolean
+  neupId?: boolean
   connectionId?: boolean
   type?: boolean
   displayName?: boolean
@@ -746,7 +784,7 @@ export type AccountSelectScalar = {
   moreDetails?: boolean
 }
 
-export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "connectionId" | "type" | "displayName" | "displayImage" | "createdOn" | "status" | "moreDetails", ExtArgs["result"]["account"]>
+export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "neupId" | "connectionId" | "type" | "displayName" | "displayImage" | "createdOn" | "status" | "moreDetails", ExtArgs["result"]["account"]>
 export type AccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   articles?: boolean | Prisma.Account$articlesArgs<ExtArgs>
   comments?: boolean | Prisma.Account$commentsArgs<ExtArgs>
@@ -765,6 +803,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    neupId: string | null
     connectionId: string
     type: string
     displayName: string
@@ -1199,6 +1238,7 @@ export interface Prisma__AccountClient<T, Null = never, ExtArgs extends runtime.
  */
 export interface AccountFieldRefs {
   readonly id: Prisma.FieldRef<"Account", 'String'>
+  readonly neupId: Prisma.FieldRef<"Account", 'String'>
   readonly connectionId: Prisma.FieldRef<"Account", 'String'>
   readonly type: Prisma.FieldRef<"Account", 'String'>
   readonly displayName: Prisma.FieldRef<"Account", 'String'>

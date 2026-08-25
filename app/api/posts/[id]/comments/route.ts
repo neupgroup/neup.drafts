@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
-import { prisma } from '@/inapp/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
+import { prisma } from "@/inapp/lib/prisma";
 
 // PROTECTED: Only logged-in users can write a comment
 export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
@@ -8,21 +8,24 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
     // 1. Grab the comment content body from the request
     const { text } = await req.json();
 
-    if (!text || text.trim() === '') {
-      return NextResponse.json({ error: 'Comment body cannot be empty' }, { status: 400 });
+    if (!text || text.trim() === "") {
+      return NextResponse.json(
+        { error: "Comment body cannot be empty" },
+        { status: 400 },
+      );
     }
 
     // 2. Extract the article ID (CUID string) directly from the request URL path
     const url = new URL(req.url);
-    const pathSegments = url.pathname.split('/');
-    const articleId = pathSegments[pathSegments.length - 2]; 
+    const pathSegments = url.pathname.split("/");
+    const articleId = pathSegments[pathSegments.length - 2];
 
     // 3. Save the new comment to PostgreSQL
     await prisma.comment.create({
       data: {
-        content: text, 
-        articleId: articleId, 
-        authorId: context.user.id, // <--- CHANGED: We now map directly to the unique database ID!
+        content: text,
+        articleId: articleId,
+        authorId: context.accountId, // <--- CHANGED: We now map directly to the unique database ID!
       },
     });
 
@@ -34,17 +37,22 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
           select: { id: true, displayName: true, neupId: true, status: true }, // <--- Included 'id' here for safe UI profile routing
         },
       },
-      orderBy: { createdAt: 'desc' }, // Displays newest comments first
+      orderBy: { createdAt: "desc" }, // Displays newest comments first
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Comment saved successfully!",
-      comments: updatedComments // Sends fresh DB comments back to the UI
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Comment saved successfully!",
+        comments: updatedComments, // Sends fresh DB comments back to the UI
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Comment submission crashed:", error);
-    return NextResponse.json({ error: 'Server processing error' }, { status: 500 });
+    return NextResponse.json(
+      { error: "Server processing error" },
+      { status: 500 },
+    );
   }
 });

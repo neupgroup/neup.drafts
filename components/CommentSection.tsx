@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, SyntheticEvent } from 'react';
+import { useState, SyntheticEvent } from "react";
 
 interface CommentAuthor {
   id: string;
@@ -22,59 +22,70 @@ interface CommentSectionProps {
   currentUser?: {
     id: string;
     displayName: string;
-    neupId: string;
+    displayImage: string;
+    neupId: string | null;
+    type: string;
+    createdOn: string;
     status: string;
+    moreDetails: unknown;
   } | null;
 }
 
-export function CommentSection({ postId, comments, currentUser }: CommentSectionProps) {
-  const [commentText, setCommentText] = useState('');
+export function CommentSection({
+  postId,
+  comments,
+  currentUser,
+}: CommentSectionProps) {
+  const [commentText, setCommentText] = useState("");
   const [allComments, setAllComments] = useState<Comment[]>(comments);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Fixed by switching from FormEvent to SyntheticEvent
   const handlePostComment = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Check if user is logged in before allowing the post
     if (!currentUser || !currentUser.neupId) {
-      setError('Could not post comment: are you logged in?');
+      setError("Could not post comment: are you logged in?");
       return;
     }
 
     try {
       // 1. Send the data to your API route
       const response = await fetch(`/api/posts/${postId}/comments`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: commentText }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save comment on server');
+        throw new Error("Failed to save comment on server");
       }
 
       // 2. Parse the updated comments array returned by your route.ts
-      const data = (await response.json()) as { success: boolean; comments: Comment[] };
+      const data = (await response.json()) as {
+        success: boolean;
+        comments: Comment[];
+      };
 
       // 3. Update the local UI state with the server's data
       setAllComments(data.comments);
-      setCommentText('');
+      setCommentText("");
     } catch (err) {
-      setError((err as Error).message || 'Failed to submit comment.');
+      setError((err as Error).message || "Failed to submit comment.");
     }
   };
 
   const getAuthorName = (comment: Comment) => {
-    if (typeof comment.author === 'string') return comment.author;
-    return comment.author?.neupId || comment.author?.displayName || 'Anonymous';
+    if (typeof comment.author === "string") return comment.author;
+    return comment.author?.neupId || comment.author?.displayName || "Anonymous";
   };
 
   const getCommentBody = (comment: Comment) => {
-    return comment.content || comment.text || '';
+    return comment.content || comment.text || "";
   };
 
   return (
@@ -87,12 +98,17 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
           {allComments.length}
         </span>
       </div>
-      
-      {error && <p className="mb-3 text-xs font-medium text-rose-600">{error}</p>}
+
+      {error && (
+        <p className="mb-3 text-xs font-medium text-rose-600">{error}</p>
+      )}
 
       {/* COMMENT SUBMISSION FORM */}
       {currentUser ? (
-        <form onSubmit={handlePostComment} className="mb-8 grid gap-3 sm:grid-cols-[1fr_auto]">
+        <form
+          onSubmit={handlePostComment}
+          className="mb-8 grid gap-3 sm:grid-cols-[1fr_auto]"
+        >
           <input
             type="text"
             placeholder={`Comment as @${currentUser.neupId}...`}
@@ -109,7 +125,9 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
           </button>
         </form>
       ) : (
-        <p className="mb-8 text-sm italic text-slate-500">Please log in to leave a comment.</p>
+        <p className="mb-8 text-sm italic text-slate-500">
+          Please log in to leave a comment.
+        </p>
       )}
 
       {/* COMMENTS FEED LIST */}
@@ -124,8 +142,12 @@ export function CommentSection({ postId, comments, currentUser }: CommentSection
               key={`${comment.id}-${index}`}
               className="border border-slate-200 bg-slate-50 p-4 text-sm"
             >
-              <p className="font-medium text-rose-600">@{getAuthorName(comment)}</p>
-              <p className="mt-2 leading-6 text-slate-700">{getCommentBody(comment)}</p>
+              <p className="font-medium text-rose-600">
+                @{getAuthorName(comment)}
+              </p>
+              <p className="mt-2 leading-6 text-slate-700">
+                {getCommentBody(comment)}
+              </p>
             </div>
           ))
         )}

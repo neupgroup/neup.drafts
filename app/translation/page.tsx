@@ -1,15 +1,21 @@
-import { cookies } from 'next/headers';
-import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import HeaderV1S1 from '@/components/header.v1s1';
-import TranslationWidget from '@/components/TranslationWidget';
+import { cookies } from "next/headers";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import HeaderV1S1 from "@/components/header.v1s1";
+import TranslationWidget from "@/components/TranslationWidget";
 
 // Define the shape of the user object returned by your mock auth
 export default async function TranslationPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
-  
-  // Trigger your mock auth check on the server
-  const user = token ? await verifyTokenWithBridge(token) : null;
+
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+
+  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
+
+  if (!authResult.authenticated) {
+    // keep your existing unauthorized handling
+  }
+
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   // Security Gatekeeper: Block users who aren't logged in
   if (!user) {
@@ -35,9 +41,12 @@ export default async function TranslationPage() {
           <p className="text-xs font-medium uppercase tracking-[0.24em] text-blue-600">
             Translation
           </p>
-          <h1 className="mt-3 text-3xl font-medium tracking-tight text-slate-950">Translation Tools</h1>
+          <h1 className="mt-3 text-3xl font-medium tracking-tight text-slate-950">
+            Translation Tools
+          </h1>
           <p className="mt-2 text-sm text-slate-600">
-            Authenticated as <span className="font-medium text-slate-950">@{user.neupId}</span>
+            Authenticated as{" "}
+            <span className="font-medium text-slate-950">@{user.neupId}</span>
           </p>
         </div>
 

@@ -1,39 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
-import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
-import { prisma } from '@/inapp/lib/prisma';
-import { getArticleFeed } from '@/services/articles/articles';
+import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
+import { prisma } from "@/inapp/lib/prisma";
+import { getArticleFeed } from "@/services/articles/articles";
 
 const ARTICLE_ID_PATTERN = /^[a-z0-9]{8,32}$/;
 
 function createArticleId(): string {
-  return randomUUID().replace(/-/g, '').slice(0, 12);
+  return randomUUID().replace(/-/g, "").slice(0, 12);
 }
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function buildArticleSlug(slug: string, id: string): string {
   const baseSlug = slugify(slug);
-  return baseSlug ? `${baseSlug}-${id}` : '';
+  return baseSlug ? `${baseSlug}-${id}` : "";
 }
 
 function normalizeArticleContent(content: string): string {
-  return content.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ');
+  return content.replace(/&nbsp;/gi, " ").replace(/\u00a0/g, " ");
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
   return (
-    typeof error === 'object' &&
+    typeof error === "object" &&
     error !== null &&
-    'code' in error &&
-    error.code === 'P2002'
+    "code" in error &&
+    error.code === "P2002"
   );
 }
 
@@ -45,7 +45,10 @@ export async function GET() {
     return NextResponse.json({ posts });
   } catch (error) {
     console.error("Failed to fetch posts:", error);
-    return NextResponse.json({ error: 'Failed to read posts feed' }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to read posts feed" },
+      { status: 500 },
+    );
   }
 }
 
@@ -54,25 +57,37 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
     const { title, content, slug, articleId } = await req.json();
 
-    if (typeof title !== 'string' || typeof content !== 'string') {
-      return NextResponse.json({ error: 'Missing title or content' }, { status: 400 });
+    if (typeof title !== "string" || typeof content !== "string") {
+      return NextResponse.json(
+        { error: "Missing title or content" },
+        { status: 400 },
+      );
     }
 
     const nextTitle = title.trim();
     const normalizedContent = normalizeArticleContent(content).trim();
 
     if (!nextTitle || !normalizedContent) {
-      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Title and content are required" },
+        { status: 400 },
+      );
     }
 
     const id =
-      typeof articleId === 'string' && ARTICLE_ID_PATTERN.test(articleId)
+      typeof articleId === "string" && ARTICLE_ID_PATTERN.test(articleId)
         ? articleId
         : createArticleId();
-    const finalSlug = buildArticleSlug(typeof slug === 'string' ? slug : nextTitle, id);
+    const finalSlug = buildArticleSlug(
+      typeof slug === "string" ? slug : nextTitle,
+      id,
+    );
 
     if (!finalSlug) {
-      return NextResponse.json({ error: 'Title must contain letters or numbers' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Title must contain letters or numbers" },
+        { status: 400 },
+      );
     }
 
     // Create the article in PostgreSQL using authorId
@@ -82,7 +97,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
         title: nextTitle,
         content: normalizedContent,
         slug: finalSlug,
-        authorId: context.user.id, // Connects directly via unique CUID
+        authorId: context.accountId, // Connects directly via unique CUID
       },
       include: {
         author: {
@@ -91,12 +106,21 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
       },
     });
 
-    return NextResponse.json({ message: 'Post created!', post: newPost }, { status: 201 });
+    return NextResponse.json(
+      { message: "Post created!", post: newPost },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Post creation failed:", error);
     if (isUniqueConstraintError(error)) {
-      return NextResponse.json({ error: 'Article slug or id already exists' }, { status: 409 });
+      return NextResponse.json(
+        { error: "Article slug or id already exists" },
+        { status: 409 },
+      );
     }
-    return NextResponse.json({ error: 'Invalid payload or server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: "Invalid payload or server error" },
+      { status: 500 },
+    );
   }
 });

@@ -1,5 +1,6 @@
 import { auth } from "@/logica/account/auth";
 import { current } from "@/logica/account/current";
+import { ensureRecord } from "@/logica/account/self";
 import { createAccountAccess } from "@/logica/account/access";
 
 const appId = process.env.NEUP_APP_ID;
@@ -25,6 +26,18 @@ export const bridgeAuth = {
 
     try {
       return await current.id.get(authAccountToken);
+    } catch {
+      return null;
+    }
+  },
+
+  async getCurrentAccount(authAccountToken: string | null) {
+    if (!authAccountToken) {
+      return null;
+    }
+
+    try {
+      return await ensureRecord(authAccountToken);
     } catch {
       return null;
     }

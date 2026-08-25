@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 
+export interface AuthContext {
+  accountId: string;
+}
+
 export const withAuth = (
-  handler: (req: NextRequest) => Promise<NextResponse>,
+  handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>,
 ) => {
   return async (req: NextRequest) => {
     const authAccountToken = req.cookies.get("auth_account")?.value ?? null;
@@ -35,6 +39,6 @@ export const withAuth = (
     }
 
     // 4. Authenticated + authorized
-    return handler(req);
+    return handler(req, { accountId });
   };
 };

@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Account: 'Account',
   Article: 'Article',
+  ArticleAuthor: 'ArticleAuthor',
   Comment: 'Comment',
   Reaction: 'Reaction'
 } as const
@@ -75,6 +76,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const AccountScalarFieldEnum = {
   id: 'id',
+  neupId: 'neupId',
   connectionId: 'connectionId',
   type: 'type',
   displayName: 'displayName',
@@ -99,6 +101,17 @@ export const ArticleScalarFieldEnum = {
 } as const
 
 export type ArticleScalarFieldEnum = (typeof ArticleScalarFieldEnum)[keyof typeof ArticleScalarFieldEnum]
+
+
+export const ArticleAuthorScalarFieldEnum = {
+  id: 'id',
+  articleId: 'articleId',
+  authorId: 'authorId',
+  role: 'role',
+  status: 'status'
+} as const
+
+export type ArticleAuthorScalarFieldEnum = (typeof ArticleAuthorScalarFieldEnum)[keyof typeof ArticleAuthorScalarFieldEnum]
 
 
 export const CommentScalarFieldEnum = {

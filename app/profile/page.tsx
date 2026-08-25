@@ -1,10 +1,10 @@
-import { cookies } from 'next/headers';
-import Link from 'next/link';
-import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { prisma } from '@/inapp/lib/prisma'; 
-import { Prisma } from '@/prisma/client/client';
-import HeaderV1S1 from '@/components/header.v1s1';
-import SidebarNav, { getSharedSidebarSections } from '@/components/SidebarNav';
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { prisma } from "@/inapp/lib/prisma";
+import { Prisma } from "@/prisma/client/client";
+import HeaderV1S1 from "@/components/header.v1s1";
+import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
 
 // Extract the exact return type for Article + included relations
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -20,14 +20,14 @@ function getArticlePath(post: ArticleWithRelations): string {
 }
 
 function getArticleEditPath(post: ArticleWithRelations): string {
-  return `/compose?article=${encodeURIComponent(getArticlePath(post).replace('/article/', ''))}`;
+  return `/compose?article=${encodeURIComponent(getArticlePath(post).replace("/article/", ""))}`;
 }
 
 function formatProfileDate(date: Date): string {
-  return new Intl.DateTimeFormat('en', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(date);
 }
 
@@ -35,17 +35,17 @@ function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) {
-    return 'U';
+    return "U";
   }
 
   return parts
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
-    .join('');
+    .join("");
 }
 
 function getPostExcerpt(content: string): string {
-  const normalizedContent = content.replace(/\s+/g, ' ').trim();
+  const normalizedContent = content.replace(/\s+/g, " ").trim();
 
   if (normalizedContent.length <= 160) {
     return normalizedContent;
@@ -54,7 +54,9 @@ function getPostExcerpt(content: string): string {
   return `${normalizedContent.slice(0, 157)}...`;
 }
 
-async function getAccountPosts(accountId: string): Promise<ArticleWithRelations[]> {
+async function getAccountPosts(
+  accountId: string,
+): Promise<ArticleWithRelations[]> {
   try {
     const accountPosts = await prisma.article.findMany({
       where: {
@@ -65,7 +67,7 @@ async function getAccountPosts(accountId: string): Promise<ArticleWithRelations[
         reactions: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -78,9 +80,10 @@ async function getAccountPosts(accountId: string): Promise<ArticleWithRelations[
 
 export default async function AccountPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
 
-  const user = token ? await verifyTokenWithBridge(token) : null;
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   if (!user) {
     return (
@@ -90,7 +93,7 @@ export default async function AccountPage() {
           <section className="max-w-md border border-slate-200 bg-slate-50 p-8">
             <p className="font-medium text-red-600">Access Denied.</p>
             <p className="mt-2 text-sm text-slate-600">
-            Please log in to view your profile and publications.
+              Please log in to view your profile and publications.
             </p>
           </section>
         </div>
@@ -98,12 +101,20 @@ export default async function AccountPage() {
     );
   }
 
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
   const myPosts = await getAccountPosts(user.id);
-  const displayName = user.displayName || user.neupId;
-  const totalReactions = myPosts.reduce((sum, post) => sum + post.reactions.length, 0);
-  const totalComments = myPosts.reduce((sum, post) => sum + post.comments.length, 0);
+
+  const displayName = user.displayName || user.neupId || "User";
+
+  const totalReactions = myPosts.reduce(
+    (sum, post) => sum + post.reactions.length,
+    0,
+  );
+  const totalComments = myPosts.reduce(
+    (sum, post) => sum + post.comments.length,
+    0,
+  );
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -111,9 +122,7 @@ export default async function AccountPage() {
 
       <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
         <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
-          <SidebarNav
-            sections={getSharedSidebarSections('profile')}
-          />
+          <SidebarNav sections={getSharedSidebarSections("profile")} />
         </aside>
 
         <div className="min-w-0 px-6 py-10 sm:px-10 lg:px-0 lg:pb-16 lg:pl-56 lg:pr-20 lg:pt-16">
@@ -126,12 +135,16 @@ export default async function AccountPage() {
                   </h1>
                   <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 lg:hidden">
                     {myPosts.length > 0
-                      ? `Published ${myPosts.length} ${myPosts.length === 1 ? 'story' : 'stories'} with ${totalReactions} ${totalReactions === 1 ? 'reaction' : 'reactions'} and ${totalComments} ${totalComments === 1 ? 'comment' : 'comments'}.`
-                      : 'No public stories yet. Start your first draft when you are ready to publish.'}
+                      ? `Published ${myPosts.length} ${myPosts.length === 1 ? "story" : "stories"} with ${totalReactions} ${totalReactions === 1 ? "reaction" : "reactions"} and ${totalComments} ${totalComments === 1 ? "comment" : "comments"}.`
+                      : "No public stories yet. Start your first draft when you are ready to publish."}
                   </p>
                 </div>
 
-                <form action={`${basePath}/api/auth/signout`} method="POST" className="lg:hidden">
+                <form
+                  action={`${basePath}/api/auth/signout`}
+                  method="POST"
+                  className="lg:hidden"
+                >
                   <button
                     type="submit"
                     className="cursor-pointer border border-red-500/30 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
@@ -142,7 +155,10 @@ export default async function AccountPage() {
               </div>
 
               <div className="mt-12 flex gap-9 overflow-x-auto border-b border-slate-200 text-sm text-slate-500">
-                <Link href="/profile" className="border-b border-slate-950 pb-4 font-medium text-slate-950">
+                <Link
+                  href="/profile"
+                  className="border-b border-slate-950 pb-4 font-medium text-slate-950"
+                >
                   Home
                 </Link>
                 <span className="pb-4">Reposts</span>
@@ -159,7 +175,8 @@ export default async function AccountPage() {
                     Start your first story
                   </h2>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Your published drafts will appear here in a clean reading feed.
+                    Your published drafts will appear here in a clean reading
+                    feed.
                   </p>
                   <Link
                     href="/compose"
@@ -177,7 +194,9 @@ export default async function AccountPage() {
                       <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-950 text-[11px] font-semibold text-white">
                         {getInitials(displayName)}
                       </div>
-                      <span className="font-medium text-slate-700">{displayName}</span>
+                      <span className="font-medium text-slate-700">
+                        {displayName}
+                      </span>
                       <span>-</span>
                       <span>{formatProfileDate(post.createdAt)}</span>
                     </div>

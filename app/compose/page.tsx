@@ -1,9 +1,9 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import ComposePostForm from '@/components/editor/ComposePostForm';
-import HeaderV1S1 from '@/components/header.v1s1';
-import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { prisma } from '@/inapp/lib/prisma';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import ComposePostForm from "@/components/editor/ComposePostForm";
+import HeaderV1S1 from "@/components/header.v1s1";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { prisma } from "@/inapp/lib/prisma";
 
 interface ComposePageProps {
   searchParams: Promise<{
@@ -12,7 +12,7 @@ interface ComposePageProps {
 }
 
 function getArticleLookup(article: string): { id: string; slug: string } {
-  const articleSegmentParts = article.split('-');
+  const articleSegmentParts = article.split("-");
   return {
     id: articleSegmentParts[articleSegmentParts.length - 1] || article,
     slug: article,
@@ -21,19 +21,24 @@ function getArticleLookup(article: string): { id: string; slug: string } {
 
 export default async function ComposePage({ searchParams }: ComposePageProps) {
   const query = await searchParams;
-  const articleParam = Array.isArray(query.article) ? query.article[0] : query.article;
+  const articleParam = Array.isArray(query.article)
+    ? query.article[0]
+    : query.article;
 
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
 
-  if (!token) {
-    redirect('/unauthorized');
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+
+  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
+
+  if (!authResult.authenticated) {
+    redirect("/unauthorized");
   }
 
-  const user = await verifyTokenWithBridge(token);
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   if (!user) {
-    redirect('/unauthorized');
+    redirect("/unauthorized");
   }
 
   if (!articleParam) {
@@ -51,10 +56,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
   const articleLookup = getArticleLookup(articleParam);
   const article = await prisma.article.findFirst({
     where: {
-      OR: [
-        { id: articleLookup.id },
-        { slug: articleLookup.slug },
-      ],
+      OR: [{ id: articleLookup.id }, { slug: articleLookup.slug }],
     },
     select: {
       id: true,
@@ -66,13 +68,13 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
   });
 
   if (!article) {
-    redirect('/compose');
+    redirect("/compose");
   }
 
-  const canEdit = article.authorId === user.id || user.status === 'ADMIN';
+  const canEdit = article.authorId === user.id || user.status === "ADMIN";
 
   if (!canEdit) {
-    redirect('/unauthorized');
+    redirect("/unauthorized");
   }
 
   return (

@@ -13,15 +13,17 @@ Use `/manage/articles` to scan managed articles, inspect engagement counts, and 
 ::end
 */
 
-import { cookies } from 'next/headers';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import HeaderV1S1 from '@/components/header.v1s1';
-import ManageShell from '@/components/ManageShell';
-import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { getManagedArticlePosts } from '@/services/articles/articles';
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import HeaderV1S1 from "@/components/header.v1s1";
+import ManageShell from "@/components/ManageShell";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { getManagedArticlePosts } from "@/services/articles/articles";
 
-type ManagedArticle = Awaited<ReturnType<typeof getManagedArticlePosts>>[number];
+type ManagedArticle = Awaited<
+  ReturnType<typeof getManagedArticlePosts>
+>[number];
 
 function getPublicArticlePath(post: ManagedArticle): string {
   return `/article/${post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`}`;
@@ -36,15 +38,18 @@ function getArticleEditPath(post: ManagedArticle): string {
 }
 
 function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(date);
 }
 
 function getPostExcerpt(content: string): string {
-  const normalizedContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const normalizedContent = content
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   if (normalizedContent.length <= 100) {
     return normalizedContent;
@@ -55,21 +60,30 @@ function getPostExcerpt(content: string): string {
 
 export default async function ManageArticlesPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
 
-  if (!token) {
-    redirect('/unauthorized');
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+
+  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
+
+  if (!authResult.authenticated) {
+    redirect("/unauthorized");
   }
 
-  const user = await verifyTokenWithBridge(token);
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   if (!user) {
-    redirect('/unauthorized');
+    redirect("/unauthorized");
   }
 
   const posts = await getManagedArticlePosts(user.id);
-  const totalReactions = posts.reduce((sum, post) => sum + post.reactions.length, 0);
-  const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
+  const totalReactions = posts.reduce(
+    (sum, post) => sum + post.reactions.length,
+    0,
+  );
+  const totalComments = posts.reduce(
+    (sum, post) => sum + post.comments.length,
+    0,
+  );
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -81,9 +95,9 @@ export default async function ManageArticlesPage() {
         ctaLabel="New post"
         description="Browse every managed article with current response counts and direct links to detailed management views."
         metrics={[
-          { label: 'Posts', value: posts.length },
-          { label: 'Reactions', value: totalReactions },
-          { label: 'Comments', value: totalComments },
+          { label: "Posts", value: posts.length },
+          { label: "Reactions", value: totalReactions },
+          { label: "Comments", value: totalComments },
         ]}
         title="Articles"
       >
@@ -93,7 +107,8 @@ export default async function ManageArticlesPage() {
               No articles to manage
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">
-              Publish a draft first, then return here to review engagement and manage each story.
+              Publish a draft first, then return here to review engagement and
+              manage each story.
             </p>
             <Link
               href="/compose"
@@ -126,12 +141,18 @@ export default async function ManageArticlesPage() {
                       {post.title}
                     </Link>
                     <p className="mt-1 line-clamp-1 text-slate-500">
-                      {getPostExcerpt(post.content) || 'No body content.'}
+                      {getPostExcerpt(post.content) || "No body content."}
                     </p>
                   </div>
-                  <span className="font-mono text-slate-600">{post.reactions.length}</span>
-                  <span className="font-mono text-slate-600">{post.comments.length}</span>
-                  <span className="text-slate-600">{formatDate(post.updatedAt)}</span>
+                  <span className="font-mono text-slate-600">
+                    {post.reactions.length}
+                  </span>
+                  <span className="font-mono text-slate-600">
+                    {post.comments.length}
+                  </span>
+                  <span className="text-slate-600">
+                    {formatDate(post.updatedAt)}
+                  </span>
                   <div className="flex justify-end gap-4 text-sm font-medium">
                     <Link
                       href={getManagedArticlePath(post)}

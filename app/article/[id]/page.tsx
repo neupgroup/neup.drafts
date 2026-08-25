@@ -1,18 +1,23 @@
-import { cookies } from 'next/headers';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { getArticleBySlugOrId } from '@/services/articles/articles';
-import { ReactionButton } from '@/components/ReactionButton';
-import { CommentSection } from '@/components/CommentSection';
-import HeaderV1S1 from '@/components/header.v1s1';
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { getArticleBySlugOrId } from "@/services/articles/articles";
+import { ReactionButton } from "@/components/ReactionButton";
+import { CommentSection } from "@/components/CommentSection";
+import HeaderV1S1 from "@/components/header.v1s1";
 
-function getCanonicalArticleSlug(post: { id: string; slug?: string | null }): string {
+function getCanonicalArticleSlug(post: {
+  id: string;
+  slug?: string | null;
+}): string {
   if (!post.slug) {
     return post.id;
   }
 
-  return post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`;
+  return post.slug.endsWith(`-${post.id}`)
+    ? post.slug
+    : `${post.slug}-${post.id}`;
 }
 
 function getContentBlocks(content: string): string[] {
@@ -30,16 +35,16 @@ function sanitizeUrl(value: string): string {
   const trimmedValue = value.trim();
 
   if (
-    trimmedValue.startsWith('data:image/') ||
-    trimmedValue.startsWith('data:video/') ||
-    trimmedValue.startsWith('data:audio/') ||
-    trimmedValue.startsWith('https://') ||
-    trimmedValue.startsWith('http://')
+    trimmedValue.startsWith("data:image/") ||
+    trimmedValue.startsWith("data:video/") ||
+    trimmedValue.startsWith("data:audio/") ||
+    trimmedValue.startsWith("https://") ||
+    trimmedValue.startsWith("http://")
   ) {
     return trimmedValue;
   }
 
-  return '';
+  return "";
 }
 
 function sanitizeEmbedUrl(value: string): string {
@@ -47,82 +52,99 @@ function sanitizeEmbedUrl(value: string): string {
 
   try {
     const url = new URL(trimmedValue);
-    const host = url.hostname.replace(/^www\./, '');
+    const host = url.hostname.replace(/^www\./, "");
 
     if (
-      (host === 'youtube.com' && url.pathname.startsWith('/embed/')) ||
-      (host === 'youtube-nocookie.com' && url.pathname.startsWith('/embed/')) ||
-      (host === 'player.vimeo.com' && url.pathname.startsWith('/video/'))
+      (host === "youtube.com" && url.pathname.startsWith("/embed/")) ||
+      (host === "youtube-nocookie.com" && url.pathname.startsWith("/embed/")) ||
+      (host === "player.vimeo.com" && url.pathname.startsWith("/video/"))
     ) {
       return url.toString();
     }
   } catch {
-    return '';
+    return "";
   }
 
-  return '';
+  return "";
 }
 
 function sanitizeLinkUrl(value: string): string {
   const trimmedValue = value.trim();
 
-  if (trimmedValue.startsWith('/') && !trimmedValue.startsWith('//')) {
+  if (trimmedValue.startsWith("/") && !trimmedValue.startsWith("//")) {
     return trimmedValue;
   }
 
   try {
     const url = new URL(trimmedValue);
 
-    if (['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) {
+    if (["http:", "https:", "mailto:", "tel:"].includes(url.protocol)) {
       return url.toString();
     }
   } catch {
-    return '';
+    return "";
   }
 
-  return '';
+  return "";
 }
 
 function sanitizeAttributeValue(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function getAllowedAttributes(tagName: string, attributes: string): string {
   const allowedAttributes: string[] = [];
-  const attributePattern = /([a-zA-Z0-9:-]+)(?:\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
+  const attributePattern =
+    /([a-zA-Z0-9:-]+)(?:\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
   let match: RegExpExecArray | null;
 
   while ((match = attributePattern.exec(attributes)) !== null) {
     const attributeName = match[1].toLowerCase();
-    const attributeValue = match[3] ?? match[4] ?? match[5] ?? '';
+    const attributeValue = match[3] ?? match[4] ?? match[5] ?? "";
 
-    if (attributeName.startsWith('on')) {
-      continue;
-    }
-
-    if (attributeName === 'data-editor-block' && ['aside', 'div', 'figure', 'ol', 'ul'].includes(tagName)) {
-      allowedAttributes.push(`data-editor-block="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName.startsWith("on")) {
       continue;
     }
 
     if (
-      attributeName.startsWith('data-') &&
-      ['aside', 'div', 'figure', 'h2', 'h3', 'li', 'ol', 'p', 'ul'].includes(tagName)
+      attributeName === "data-editor-block" &&
+      ["aside", "div", "figure", "ol", "ul"].includes(tagName)
     ) {
-      allowedAttributes.push(`${attributeName}="${sanitizeAttributeValue(attributeValue)}"`);
+      allowedAttributes.push(
+        `data-editor-block="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'role' && tagName === 'aside' && attributeValue === 'note') {
+    if (
+      attributeName.startsWith("data-") &&
+      ["aside", "div", "figure", "h2", "h3", "li", "ol", "p", "ul"].includes(
+        tagName,
+      )
+    ) {
+      allowedAttributes.push(
+        `${attributeName}="${sanitizeAttributeValue(attributeValue)}"`,
+      );
+      continue;
+    }
+
+    if (
+      attributeName === "role" &&
+      tagName === "aside" &&
+      attributeValue === "note"
+    ) {
       allowedAttributes.push('role="note"');
       continue;
     }
 
-    if (attributeName === 'src' && ['audio', 'img', 'video'].includes(tagName)) {
+    if (
+      attributeName === "src" &&
+      ["audio", "img", "video"].includes(tagName)
+    ) {
       const safeUrl = sanitizeUrl(attributeValue);
 
       if (safeUrl) {
@@ -132,7 +154,7 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'src' && tagName === 'iframe') {
+    if (attributeName === "src" && tagName === "iframe") {
       const safeUrl = sanitizeEmbedUrl(attributeValue);
 
       if (safeUrl) {
@@ -142,32 +164,38 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'title' && tagName === 'iframe') {
-      allowedAttributes.push(`title="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === "title" && tagName === "iframe") {
+      allowedAttributes.push(
+        `title="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'loading' && ['iframe', 'img'].includes(tagName)) {
-      allowedAttributes.push(`loading="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === "loading" && ["iframe", "img"].includes(tagName)) {
+      allowedAttributes.push(
+        `loading="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'allow' && tagName === 'iframe') {
-      allowedAttributes.push(`allow="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === "allow" && tagName === "iframe") {
+      allowedAttributes.push(
+        `allow="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'allowfullscreen' && tagName === 'iframe') {
-      allowedAttributes.push('allowfullscreen');
+    if (attributeName === "allowfullscreen" && tagName === "iframe") {
+      allowedAttributes.push("allowfullscreen");
       continue;
     }
 
-    if (attributeName === 'alt' && tagName === 'img') {
+    if (attributeName === "alt" && tagName === "img") {
       allowedAttributes.push(`alt="${sanitizeAttributeValue(attributeValue)}"`);
       continue;
     }
 
-    if (attributeName === 'href' && tagName === 'a') {
+    if (attributeName === "href" && tagName === "a") {
       const safeUrl = sanitizeLinkUrl(attributeValue);
 
       if (safeUrl) {
@@ -177,32 +205,42 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'target' && tagName === 'a' && attributeValue === '_blank') {
+    if (
+      attributeName === "target" &&
+      tagName === "a" &&
+      attributeValue === "_blank"
+    ) {
       allowedAttributes.push('target="_blank"');
       continue;
     }
 
-    if (attributeName === 'rel' && tagName === 'a') {
+    if (attributeName === "rel" && tagName === "a") {
       allowedAttributes.push('rel="noopener noreferrer"');
       continue;
     }
 
-    if (attributeName === 'kind' && tagName === 'track') {
-      allowedAttributes.push(`kind="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === "kind" && tagName === "track") {
+      allowedAttributes.push(
+        `kind="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'label' && tagName === 'track') {
-      allowedAttributes.push(`label="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === "label" && tagName === "track") {
+      allowedAttributes.push(
+        `label="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'srclang' && tagName === 'track') {
-      allowedAttributes.push(`srclang="${sanitizeAttributeValue(attributeValue)}"`);
+    if (attributeName === "srclang" && tagName === "track") {
+      allowedAttributes.push(
+        `srclang="${sanitizeAttributeValue(attributeValue)}"`,
+      );
       continue;
     }
 
-    if (attributeName === 'src' && tagName === 'track') {
+    if (attributeName === "src" && tagName === "track") {
       const safeUrl = sanitizeUrl(attributeValue);
 
       if (safeUrl) {
@@ -212,82 +250,85 @@ function getAllowedAttributes(tagName: string, attributes: string): string {
       continue;
     }
 
-    if (attributeName === 'controls' && ['audio', 'video'].includes(tagName)) {
-      allowedAttributes.push('controls');
+    if (attributeName === "controls" && ["audio", "video"].includes(tagName)) {
+      allowedAttributes.push("controls");
       continue;
     }
 
-    if (attributeName === 'autoplay' && tagName === 'video') {
-      allowedAttributes.push('autoplay');
+    if (attributeName === "autoplay" && tagName === "video") {
+      allowedAttributes.push("autoplay");
       continue;
     }
 
-    if (attributeName === 'muted' && tagName === 'video') {
-      allowedAttributes.push('muted');
+    if (attributeName === "muted" && tagName === "video") {
+      allowedAttributes.push("muted");
     }
   }
 
-  return allowedAttributes.length > 0 ? ` ${allowedAttributes.join(' ')}` : '';
+  return allowedAttributes.length > 0 ? ` ${allowedAttributes.join(" ")}` : "";
 }
 
 function sanitizeArticleHtml(content: string): string {
   const allowedTags = new Set([
-    'a',
-    'aside',
-    'audio',
-    'b',
-    'br',
-    'details',
-    'div',
-    'em',
-    'figcaption',
-    'figure',
-    'h2',
-    'h3',
-    'i',
-    'iframe',
-    'img',
-    'li',
-    'mark',
-    'ol',
-    'p',
-    'strong',
-    'table',
-    'tbody',
-    'td',
-    'summary',
-    'track',
-    'tr',
-    'u',
-    'ul',
-    'video',
+    "a",
+    "aside",
+    "audio",
+    "b",
+    "br",
+    "details",
+    "div",
+    "em",
+    "figcaption",
+    "figure",
+    "h2",
+    "h3",
+    "i",
+    "iframe",
+    "img",
+    "li",
+    "mark",
+    "ol",
+    "p",
+    "strong",
+    "table",
+    "tbody",
+    "td",
+    "summary",
+    "track",
+    "tr",
+    "u",
+    "ul",
+    "video",
   ]);
 
   return content
-    .replace(/<h1(\s[^>]*)?>/gi, '<h2$1>')
-    .replace(/<\/h1\s*>/gi, '</h2>')
-    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
-    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
-    .replace(/<button\b[\s\S]*?<\/button>/gi, '')
-    .replace(/<\/?([a-zA-Z0-9-]+)([^>]*)>/g, (tag, rawTagName: string, attributes: string) => {
-      const tagName = rawTagName.toLowerCase();
+    .replace(/<h1(\s[^>]*)?>/gi, "<h2$1>")
+    .replace(/<\/h1\s*>/gi, "</h2>")
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+    .replace(/<button\b[\s\S]*?<\/button>/gi, "")
+    .replace(
+      /<\/?([a-zA-Z0-9-]+)([^>]*)>/g,
+      (tag, rawTagName: string, attributes: string) => {
+        const tagName = rawTagName.toLowerCase();
 
-      if (!allowedTags.has(tagName)) {
-        return '';
-      }
+        if (!allowedTags.has(tagName)) {
+          return "";
+        }
 
-      if (tag.startsWith('</')) {
-        return tagName === 'br' || tagName === 'img' || tagName === 'track'
-          ? ''
-          : `</${tagName}>`;
-      }
+        if (tag.startsWith("</")) {
+          return tagName === "br" || tagName === "img" || tagName === "track"
+            ? ""
+            : `</${tagName}>`;
+        }
 
-      const safeAttributes = getAllowedAttributes(tagName, attributes);
+        const safeAttributes = getAllowedAttributes(tagName, attributes);
 
-      return tagName === 'br' || tagName === 'img' || tagName === 'track'
-        ? `<${tagName}${safeAttributes}>`
-        : `<${tagName}${safeAttributes}>`;
-    });
+        return tagName === "br" || tagName === "img" || tagName === "track"
+          ? `<${tagName}${safeAttributes}>`
+          : `<${tagName}${safeAttributes}>`;
+      },
+    );
 }
 
 async function getPost(id: string) {
@@ -299,22 +340,19 @@ async function getPost(id: string) {
   }
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id: slug } = await params;
 
   // Native Server-side Auth verification via Cookie Token
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
 
-  if (!token) {
-    redirect('/unauthorized'); // Kicks unauthenticated users out
-  }
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const user = await verifyTokenWithBridge(token);
-
-  if (!user) {
-    redirect('/unauthorized'); // Kicks unauthenticated users out
-  }
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   const post = await getPost(slug);
 
@@ -332,7 +370,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             Article Not Found
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">
-            The article you are looking for does not exist or is no longer available.
+            The article you are looking for does not exist or is no longer
+            available.
           </p>
           <Link
             href="/"
@@ -352,7 +391,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   }
 
   const authorDisplayName =
-    typeof post.author === 'object' && post.author !== null
+    typeof post.author === "object" && post.author !== null
       ? post.author.neupId || post.author.displayName
       : post.author;
 
@@ -360,7 +399,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   const likesCount = post._count?.reactions ?? post.likes ?? 0;
   const hasHtmlContent = isHtmlContent(post.content);
   const contentBlocks = getContentBlocks(post.content);
-  const articleHtml = hasHtmlContent ? sanitizeArticleHtml(post.content) : '';
+  const articleHtml = hasHtmlContent ? sanitizeArticleHtml(post.content) : "";
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
@@ -370,7 +409,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         <article className="space-y-8">
           <header className="border-b border-slate-200 pb-8">
             <div className="flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.18em] text-rose-600">
-              <span>@{authorDisplayName || 'Anonymous'}</span>
+              <span>@{authorDisplayName || "Anonymous"}</span>
             </div>
 
             <h1 className="mt-3 max-w-3xl font-serif text-4xl font-medium leading-tight tracking-tight text-slate-700">

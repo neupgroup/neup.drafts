@@ -13,15 +13,17 @@ Use `/manage` to review article volume, engagement totals, and shortcuts into ar
 ::end
 */
 
-import { cookies } from 'next/headers';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import HeaderV1S1 from '@/components/header.v1s1';
-import ManageShell from '@/components/ManageShell';
-import { verifyTokenWithBridge } from '@/inapp/lib/bridge-auth.service';
-import { getManagedArticlePosts } from '@/services/articles/articles';
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import HeaderV1S1 from "@/components/header.v1s1";
+import ManageShell from "@/components/ManageShell";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { getManagedArticlePosts } from "@/services/articles/articles";
 
-type ManagedArticle = Awaited<ReturnType<typeof getManagedArticlePosts>>[number];
+type ManagedArticle = Awaited<
+  ReturnType<typeof getManagedArticlePosts>
+>[number];
 
 function getManagedArticlePath(post: ManagedArticle): string {
   return `/manage/articles/${post.slug.endsWith(`-${post.id}`) ? post.slug : `${post.slug}-${post.id}`}`;
@@ -32,15 +34,18 @@ function getArticleEditPath(post: ManagedArticle): string {
 }
 
 function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(date);
 }
 
 function getPostExcerpt(content: string): string {
-  const normalizedContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const normalizedContent = content
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   if (normalizedContent.length <= 140) {
     return normalizedContent;
@@ -51,21 +56,30 @@ function getPostExcerpt(content: string): string {
 
 export default async function ManageOverviewPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
 
-  if (!token) {
-    redirect('/unauthorized');
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+
+  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
+
+  if (!authResult.authenticated) {
+    redirect("/unauthorized");
   }
 
-  const user = await verifyTokenWithBridge(token);
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   if (!user) {
-    redirect('/unauthorized');
+    redirect("/unauthorized");
   }
 
   const posts = await getManagedArticlePosts(user.id);
-  const totalReactions = posts.reduce((sum, post) => sum + post.reactions.length, 0);
-  const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
+  const totalReactions = posts.reduce(
+    (sum, post) => sum + post.reactions.length,
+    0,
+  );
+  const totalComments = posts.reduce(
+    (sum, post) => sum + post.comments.length,
+    0,
+  );
   const displayName = user.displayName || user.neupId;
   const recentPosts = posts.slice(0, 5);
 
@@ -79,9 +93,9 @@ export default async function ManageOverviewPage() {
         ctaLabel="New post"
         description={`Track the article workspace for @${displayName}, jump into editing, and review current engagement at a glance.`}
         metrics={[
-          { label: 'Posts', value: posts.length },
-          { label: 'Reactions', value: totalReactions },
-          { label: 'Comments', value: totalComments },
+          { label: "Posts", value: posts.length },
+          { label: "Reactions", value: totalReactions },
+          { label: "Comments", value: totalComments },
         ]}
         title="Overview"
       >
@@ -89,7 +103,9 @@ export default async function ManageOverviewPage() {
           <section className="border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-950">Recent articles</h2>
+                <h2 className="text-lg font-semibold text-slate-950">
+                  Recent articles
+                </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   Latest updates across your published drafts.
                 </p>
@@ -119,7 +135,7 @@ export default async function ManageOverviewPage() {
                           {post.title}
                         </Link>
                         <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">
-                          {getPostExcerpt(post.content) || 'No body content.'}
+                          {getPostExcerpt(post.content) || "No body content."}
                         </p>
                       </div>
                       <span className="shrink-0 text-xs uppercase tracking-[0.16em] text-slate-400">
@@ -145,9 +161,12 @@ export default async function ManageOverviewPage() {
 
           <div className="space-y-6">
             <section className="border border-slate-200 bg-slate-50 p-5">
-              <h2 className="text-lg font-semibold text-slate-950">Inventory</h2>
+              <h2 className="text-lg font-semibold text-slate-950">
+                Inventory
+              </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Inspect every article row with direct links into edit and public view flows.
+                Inspect every article row with direct links into edit and public
+                view flows.
               </p>
               <Link
                 href="/manage/articles"
@@ -160,7 +179,8 @@ export default async function ManageOverviewPage() {
             <section className="border border-slate-200 bg-slate-50 p-5">
               <h2 className="text-lg font-semibold text-slate-950">Stats</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Compare engagement concentration, top-performing posts, and response averages.
+                Compare engagement concentration, top-performing posts, and
+                response averages.
               </p>
               <Link
                 href="/manage/stats"

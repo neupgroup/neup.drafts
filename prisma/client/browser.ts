@@ -28,6 +28,11 @@ export type Account = Prisma.AccountModel
  */
 export type Article = Prisma.ArticleModel
 /**
+ * Model ArticleAuthor
+ * 
+ */
+export type ArticleAuthor = Prisma.ArticleAuthorModel
+/**
  * Model Comment
  * 
  */

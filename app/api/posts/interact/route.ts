@@ -1,17 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withAuth, AuthContext } from '@/inapp/lib/auth-guard';
-import { prisma } from '@/inapp/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
+import { prisma } from "@/inapp/lib/prisma";
 
 // POST /api/posts/interact -> Handles liking/unliking a post
 export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
   try {
     const { postId, action } = await req.json();
 
-    if (!postId || action !== 'like') {
-      return NextResponse.json({ error: 'Missing postId or invalid action' }, { status: 400 });
+    if (!postId || action !== "like") {
+      return NextResponse.json(
+        { error: "Missing postId or invalid action" },
+        { status: 400 },
+      );
     }
 
-    const accountId = context.user.id;
+    const accountId = context.accountId;
 
     // 1. Verify the article exists in the database
     const article = await prisma.article.findUnique({
@@ -19,7 +22,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
     });
 
     if (!article) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
     // 2. Check if this specific account already liked the post
@@ -27,7 +30,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
       where: {
         articleId: postId,
         accountId,
-        type: 'LIKE',
+        type: "LIKE",
       },
     });
 
@@ -39,7 +42,7 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
     } else {
       await prisma.reaction.create({
         data: {
-          type: 'LIKE',
+          type: "LIKE",
           articleId: postId,
           accountId,
         },
@@ -50,18 +53,22 @@ export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
     const likesCount = await prisma.reaction.count({
       where: {
         articleId: postId,
-        type: 'LIKE',
+        type: "LIKE",
       },
     });
 
-    return NextResponse.json({ 
-      message: existingReaction ? 'Unliked successfully' : 'Liked successfully', 
-      likes: likesCount,
-      hasLiked: !existingReaction,
-    }, { status: 200 });
-
+    return NextResponse.json(
+      {
+        message: existingReaction
+          ? "Unliked successfully"
+          : "Liked successfully",
+        likes: likesCount,
+        hasLiked: !existingReaction,
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Interaction failed:", error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 });

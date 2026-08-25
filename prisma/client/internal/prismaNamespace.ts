@@ -399,6 +399,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Account: 'Account',
   Article: 'Article',
+  ArticleAuthor: 'ArticleAuthor',
   Comment: 'Comment',
   Reaction: 'Reaction'
 } as const
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "article" | "comment" | "reaction"
+    modelProps: "account" | "article" | "articleAuthor" | "comment" | "reaction"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -565,6 +566,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ArticleCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ArticleCountAggregateOutputType> | number
+        }
+      }
+    }
+    ArticleAuthor: {
+      payload: Prisma.$ArticleAuthorPayload<ExtArgs>
+      fields: Prisma.ArticleAuthorFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ArticleAuthorFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ArticleAuthorFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>
+        }
+        findFirst: {
+          args: Prisma.ArticleAuthorFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ArticleAuthorFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>
+        }
+        findMany: {
+          args: Prisma.ArticleAuthorFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>[]
+        }
+        create: {
+          args: Prisma.ArticleAuthorCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>
+        }
+        createMany: {
+          args: Prisma.ArticleAuthorCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ArticleAuthorCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>[]
+        }
+        delete: {
+          args: Prisma.ArticleAuthorDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>
+        }
+        update: {
+          args: Prisma.ArticleAuthorUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>
+        }
+        deleteMany: {
+          args: Prisma.ArticleAuthorDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ArticleAuthorUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ArticleAuthorUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>[]
+        }
+        upsert: {
+          args: Prisma.ArticleAuthorUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ArticleAuthorPayload>
+        }
+        aggregate: {
+          args: Prisma.ArticleAuthorAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArticleAuthor>
+        }
+        groupBy: {
+          args: Prisma.ArticleAuthorGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleAuthorGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ArticleAuthorCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticleAuthorCountAggregateOutputType> | number
         }
       }
     }
@@ -757,6 +832,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const AccountScalarFieldEnum = {
   id: 'id',
+  neupId: 'neupId',
   connectionId: 'connectionId',
   type: 'type',
   displayName: 'displayName',
@@ -781,6 +857,17 @@ export const ArticleScalarFieldEnum = {
 } as const
 
 export type ArticleScalarFieldEnum = (typeof ArticleScalarFieldEnum)[keyof typeof ArticleScalarFieldEnum]
+
+
+export const ArticleAuthorScalarFieldEnum = {
+  id: 'id',
+  articleId: 'articleId',
+  authorId: 'authorId',
+  role: 'role',
+  status: 'status'
+} as const
+
+export type ArticleAuthorScalarFieldEnum = (typeof ArticleAuthorScalarFieldEnum)[keyof typeof ArticleAuthorScalarFieldEnum]
 
 
 export const CommentScalarFieldEnum = {
@@ -1075,6 +1162,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   article?: Prisma.ArticleOmit
+  articleAuthor?: Prisma.ArticleAuthorOmit
   comment?: Prisma.CommentOmit
   reaction?: Prisma.ReactionOmit
 }
