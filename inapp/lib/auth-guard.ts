@@ -6,6 +6,7 @@ export interface AuthContext {
 }
 
 export const withAuth = (
+  permission: string,
   handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>,
 ) => {
   return async (req: NextRequest) => {
@@ -30,7 +31,10 @@ export const withAuth = (
     }
 
     // 3. Authorization
-    const authorized = await bridgeAuth.checkAuthorization(accountId);
+    const authorized = await bridgeAuth.checkAuthorization(
+      accountId,
+      permission,
+    );
 
     if (!authorized) {
       return new NextResponse("Forbidden", {

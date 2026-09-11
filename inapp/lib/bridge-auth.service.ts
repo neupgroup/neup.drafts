@@ -10,8 +10,6 @@ if (!appId || !appSecret) {
   throw new Error("Central Auth application credentials are not configured.");
 }
 
-const REQUIRED_PERMISSION = "replacement_for_now";
-
 export const bridgeAuth = {
   async checkAuthentication(authAccountToken?: string | null) {
     return auth.check({
@@ -43,19 +41,30 @@ export const bridgeAuth = {
     }
   },
 
-  async checkAuthorization(accountId: string) {
+  async checkAuthorization(accountId: string, permission: string) {
     if (!accountId) {
       return false;
     }
 
     const access = createAccountAccess(accountId);
 
-    const result = await access
-      .permission(REQUIRED_PERMISSION)
-      .check(appId, accountId, {
-        appSecret,
-      });
+    const result = await access.permission(permission).check(appId, accountId, {
+      appSecret,
+    });
 
     return result.ok && result.body.allowed === true;
+  },
+
+  async getAccountAccess(accountId: string) {
+    if (!accountId) {
+      return null;
+    }
+
+    const access = createAccountAccess(accountId);
+
+    return access.permission.list({
+      appId,
+      appSecret,
+    });
   },
 };

@@ -25,12 +25,6 @@ export async function proxy(req: NextRequest) {
     return redirectToAuth(req);
   }
 
-  const authorized = await bridgeAuth.checkAuthorization(accountId);
-
-  if (!authorized) {
-    return redirectToAuth(req);
-  }
-
   return NextResponse.next();
 }
 
