@@ -243,6 +243,7 @@ export type ArticleWhereInput = {
   author?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
+  authzAccess?: Prisma.AuthzAccessListRelationFilter
 }
 
 export type ArticleOrderByWithRelationInput = {
@@ -257,6 +258,7 @@ export type ArticleOrderByWithRelationInput = {
   author?: Prisma.AccountOrderByWithRelationInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   reactions?: Prisma.ReactionOrderByRelationAggregateInput
+  authzAccess?: Prisma.AuthzAccessOrderByRelationAggregateInput
 }
 
 export type ArticleWhereUniqueInput = Prisma.AtLeast<{
@@ -274,6 +276,7 @@ export type ArticleWhereUniqueInput = Prisma.AtLeast<{
   author?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
+  authzAccess?: Prisma.AuthzAccessListRelationFilter
 }, "id" | "slug">
 
 export type ArticleOrderByWithAggregationInput = {
@@ -317,6 +320,7 @@ export type ArticleCreateInput = {
   author: Prisma.AccountCreateNestedOneWithoutArticlesInput
   comments?: Prisma.CommentCreateNestedManyWithoutArticleInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleUncheckedCreateInput = {
@@ -330,6 +334,7 @@ export type ArticleUncheckedCreateInput = {
   authorId: string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutArticleInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleUpdateInput = {
@@ -343,6 +348,7 @@ export type ArticleUpdateInput = {
   author?: Prisma.AccountUpdateOneRequiredWithoutArticlesNestedInput
   comments?: Prisma.CommentUpdateManyWithoutArticleNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleUncheckedUpdateInput = {
@@ -356,6 +362,7 @@ export type ArticleUncheckedUpdateInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutArticleNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleCreateManyInput = {
@@ -441,6 +448,11 @@ export type ArticleSumOrderByAggregateInput = {
   likes?: Prisma.SortOrder
 }
 
+export type ArticleNullableScalarRelationFilter = {
+  is?: Prisma.ArticleWhereInput | null
+  isNot?: Prisma.ArticleWhereInput | null
+}
+
 export type ArticleScalarRelationFilter = {
   is?: Prisma.ArticleWhereInput
   isNot?: Prisma.ArticleWhereInput
@@ -496,6 +508,22 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type ArticleCreateNestedOneWithoutAuthzAccessInput = {
+  create?: Prisma.XOR<Prisma.ArticleCreateWithoutAuthzAccessInput, Prisma.ArticleUncheckedCreateWithoutAuthzAccessInput>
+  connectOrCreate?: Prisma.ArticleCreateOrConnectWithoutAuthzAccessInput
+  connect?: Prisma.ArticleWhereUniqueInput
+}
+
+export type ArticleUpdateOneWithoutAuthzAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.ArticleCreateWithoutAuthzAccessInput, Prisma.ArticleUncheckedCreateWithoutAuthzAccessInput>
+  connectOrCreate?: Prisma.ArticleCreateOrConnectWithoutAuthzAccessInput
+  upsert?: Prisma.ArticleUpsertWithoutAuthzAccessInput
+  disconnect?: Prisma.ArticleWhereInput | boolean
+  delete?: Prisma.ArticleWhereInput | boolean
+  connect?: Prisma.ArticleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ArticleUpdateToOneWithWhereWithoutAuthzAccessInput, Prisma.ArticleUpdateWithoutAuthzAccessInput>, Prisma.ArticleUncheckedUpdateWithoutAuthzAccessInput>
+}
+
 export type ArticleCreateNestedOneWithoutCommentsInput = {
   create?: Prisma.XOR<Prisma.ArticleCreateWithoutCommentsInput, Prisma.ArticleUncheckedCreateWithoutCommentsInput>
   connectOrCreate?: Prisma.ArticleCreateOrConnectWithoutCommentsInput
@@ -534,6 +562,7 @@ export type ArticleCreateWithoutAuthorInput = {
   updatedAt?: Date | string
   comments?: Prisma.CommentCreateNestedManyWithoutArticleInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleUncheckedCreateWithoutAuthorInput = {
@@ -546,6 +575,7 @@ export type ArticleUncheckedCreateWithoutAuthorInput = {
   updatedAt?: Date | string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutArticleInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleCreateOrConnectWithoutAuthorInput = {
@@ -588,6 +618,74 @@ export type ArticleScalarWhereInput = {
   authorId?: Prisma.StringFilter<"Article"> | string
 }
 
+export type ArticleCreateWithoutAuthzAccessInput = {
+  id?: string
+  title: string
+  slug: string
+  content: string
+  likes?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  author: Prisma.AccountCreateNestedOneWithoutArticlesInput
+  comments?: Prisma.CommentCreateNestedManyWithoutArticleInput
+  reactions?: Prisma.ReactionCreateNestedManyWithoutArticleInput
+}
+
+export type ArticleUncheckedCreateWithoutAuthzAccessInput = {
+  id?: string
+  title: string
+  slug: string
+  content: string
+  likes?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  authorId: string
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutArticleInput
+  reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutArticleInput
+}
+
+export type ArticleCreateOrConnectWithoutAuthzAccessInput = {
+  where: Prisma.ArticleWhereUniqueInput
+  create: Prisma.XOR<Prisma.ArticleCreateWithoutAuthzAccessInput, Prisma.ArticleUncheckedCreateWithoutAuthzAccessInput>
+}
+
+export type ArticleUpsertWithoutAuthzAccessInput = {
+  update: Prisma.XOR<Prisma.ArticleUpdateWithoutAuthzAccessInput, Prisma.ArticleUncheckedUpdateWithoutAuthzAccessInput>
+  create: Prisma.XOR<Prisma.ArticleCreateWithoutAuthzAccessInput, Prisma.ArticleUncheckedCreateWithoutAuthzAccessInput>
+  where?: Prisma.ArticleWhereInput
+}
+
+export type ArticleUpdateToOneWithWhereWithoutAuthzAccessInput = {
+  where?: Prisma.ArticleWhereInput
+  data: Prisma.XOR<Prisma.ArticleUpdateWithoutAuthzAccessInput, Prisma.ArticleUncheckedUpdateWithoutAuthzAccessInput>
+}
+
+export type ArticleUpdateWithoutAuthzAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  likes?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  author?: Prisma.AccountUpdateOneRequiredWithoutArticlesNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutArticleNestedInput
+  reactions?: Prisma.ReactionUpdateManyWithoutArticleNestedInput
+}
+
+export type ArticleUncheckedUpdateWithoutAuthzAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  likes?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutArticleNestedInput
+  reactions?: Prisma.ReactionUncheckedUpdateManyWithoutArticleNestedInput
+}
+
 export type ArticleCreateWithoutCommentsInput = {
   id?: string
   title: string
@@ -598,6 +696,7 @@ export type ArticleCreateWithoutCommentsInput = {
   updatedAt?: Date | string
   author: Prisma.AccountCreateNestedOneWithoutArticlesInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleUncheckedCreateWithoutCommentsInput = {
@@ -610,6 +709,7 @@ export type ArticleUncheckedCreateWithoutCommentsInput = {
   updatedAt?: Date | string
   authorId: string
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleCreateOrConnectWithoutCommentsInput = {
@@ -638,6 +738,7 @@ export type ArticleUpdateWithoutCommentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.AccountUpdateOneRequiredWithoutArticlesNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleUncheckedUpdateWithoutCommentsInput = {
@@ -650,6 +751,7 @@ export type ArticleUncheckedUpdateWithoutCommentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleCreateWithoutReactionsInput = {
@@ -662,6 +764,7 @@ export type ArticleCreateWithoutReactionsInput = {
   updatedAt?: Date | string
   author: Prisma.AccountCreateNestedOneWithoutArticlesInput
   comments?: Prisma.CommentCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleUncheckedCreateWithoutReactionsInput = {
@@ -674,6 +777,7 @@ export type ArticleUncheckedCreateWithoutReactionsInput = {
   updatedAt?: Date | string
   authorId: string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutArticleInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutArticleInput
 }
 
 export type ArticleCreateOrConnectWithoutReactionsInput = {
@@ -702,6 +806,7 @@ export type ArticleUpdateWithoutReactionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.AccountUpdateOneRequiredWithoutArticlesNestedInput
   comments?: Prisma.CommentUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleUncheckedUpdateWithoutReactionsInput = {
@@ -714,6 +819,7 @@ export type ArticleUncheckedUpdateWithoutReactionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleCreateManyAuthorInput = {
@@ -736,6 +842,7 @@ export type ArticleUpdateWithoutAuthorInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUpdateManyWithoutArticleNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleUncheckedUpdateWithoutAuthorInput = {
@@ -748,6 +855,7 @@ export type ArticleUncheckedUpdateWithoutAuthorInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutArticleNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutArticleNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutArticleNestedInput
 }
 
 export type ArticleUncheckedUpdateManyWithoutAuthorInput = {
@@ -768,11 +876,13 @@ export type ArticleUncheckedUpdateManyWithoutAuthorInput = {
 export type ArticleCountOutputType = {
   comments: number
   reactions: number
+  authzAccess: number
 }
 
 export type ArticleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   comments?: boolean | ArticleCountOutputTypeCountCommentsArgs
   reactions?: boolean | ArticleCountOutputTypeCountReactionsArgs
+  authzAccess?: boolean | ArticleCountOutputTypeCountAuthzAccessArgs
 }
 
 /**
@@ -799,6 +909,13 @@ export type ArticleCountOutputTypeCountReactionsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ReactionWhereInput
 }
 
+/**
+ * ArticleCountOutputType without action
+ */
+export type ArticleCountOutputTypeCountAuthzAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthzAccessWhereInput
+}
+
 
 export type ArticleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -812,6 +929,7 @@ export type ArticleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   author?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   comments?: boolean | Prisma.Article$commentsArgs<ExtArgs>
   reactions?: boolean | Prisma.Article$reactionsArgs<ExtArgs>
+  authzAccess?: boolean | Prisma.Article$authzAccessArgs<ExtArgs>
   _count?: boolean | Prisma.ArticleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["article"]>
 
@@ -855,6 +973,7 @@ export type ArticleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   author?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   comments?: boolean | Prisma.Article$commentsArgs<ExtArgs>
   reactions?: boolean | Prisma.Article$reactionsArgs<ExtArgs>
+  authzAccess?: boolean | Prisma.Article$authzAccessArgs<ExtArgs>
   _count?: boolean | Prisma.ArticleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ArticleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -870,6 +989,7 @@ export type $ArticlePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     author: Prisma.$AccountPayload<ExtArgs>
     comments: Prisma.$CommentPayload<ExtArgs>[]
     reactions: Prisma.$ReactionPayload<ExtArgs>[]
+    authzAccess: Prisma.$AuthzAccessPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1277,6 +1397,7 @@ export interface Prisma__ArticleClient<T, Null = never, ExtArgs extends runtime.
   author<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   comments<T extends Prisma.Article$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Article$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reactions<T extends Prisma.Article$reactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Article$reactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  authzAccess<T extends Prisma.Article$authzAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Article$authzAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1760,6 +1881,30 @@ export type Article$reactionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ReactionScalarFieldEnum | Prisma.ReactionScalarFieldEnum[]
+}
+
+/**
+ * Article.authzAccess
+ */
+export type Article$authzAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthzAccess
+   */
+  select?: Prisma.AuthzAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuthzAccess
+   */
+  omit?: Prisma.AuthzAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzAccessInclude<ExtArgs> | null
+  where?: Prisma.AuthzAccessWhereInput
+  orderBy?: Prisma.AuthzAccessOrderByWithRelationInput | Prisma.AuthzAccessOrderByWithRelationInput[]
+  cursor?: Prisma.AuthzAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuthzAccessScalarFieldEnum | Prisma.AuthzAccessScalarFieldEnum[]
 }
 
 /**

@@ -23,8 +23,7 @@ The delegate guard rebuilds the cached client when the generated Prisma client s
 ::end
 */
 
-export { prisma } from '@/core/database/prisma'
-export { default } from '@/core/database/prisma'
-export { Prisma } from '@/core/database/prisma'
-export type * from '@/core/database/prisma'
-
+export { prisma } from "@/core/database/prisma";
+export { default } from "@/core/database/prisma";
+export { Prisma } from "@/core/database/prisma";
+export type * from "@/core/database/prisma";

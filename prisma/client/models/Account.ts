@@ -33,6 +33,7 @@ export type AccountMinAggregateOutputType = {
   displayImage: string | null
   createdOn: Date | null
   status: string | null
+  isVerified: boolean | null
 }
 
 export type AccountMaxAggregateOutputType = {
@@ -44,6 +45,7 @@ export type AccountMaxAggregateOutputType = {
   displayImage: string | null
   createdOn: Date | null
   status: string | null
+  isVerified: boolean | null
 }
 
 export type AccountCountAggregateOutputType = {
@@ -55,6 +57,7 @@ export type AccountCountAggregateOutputType = {
   displayImage: number
   createdOn: number
   status: number
+  isVerified: number
   moreDetails: number
   _all: number
 }
@@ -69,6 +72,7 @@ export type AccountMinAggregateInputType = {
   displayImage?: true
   createdOn?: true
   status?: true
+  isVerified?: true
 }
 
 export type AccountMaxAggregateInputType = {
@@ -80,6 +84,7 @@ export type AccountMaxAggregateInputType = {
   displayImage?: true
   createdOn?: true
   status?: true
+  isVerified?: true
 }
 
 export type AccountCountAggregateInputType = {
@@ -91,6 +96,7 @@ export type AccountCountAggregateInputType = {
   displayImage?: true
   createdOn?: true
   status?: true
+  isVerified?: true
   moreDetails?: true
   _all?: true
 }
@@ -176,6 +182,7 @@ export type AccountGroupByOutputType = {
   displayImage: string | null
   createdOn: Date
   status: string
+  isVerified: boolean
   moreDetails: runtime.JsonValue | null
   _count: AccountCountAggregateOutputType | null
   _min: AccountMinAggregateOutputType | null
@@ -209,10 +216,12 @@ export type AccountWhereInput = {
   displayImage?: Prisma.StringNullableFilter<"Account"> | string | null
   createdOn?: Prisma.DateTimeFilter<"Account"> | Date | string
   status?: Prisma.StringFilter<"Account"> | string
+  isVerified?: Prisma.BoolFilter<"Account"> | boolean
   moreDetails?: Prisma.JsonNullableFilter<"Account">
   articles?: Prisma.ArticleListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
+  authzAccess?: Prisma.AuthzAccessListRelationFilter
 }
 
 export type AccountOrderByWithRelationInput = {
@@ -224,10 +233,12 @@ export type AccountOrderByWithRelationInput = {
   displayImage?: Prisma.SortOrderInput | Prisma.SortOrder
   createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  isVerified?: Prisma.SortOrder
   moreDetails?: Prisma.SortOrderInput | Prisma.SortOrder
   articles?: Prisma.ArticleOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   reactions?: Prisma.ReactionOrderByRelationAggregateInput
+  authzAccess?: Prisma.AuthzAccessOrderByRelationAggregateInput
 }
 
 export type AccountWhereUniqueInput = Prisma.AtLeast<{
@@ -242,10 +253,12 @@ export type AccountWhereUniqueInput = Prisma.AtLeast<{
   displayImage?: Prisma.StringNullableFilter<"Account"> | string | null
   createdOn?: Prisma.DateTimeFilter<"Account"> | Date | string
   status?: Prisma.StringFilter<"Account"> | string
+  isVerified?: Prisma.BoolFilter<"Account"> | boolean
   moreDetails?: Prisma.JsonNullableFilter<"Account">
   articles?: Prisma.ArticleListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   reactions?: Prisma.ReactionListRelationFilter
+  authzAccess?: Prisma.AuthzAccessListRelationFilter
 }, "id" | "neupId" | "connectionId">
 
 export type AccountOrderByWithAggregationInput = {
@@ -257,6 +270,7 @@ export type AccountOrderByWithAggregationInput = {
   displayImage?: Prisma.SortOrderInput | Prisma.SortOrder
   createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  isVerified?: Prisma.SortOrder
   moreDetails?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AccountCountOrderByAggregateInput
   _max?: Prisma.AccountMaxOrderByAggregateInput
@@ -275,6 +289,7 @@ export type AccountScalarWhereWithAggregatesInput = {
   displayImage?: Prisma.StringNullableWithAggregatesFilter<"Account"> | string | null
   createdOn?: Prisma.DateTimeWithAggregatesFilter<"Account"> | Date | string
   status?: Prisma.StringWithAggregatesFilter<"Account"> | string
+  isVerified?: Prisma.BoolWithAggregatesFilter<"Account"> | boolean
   moreDetails?: Prisma.JsonNullableWithAggregatesFilter<"Account">
 }
 
@@ -287,10 +302,12 @@ export type AccountCreateInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateInput = {
@@ -302,10 +319,12 @@ export type AccountUncheckedCreateInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUpdateInput = {
@@ -317,10 +336,12 @@ export type AccountUpdateInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateInput = {
@@ -332,10 +353,12 @@ export type AccountUncheckedUpdateInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateManyInput = {
@@ -347,6 +370,7 @@ export type AccountCreateManyInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -359,6 +383,7 @@ export type AccountUpdateManyMutationInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -371,6 +396,7 @@ export type AccountUncheckedUpdateManyInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -383,6 +409,7 @@ export type AccountCountOrderByAggregateInput = {
   displayImage?: Prisma.SortOrder
   createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  isVerified?: Prisma.SortOrder
   moreDetails?: Prisma.SortOrder
 }
 
@@ -395,6 +422,7 @@ export type AccountMaxOrderByAggregateInput = {
   displayImage?: Prisma.SortOrder
   createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  isVerified?: Prisma.SortOrder
 }
 
 export type AccountMinOrderByAggregateInput = {
@@ -406,6 +434,7 @@ export type AccountMinOrderByAggregateInput = {
   displayImage?: Prisma.SortOrder
   createdOn?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  isVerified?: Prisma.SortOrder
 }
 
 export type AccountScalarRelationFilter = {
@@ -425,6 +454,10 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type AccountCreateNestedOneWithoutArticlesInput = {
   create?: Prisma.XOR<Prisma.AccountCreateWithoutArticlesInput, Prisma.AccountUncheckedCreateWithoutArticlesInput>
   connectOrCreate?: Prisma.AccountCreateOrConnectWithoutArticlesInput
@@ -437,6 +470,20 @@ export type AccountUpdateOneRequiredWithoutArticlesNestedInput = {
   upsert?: Prisma.AccountUpsertWithoutArticlesInput
   connect?: Prisma.AccountWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccountUpdateToOneWithWhereWithoutArticlesInput, Prisma.AccountUpdateWithoutArticlesInput>, Prisma.AccountUncheckedUpdateWithoutArticlesInput>
+}
+
+export type AccountCreateNestedOneWithoutAuthzAccessInput = {
+  create?: Prisma.XOR<Prisma.AccountCreateWithoutAuthzAccessInput, Prisma.AccountUncheckedCreateWithoutAuthzAccessInput>
+  connectOrCreate?: Prisma.AccountCreateOrConnectWithoutAuthzAccessInput
+  connect?: Prisma.AccountWhereUniqueInput
+}
+
+export type AccountUpdateOneRequiredWithoutAuthzAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.AccountCreateWithoutAuthzAccessInput, Prisma.AccountUncheckedCreateWithoutAuthzAccessInput>
+  connectOrCreate?: Prisma.AccountCreateOrConnectWithoutAuthzAccessInput
+  upsert?: Prisma.AccountUpsertWithoutAuthzAccessInput
+  connect?: Prisma.AccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccountUpdateToOneWithWhereWithoutAuthzAccessInput, Prisma.AccountUpdateWithoutAuthzAccessInput>, Prisma.AccountUncheckedUpdateWithoutAuthzAccessInput>
 }
 
 export type AccountCreateNestedOneWithoutCommentsInput = {
@@ -476,9 +523,11 @@ export type AccountCreateWithoutArticlesInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutArticlesInput = {
@@ -490,9 +539,11 @@ export type AccountUncheckedCreateWithoutArticlesInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutArticlesInput = {
@@ -520,9 +571,11 @@ export type AccountUpdateWithoutArticlesInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutArticlesInput = {
@@ -534,7 +587,89 @@ export type AccountUncheckedUpdateWithoutArticlesInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
+  reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutAccountNestedInput
+}
+
+export type AccountCreateWithoutAuthzAccessInput = {
+  id?: string
+  neupId?: string | null
+  connectionId: string
+  type: string
+  displayName: string
+  displayImage?: string | null
+  createdOn?: Date | string
+  status?: string
+  isVerified?: boolean
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
+  reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
+}
+
+export type AccountUncheckedCreateWithoutAuthzAccessInput = {
+  id?: string
+  neupId?: string | null
+  connectionId: string
+  type: string
+  displayName: string
+  displayImage?: string | null
+  createdOn?: Date | string
+  status?: string
+  isVerified?: boolean
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
+  reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type AccountCreateOrConnectWithoutAuthzAccessInput = {
+  where: Prisma.AccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccountCreateWithoutAuthzAccessInput, Prisma.AccountUncheckedCreateWithoutAuthzAccessInput>
+}
+
+export type AccountUpsertWithoutAuthzAccessInput = {
+  update: Prisma.XOR<Prisma.AccountUpdateWithoutAuthzAccessInput, Prisma.AccountUncheckedUpdateWithoutAuthzAccessInput>
+  create: Prisma.XOR<Prisma.AccountCreateWithoutAuthzAccessInput, Prisma.AccountUncheckedCreateWithoutAuthzAccessInput>
+  where?: Prisma.AccountWhereInput
+}
+
+export type AccountUpdateToOneWithWhereWithoutAuthzAccessInput = {
+  where?: Prisma.AccountWhereInput
+  data: Prisma.XOR<Prisma.AccountUpdateWithoutAuthzAccessInput, Prisma.AccountUncheckedUpdateWithoutAuthzAccessInput>
+}
+
+export type AccountUpdateWithoutAuthzAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
+  reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
+}
+
+export type AccountUncheckedUpdateWithoutAuthzAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  neupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
 }
@@ -548,9 +683,11 @@ export type AccountCreateWithoutCommentsInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionCreateNestedManyWithoutAccountInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutCommentsInput = {
@@ -562,9 +699,11 @@ export type AccountUncheckedCreateWithoutCommentsInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
   reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutAccountInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutCommentsInput = {
@@ -592,9 +731,11 @@ export type AccountUpdateWithoutCommentsInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUpdateManyWithoutAccountNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutCommentsInput = {
@@ -606,9 +747,11 @@ export type AccountUncheckedUpdateWithoutCommentsInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   reactions?: Prisma.ReactionUncheckedUpdateManyWithoutAccountNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateWithoutReactionsInput = {
@@ -620,9 +763,11 @@ export type AccountCreateWithoutReactionsInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
+  authzAccess?: Prisma.AuthzAccessCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutReactionsInput = {
@@ -634,9 +779,11 @@ export type AccountUncheckedCreateWithoutReactionsInput = {
   displayImage?: string | null
   createdOn?: Date | string
   status?: string
+  isVerified?: boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedCreateNestedManyWithoutAuthorInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
+  authzAccess?: Prisma.AuthzAccessUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutReactionsInput = {
@@ -664,9 +811,11 @@ export type AccountUpdateWithoutReactionsInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
+  authzAccess?: Prisma.AuthzAccessUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutReactionsInput = {
@@ -678,9 +827,11 @@ export type AccountUncheckedUpdateWithoutReactionsInput = {
   displayImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moreDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   articles?: Prisma.ArticleUncheckedUpdateManyWithoutAuthorNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
+  authzAccess?: Prisma.AuthzAccessUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 
@@ -692,12 +843,14 @@ export type AccountCountOutputType = {
   articles: number
   comments: number
   reactions: number
+  authzAccess: number
 }
 
 export type AccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   articles?: boolean | AccountCountOutputTypeCountArticlesArgs
   comments?: boolean | AccountCountOutputTypeCountCommentsArgs
   reactions?: boolean | AccountCountOutputTypeCountReactionsArgs
+  authzAccess?: boolean | AccountCountOutputTypeCountAuthzAccessArgs
 }
 
 /**
@@ -731,6 +884,13 @@ export type AccountCountOutputTypeCountReactionsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ReactionWhereInput
 }
 
+/**
+ * AccountCountOutputType without action
+ */
+export type AccountCountOutputTypeCountAuthzAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthzAccessWhereInput
+}
+
 
 export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -741,10 +901,12 @@ export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   displayImage?: boolean
   createdOn?: boolean
   status?: boolean
+  isVerified?: boolean
   moreDetails?: boolean
   articles?: boolean | Prisma.Account$articlesArgs<ExtArgs>
   comments?: boolean | Prisma.Account$commentsArgs<ExtArgs>
   reactions?: boolean | Prisma.Account$reactionsArgs<ExtArgs>
+  authzAccess?: boolean | Prisma.Account$authzAccessArgs<ExtArgs>
   _count?: boolean | Prisma.AccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["account"]>
 
@@ -757,6 +919,7 @@ export type AccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   displayImage?: boolean
   createdOn?: boolean
   status?: boolean
+  isVerified?: boolean
   moreDetails?: boolean
 }, ExtArgs["result"]["account"]>
 
@@ -769,6 +932,7 @@ export type AccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   displayImage?: boolean
   createdOn?: boolean
   status?: boolean
+  isVerified?: boolean
   moreDetails?: boolean
 }, ExtArgs["result"]["account"]>
 
@@ -781,14 +945,16 @@ export type AccountSelectScalar = {
   displayImage?: boolean
   createdOn?: boolean
   status?: boolean
+  isVerified?: boolean
   moreDetails?: boolean
 }
 
-export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "neupId" | "connectionId" | "type" | "displayName" | "displayImage" | "createdOn" | "status" | "moreDetails", ExtArgs["result"]["account"]>
+export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "neupId" | "connectionId" | "type" | "displayName" | "displayImage" | "createdOn" | "status" | "isVerified" | "moreDetails", ExtArgs["result"]["account"]>
 export type AccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   articles?: boolean | Prisma.Account$articlesArgs<ExtArgs>
   comments?: boolean | Prisma.Account$commentsArgs<ExtArgs>
   reactions?: boolean | Prisma.Account$reactionsArgs<ExtArgs>
+  authzAccess?: boolean | Prisma.Account$authzAccessArgs<ExtArgs>
   _count?: boolean | Prisma.AccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -800,6 +966,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     articles: Prisma.$ArticlePayload<ExtArgs>[]
     comments: Prisma.$CommentPayload<ExtArgs>[]
     reactions: Prisma.$ReactionPayload<ExtArgs>[]
+    authzAccess: Prisma.$AuthzAccessPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -810,6 +977,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     displayImage: string | null
     createdOn: Date
     status: string
+    isVerified: boolean
     moreDetails: runtime.JsonValue | null
   }, ExtArgs["result"]["account"]>
   composites: {}
@@ -1208,6 +1376,7 @@ export interface Prisma__AccountClient<T, Null = never, ExtArgs extends runtime.
   articles<T extends Prisma.Account$articlesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$articlesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArticlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Account$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reactions<T extends Prisma.Account$reactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$reactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  authzAccess<T extends Prisma.Account$authzAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$authzAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthzAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1245,6 +1414,7 @@ export interface AccountFieldRefs {
   readonly displayImage: Prisma.FieldRef<"Account", 'String'>
   readonly createdOn: Prisma.FieldRef<"Account", 'DateTime'>
   readonly status: Prisma.FieldRef<"Account", 'String'>
+  readonly isVerified: Prisma.FieldRef<"Account", 'Boolean'>
   readonly moreDetails: Prisma.FieldRef<"Account", 'Json'>
 }
     
@@ -1708,6 +1878,30 @@ export type Account$reactionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ReactionScalarFieldEnum | Prisma.ReactionScalarFieldEnum[]
+}
+
+/**
+ * Account.authzAccess
+ */
+export type Account$authzAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthzAccess
+   */
+  select?: Prisma.AuthzAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuthzAccess
+   */
+  omit?: Prisma.AuthzAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzAccessInclude<ExtArgs> | null
+  where?: Prisma.AuthzAccessWhereInput
+  orderBy?: Prisma.AuthzAccessOrderByWithRelationInput | Prisma.AuthzAccessOrderByWithRelationInput[]
+  cursor?: Prisma.AuthzAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuthzAccessScalarFieldEnum | Prisma.AuthzAccessScalarFieldEnum[]
 }
 
 /**

@@ -57,6 +57,16 @@ export type Article = Prisma.ArticleModel
  */
 export type ArticleAuthor = Prisma.ArticleAuthorModel
 /**
+ * Model AuthzAccess
+ * 
+ */
+export type AuthzAccess = Prisma.AuthzAccessModel
+/**
+ * Model AuthzRole
+ * 
+ */
+export type AuthzRole = Prisma.AuthzRoleModel
+/**
  * Model Comment
  * 
  */

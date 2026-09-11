@@ -22,11 +22,13 @@ model Account {
   displayImage  String?   @db.VarChar(255)
   createdOn     DateTime  @default(now())
   status        String    @default("ACTIVE") @db.VarChar(255)
+  isVerified Boolean @default(false)
   moreDetails   Json?
 
   articles  Article[]
   comments  Comment[]
   reactions Reaction[]
+  authzAccess AuthzAccess[]
 
   @@map("account")
 }
@@ -45,6 +47,7 @@ model Article {
   author    Account   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   comments  Comment[] // Maps to post.comments in <CommentSection />
   reactions Reaction[]
+  authzAccess AuthzAccess[]
 }
 
 model ArticleAuthor {
@@ -56,6 +59,32 @@ model ArticleAuthor {
 
   @@map("article_authors")
 }
+
+model AuthzAccess {
+  id        String   @id @default(cuid())
+  accountId String   @map("account_id")
+  articleId String?  @map("article_id")
+  projectId String?  @map("project_id")
+  roleId    String   @map("role_id")
+  createdOn DateTime @default(now()) @map("created_on")
+  status    String   @default("ACTIVE")
+
+  // Relationships
+  account Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  article Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@map("authz_access")
+}
+
+model AuthzRole {
+  id          String   @id @default(cuid())
+  name        String
+  permissions Json?
+  syncedOn    DateTime @default(now()) @map("synced_on")
+
+  @@map("authz_role")
+}
+
 
 model Comment {
   id        String   @id @default(cuid())

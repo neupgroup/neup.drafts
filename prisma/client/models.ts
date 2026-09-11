@@ -11,6 +11,8 @@
 export type * from './models/Account'
 export type * from './models/Article'
 export type * from './models/ArticleAuthor'
+export type * from './models/AuthzAccess'
+export type * from './models/AuthzRole'
 export type * from './models/Comment'
 export type * from './models/Reaction'
 export type * from './commonInputTypes'

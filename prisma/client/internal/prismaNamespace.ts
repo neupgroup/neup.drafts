@@ -400,6 +400,8 @@ export const ModelName = {
   Account: 'Account',
   Article: 'Article',
   ArticleAuthor: 'ArticleAuthor',
+  AuthzAccess: 'AuthzAccess',
+  AuthzRole: 'AuthzRole',
   Comment: 'Comment',
   Reaction: 'Reaction'
 } as const
@@ -417,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "account" | "article" | "articleAuthor" | "comment" | "reaction"
+    modelProps: "account" | "article" | "articleAuthor" | "authzAccess" | "authzRole" | "comment" | "reaction"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -643,6 +645,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AuthzAccess: {
+      payload: Prisma.$AuthzAccessPayload<ExtArgs>
+      fields: Prisma.AuthzAccessFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthzAccessFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthzAccessFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
+        }
+        findFirst: {
+          args: Prisma.AuthzAccessFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthzAccessFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
+        }
+        findMany: {
+          args: Prisma.AuthzAccessFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>[]
+        }
+        create: {
+          args: Prisma.AuthzAccessCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
+        }
+        createMany: {
+          args: Prisma.AuthzAccessCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthzAccessCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>[]
+        }
+        delete: {
+          args: Prisma.AuthzAccessDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
+        }
+        update: {
+          args: Prisma.AuthzAccessUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthzAccessDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthzAccessUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthzAccessUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthzAccessUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzAccessPayload>
+        }
+        aggregate: {
+          args: Prisma.AuthzAccessAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthzAccess>
+        }
+        groupBy: {
+          args: Prisma.AuthzAccessGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthzAccessGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthzAccessCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthzAccessCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuthzRole: {
+      payload: Prisma.$AuthzRolePayload<ExtArgs>
+      fields: Prisma.AuthzRoleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthzRoleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthzRoleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>
+        }
+        findFirst: {
+          args: Prisma.AuthzRoleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthzRoleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>
+        }
+        findMany: {
+          args: Prisma.AuthzRoleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>[]
+        }
+        create: {
+          args: Prisma.AuthzRoleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>
+        }
+        createMany: {
+          args: Prisma.AuthzRoleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthzRoleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>[]
+        }
+        delete: {
+          args: Prisma.AuthzRoleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>
+        }
+        update: {
+          args: Prisma.AuthzRoleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthzRoleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthzRoleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthzRoleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthzRoleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthzRolePayload>
+        }
+        aggregate: {
+          args: Prisma.AuthzRoleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthzRole>
+        }
+        groupBy: {
+          args: Prisma.AuthzRoleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthzRoleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthzRoleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthzRoleCountAggregateOutputType> | number
+        }
+      }
+    }
     Comment: {
       payload: Prisma.$CommentPayload<ExtArgs>
       fields: Prisma.CommentFieldRefs
@@ -839,6 +989,7 @@ export const AccountScalarFieldEnum = {
   displayImage: 'displayImage',
   createdOn: 'createdOn',
   status: 'status',
+  isVerified: 'isVerified',
   moreDetails: 'moreDetails'
 } as const
 
@@ -868,6 +1019,29 @@ export const ArticleAuthorScalarFieldEnum = {
 } as const
 
 export type ArticleAuthorScalarFieldEnum = (typeof ArticleAuthorScalarFieldEnum)[keyof typeof ArticleAuthorScalarFieldEnum]
+
+
+export const AuthzAccessScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  articleId: 'articleId',
+  projectId: 'projectId',
+  roleId: 'roleId',
+  createdOn: 'createdOn',
+  status: 'status'
+} as const
+
+export type AuthzAccessScalarFieldEnum = (typeof AuthzAccessScalarFieldEnum)[keyof typeof AuthzAccessScalarFieldEnum]
+
+
+export const AuthzRoleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  permissions: 'permissions',
+  syncedOn: 'syncedOn'
+} as const
+
+export type AuthzRoleScalarFieldEnum = (typeof AuthzRoleScalarFieldEnum)[keyof typeof AuthzRoleScalarFieldEnum]
 
 
 export const CommentScalarFieldEnum = {
@@ -965,6 +1139,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -1163,6 +1344,8 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   article?: Prisma.ArticleOmit
   articleAuthor?: Prisma.ArticleAuthorOmit
+  authzAccess?: Prisma.AuthzAccessOmit
+  authzRole?: Prisma.AuthzRoleOmit
   comment?: Prisma.CommentOmit
   reaction?: Prisma.ReactionOmit
 }
