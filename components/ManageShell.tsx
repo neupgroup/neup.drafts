@@ -13,9 +13,9 @@ Use `ManageShell` to keep navigation, title treatment, and optional summary card
 ::end
 */
 
-import Link from 'next/link';
-import type { ReactNode } from 'react';
-import SidebarNav, { getSharedSidebarSections } from './SidebarNav';
+import Link from "next/link";
+import type { ReactNode } from "react";
+import SidebarNav, { getSharedSidebarSections } from "./SidebarNav";
 
 interface ManageMetric {
   label: string;
@@ -23,7 +23,7 @@ interface ManageMetric {
 }
 
 interface ManageShellProps {
-  activeSection: 'overview' | 'articles' | 'stats';
+  activeSection: "overview" | "articles" | "stats" | "access";
   children: ReactNode;
   ctaHref?: string;
   ctaLabel?: string;
@@ -39,7 +39,7 @@ export default function ManageShell({
   ctaHref,
   ctaLabel,
   description,
-  eyebrow = 'Manage',
+  eyebrow = "Manage",
   metrics = [],
   title,
 }: ManageShellProps) {
@@ -48,11 +48,11 @@ export default function ManageShell({
       <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
         <SidebarNav
           sections={getSharedSidebarSections(
-            activeSection === 'overview'
-              ? 'manage-overview'
-              : activeSection === 'articles'
-                ? 'manage-articles'
-                : 'manage-stats'
+            activeSection === "overview"
+              ? "manage-overview"
+              : activeSection === "articles"
+                ? "manage-articles"
+                : "manage-stats",
           )}
         />
       </aside>
@@ -97,9 +97,7 @@ export default function ManageShell({
             </div>
           ) : null}
 
-          <div className="mt-8">
-            {children}
-          </div>
+          <div className="mt-8">{children}</div>
         </div>
       </div>
     </section>

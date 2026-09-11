@@ -49,7 +49,10 @@ function getPreviewText(content: string): string {
 }
 
 export default async function ManageArticleDetailPage(
-  props: PageProps<"/manage/articles/[slug]">,
+  // props: PageProps<"/manage/articles/[slug]">,
+  props: {
+    params: Promise<{ slug: string }>;
+  },
 ) {
   const { slug } = await props.params;
 

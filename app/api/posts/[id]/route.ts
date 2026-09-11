@@ -6,6 +6,7 @@ import {
   getArticleLookupFromSlug,
   getArticleOwnershipBySlugOrId,
 } from "@/services/articles/articles";
+import { PERMISSIONS } from "@/inapp/lib/permissions";
 
 function getArticleLookupFromUrl(req: NextRequest): {
   id: string;
@@ -21,26 +22,30 @@ function normalizeArticleContent(content: string): string {
 }
 
 // PROTECTED: Only authenticated users can view a single post
-export const GET = withAuth(async (req: NextRequest) => {
-  try {
-    const articleLookup = getArticleLookupFromUrl(req);
+export const GET = withAuth(
+  PERMISSIONS.ARTICLES_VIEW,
+  async (req: NextRequest) => {
+    try {
+      const articleLookup = getArticleLookupFromUrl(req);
 
-    const post = await getArticleBySlugOrId(articleLookup.slug);
+      const post = await getArticleBySlugOrId(articleLookup.slug);
 
-    if (!post) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      if (!post) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ post });
+    } catch (error) {
+      console.error("Fetch post failed:", error);
+      return NextResponse.json({ error: "Server Error" }, { status: 500 });
     }
-
-    return NextResponse.json({ post });
-  } catch (error) {
-    console.error("Fetch post failed:", error);
-    return NextResponse.json({ error: "Server Error" }, { status: 500 });
-  }
-});
+  },
+);
 
 // PROTECTED: Only authenticated author (or admin) can update
 export const PATCH = withAuth(
-  async (req: NextRequest, context: AuthContext) => {
+  PERMISSIONS.ARTICLES_EDIT_CONTENT,
+  async (req: NextRequest) => {
     try {
       const articleLookup = getArticleLookupFromUrl(req);
       let body: unknown;
@@ -82,15 +87,15 @@ export const PATCH = withAuth(
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
       }
 
-      const isOwner = post.authorId === context.accountId;
-      const isAdmin = context.user.status === "ADMIN";
+      // const isOwner = post.authorId === context.accountId;
+      // const isAdmin = context.user.status === "ADMIN";
 
-      if (!isOwner && !isAdmin) {
-        return NextResponse.json(
-          { error: "Forbidden: You cannot edit this post" },
-          { status: 403 },
-        );
-      }
+      // if (!isOwner && !isAdmin) {
+      //   return NextResponse.json(
+      //     { error: "Forbidden: You cannot edit this post" },
+      //     { status: 403 },
+      //   );
+      // }
 
       const updatedPost = await prisma.article.update({
         where: { id: post.id },
@@ -116,6 +121,7 @@ export const PATCH = withAuth(
 
 // PROTECTED: Only authenticated author (or admin) can delete
 export const DELETE = withAuth(
+  PERMISSIONS.ARTICLES_DELETE,
   async (req: NextRequest, context: AuthContext) => {
     try {
       const articleLookup = getArticleLookupFromUrl(req);
@@ -127,16 +133,16 @@ export const DELETE = withAuth(
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
       }
 
-      // 2. Ownership check using unique user IDs (not display names)
-      const isOwner = post.authorId === context.accountId;
-      const isAdmin = context.user.status === "ADMIN";
+      // // 2. Ownership check using unique user IDs (not display names)
+      // const isOwner = post.authorId === context.accountId;
+      // //const isAdmin = context.user.status === "ADMIN";
 
-      if (!isOwner && !isAdmin) {
-        return NextResponse.json(
-          { error: "Forbidden: You cannot delete this post" },
-          { status: 403 },
-        );
-      }
+      // if (!isOwner /*&& !isAdmin*/) {
+      //   return NextResponse.json(
+      //     { error: "Forbidden: You cannot delete this post" },
+      //     { status: 403 },
+      //   );
+      // }
 
       // 3. Delete from database
       await prisma.article.delete({

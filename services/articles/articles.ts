@@ -13,10 +13,13 @@ Use these helpers when reading articles by id or canonical slug so pages do not 
 ::end
 */
 
-import { prisma } from '@/inapp/lib/prisma';
+import { prisma } from "@/inapp/lib/prisma";
 
-export function getArticleLookupFromSlug(slug: string): { id: string; slug: string } {
-  const slugParts = slug.split('-');
+export function getArticleLookupFromSlug(slug: string): {
+  id: string;
+  slug: string;
+} {
+  const slugParts = slug.split("-");
 
   return {
     id: slugParts[slugParts.length - 1] || slug,
@@ -29,22 +32,31 @@ export async function getArticleBySlugOrId(slug: string) {
 
   return prisma.article.findFirst({
     where: {
-      OR: [
-        { id: articleLookup.id },
-        { slug: articleLookup.slug },
-      ],
+      OR: [{ id: articleLookup.id }, { slug: articleLookup.slug }],
     },
     include: {
       author: {
-        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
+        select: {
+          id: true,
+          displayName: true,
+          displayImage: true,
+          neupId: true,
+          status: true,
+          isVerified: true,
+        },
       },
       comments: {
         include: {
           author: {
-            select: { id: true, displayName: true, displayImage: true, neupId: true },
+            select: {
+              id: true,
+              displayName: true,
+              displayImage: true,
+              neupId: true,
+            },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       },
       _count: {
         select: {
@@ -57,10 +69,17 @@ export async function getArticleBySlugOrId(slug: string) {
 
 export async function getArticleFeed() {
   return prisma.article.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     include: {
       author: {
-        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
+        select: {
+          id: true,
+          displayName: true,
+          displayImage: true,
+          neupId: true,
+          status: true,
+          isVerified: true,
+        },
       },
       _count: {
         select: {
@@ -79,7 +98,7 @@ export async function getManagedArticlePosts(authorId: string) {
       comments: true,
       reactions: true,
     },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { updatedAt: "desc" },
   });
 }
 
@@ -89,30 +108,44 @@ export async function getManagedArticleBySlug(authorId: string, slug: string) {
   return prisma.article.findFirst({
     where: {
       authorId,
-      OR: [
-        { id: articleLookup.id },
-        { slug: articleLookup.slug },
-      ],
+      OR: [{ id: articleLookup.id }, { slug: articleLookup.slug }],
     },
     include: {
       author: {
-        select: { id: true, displayName: true, displayImage: true, neupId: true, status: true, isVerified: true },
+        select: {
+          id: true,
+          displayName: true,
+          displayImage: true,
+          neupId: true,
+          status: true,
+          isVerified: true,
+        },
       },
       comments: {
         include: {
           author: {
-            select: { id: true, displayName: true, displayImage: true, neupId: true },
+            select: {
+              id: true,
+              displayName: true,
+              displayImage: true,
+              neupId: true,
+            },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       },
       reactions: {
         include: {
           account: {
-            select: { id: true, displayName: true, displayImage: true, neupId: true },
+            select: {
+              id: true,
+              displayName: true,
+              displayImage: true,
+              neupId: true,
+            },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -123,10 +156,7 @@ export async function getArticleOwnershipBySlugOrId(slug: string) {
 
   return prisma.article.findFirst({
     where: {
-      OR: [
-        { id: articleLookup.id },
-        { slug: articleLookup.slug },
-      ],
+      OR: [{ id: articleLookup.id }, { slug: articleLookup.slug }],
     },
     select: { id: true, authorId: true },
   });

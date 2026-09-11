@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
 import { prisma } from "@/inapp/lib/prisma";
 import { getArticleFeed } from "@/services/articles/articles";
+import { PERMISSIONS } from "@/inapp/lib/permissions";
 
 const ARTICLE_ID_PATTERN = /^[a-z0-9]{8,32}$/;
 
@@ -53,74 +54,77 @@ export async function GET() {
 }
 
 // PROTECTED: Only authenticated users can write a post
-export const POST = withAuth(async (req: NextRequest, context: AuthContext) => {
-  try {
-    const { title, content, slug, articleId } = await req.json();
+export const POST = withAuth(
+  PERMISSIONS.ARTICLES_CREATE,
+  async (req: NextRequest, context: AuthContext) => {
+    try {
+      const { title, content, slug, articleId } = await req.json();
 
-    if (typeof title !== "string" || typeof content !== "string") {
-      return NextResponse.json(
-        { error: "Missing title or content" },
-        { status: 400 },
-      );
-    }
+      if (typeof title !== "string" || typeof content !== "string") {
+        return NextResponse.json(
+          { error: "Missing title or content" },
+          { status: 400 },
+        );
+      }
 
-    const nextTitle = title.trim();
-    const normalizedContent = normalizeArticleContent(content).trim();
+      const nextTitle = title.trim();
+      const normalizedContent = normalizeArticleContent(content).trim();
 
-    if (!nextTitle || !normalizedContent) {
-      return NextResponse.json(
-        { error: "Title and content are required" },
-        { status: 400 },
-      );
-    }
+      if (!nextTitle || !normalizedContent) {
+        return NextResponse.json(
+          { error: "Title and content are required" },
+          { status: 400 },
+        );
+      }
 
-    const id =
-      typeof articleId === "string" && ARTICLE_ID_PATTERN.test(articleId)
-        ? articleId
-        : createArticleId();
-    const finalSlug = buildArticleSlug(
-      typeof slug === "string" ? slug : nextTitle,
-      id,
-    );
-
-    if (!finalSlug) {
-      return NextResponse.json(
-        { error: "Title must contain letters or numbers" },
-        { status: 400 },
-      );
-    }
-
-    // Create the article in PostgreSQL using authorId
-    const newPost = await prisma.article.create({
-      data: {
+      const id =
+        typeof articleId === "string" && ARTICLE_ID_PATTERN.test(articleId)
+          ? articleId
+          : createArticleId();
+      const finalSlug = buildArticleSlug(
+        typeof slug === "string" ? slug : nextTitle,
         id,
-        title: nextTitle,
-        content: normalizedContent,
-        slug: finalSlug,
-        authorId: context.accountId, // Connects directly via unique CUID
-      },
-      include: {
-        author: {
-          select: { id: true, displayName: true, neupId: true, status: true },
-        },
-      },
-    });
+      );
 
-    return NextResponse.json(
-      { message: "Post created!", post: newPost },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error("Post creation failed:", error);
-    if (isUniqueConstraintError(error)) {
+      if (!finalSlug) {
+        return NextResponse.json(
+          { error: "Title must contain letters or numbers" },
+          { status: 400 },
+        );
+      }
+
+      // Create the article in PostgreSQL using authorId
+      const newPost = await prisma.article.create({
+        data: {
+          id,
+          title: nextTitle,
+          content: normalizedContent,
+          slug: finalSlug,
+          authorId: context.accountId, // Connects directly via unique CUID
+        },
+        include: {
+          author: {
+            select: { id: true, displayName: true, neupId: true, status: true },
+          },
+        },
+      });
+
       return NextResponse.json(
-        { error: "Article slug or id already exists" },
-        { status: 409 },
+        { message: "Post created!", post: newPost },
+        { status: 201 },
+      );
+    } catch (error) {
+      console.error("Post creation failed:", error);
+      if (isUniqueConstraintError(error)) {
+        return NextResponse.json(
+          { error: "Article slug or id already exists" },
+          { status: 409 },
+        );
+      }
+      return NextResponse.json(
+        { error: "Invalid payload or server error" },
+        { status: 500 },
       );
     }
-    return NextResponse.json(
-      { error: "Invalid payload or server error" },
-      { status: 500 },
-    );
-  }
-});
+  },
+);
