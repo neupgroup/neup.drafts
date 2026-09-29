@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "setup": "rm -rf core && rm -rf logica && rm -rf neup.core && rm -rf neup.logica && git clone https://github.com/neupgroup/neup.core && git clone https://github.com/neupgroup/neup.logica && mv neup.core core && mv neup.logica logica",
-    "predev": "npm run setup",
-    "prebuild": "npm run setup",
-    "dev": "next dev --port 3723",
+    "neup.cloner": "mkdir @neup && cd @neup && git clone --depth 1 --single-branch --branch main https://github.com/neupgroup/nextjs.setup.git && mv nextjs.setup setup",
+    "setup": "npm run neup.cloner && cd ./@neup && chmod +x ./setup/index.sh && ./setup/index.sh",
+    "preinstall": "npm run setup -- --mode preinstall",
+    "postinstall": "npm run setup -- --mode postinstall",
+    "prebuild": "npm run setup -- --mode prebuild",
+    "postbuild": "npm run setup -- --mode postbuild",
+    "predev": "npm run setup -- --mode predev",
+    "dev": "next dev --hostname dev.neupgroup.com --port 3723",
     "build": "next build",
     "start": "next start --port 3723",
     "lint": "eslint"

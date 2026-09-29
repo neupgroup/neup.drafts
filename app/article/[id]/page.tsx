@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getArticleBySlugOrId } from "@/services/articles/articles";
 import { ReactionButton } from "@/components/ReactionButton";
+import { ShareButton } from "@/components/ShareButton";
 import { CommentSection } from "@/components/CommentSection";
 import HeaderV1S1 from "@/components/header.v1s1";
+import { RelatedPosts } from "@/components/RelatedPosts";
 
 function getCanonicalArticleSlug(post: {
   id: string;
@@ -333,7 +335,24 @@ function sanitizeArticleHtml(content: string): string {
 
 async function getPost(id: string) {
   try {
-    return await getArticleBySlugOrId(id);
+    const post = await getArticleBySlugOrId(id);
+    if (!post) return null;
+
+    // Typecast safely using 'unknown' to bypass the linter warning
+    const typedPost = post as unknown as {
+      relatedPosts?: Array<{
+        id: string;
+        title: string;
+        slug?: string;
+        authorDisplayName?: string;
+      }>;
+      [key: string]: unknown; // allows spreading the rest of the post properties
+    };
+
+    return {
+      ...post,
+      relatedPosts: typedPost.relatedPosts || [],
+    };
   } catch (error) {
     console.error("Article fetch failed:", error);
     return null;
@@ -444,11 +463,14 @@ export default async function ArticlePage({
 
         <section className="border-t border-slate-200 pt-8">
           <div className="flex flex-col gap-8">
-            <ReactionButton
-              postId={post.id}
-              initialLikes={likesCount}
-              currentUser={user}
-            />
+            <div className="flex flex-wrap gap-3">
+              <ReactionButton
+                postId={post.id}
+                initialLikes={likesCount}
+                currentUser={user}
+              />
+              <ShareButton title={post.title} />
+            </div>
 
             <CommentSection
               postId={post.id}
@@ -457,6 +479,7 @@ export default async function ArticlePage({
             />
           </div>
         </section>
+        <RelatedPosts posts={post.relatedPosts || []} />
       </div>
     </main>
   );

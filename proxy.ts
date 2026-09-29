@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
-import baseJson from "@/logica/base.json";
+import { getAuthStartUrl } from "@/inapp/lib/auth-redirect";
 
 function redirectToAuth(req: NextRequest) {
-  const authStartUrl = new URL("/account/auth/start", baseJson.neupid);
-
-  authStartUrl.searchParams.set("authenticatesTo", req.url);
-
-  return NextResponse.redirect(authStartUrl);
+  return NextResponse.redirect(getAuthStartUrl(req.url));
 }
 
 export async function proxy(req: NextRequest) {

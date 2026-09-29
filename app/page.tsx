@@ -4,6 +4,8 @@ import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getArticleFeed } from "@/services/articles/articles";
 import HeaderV1S1 from "@/components/header.v1s1";
 
+import { getClientAuthStartUrl } from "@/inapp/lib/auth-redirect";
+
 interface Author {
   id: string;
   displayName?: string | null;
@@ -24,6 +26,13 @@ interface Post {
     comments?: number;
     reactions?: number;
   };
+
+  relatedPosts?: {
+    id: string;
+    title: string;
+    slug?: string;
+    authorDisplayName?: string;
+  }[];
 }
 
 function getArticlePath(post: Post): string {
@@ -147,29 +156,23 @@ export default async function HomePage() {
           {/* Right Sidebar: Dynamic Card Based on Authentication Status */}
           <aside className="sticky top-24 space-y-6">
             {!user ? (
-              /* Sign-In Card for Logged-Out Visitors */
+              /* Get Started Card for Logged-Out Visitors */
               <div className="border border-slate-200 bg-slate-50 p-6 rounded-lg space-y-4">
                 <div>
                   <h3 className="text-xl font-medium text-slate-950">
-                    Welcome to Publications
+                    Get Started
                   </h3>
                   <p className="text-xs text-slate-600 mt-1">
-                    Log in to publish your own stories, leave reactions, and
-                    join discussions.
+                    Log in or create an account to publish your own stories,
+                    leave reactions, and join discussions.
                   </p>
                 </div>
                 <div className="space-y-2 pt-2">
                   <Link
-                    href="/login"
+                    href={getClientAuthStartUrl("http://localhost:3723/")}
                     className="block w-full bg-blue-600 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-opacity-90 rounded"
                   >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="block w-full border border-slate-300 py-2.5 text-center text-sm font-medium text-slate-900 bg-white transition-all hover:bg-slate-50 rounded"
-                  >
-                    Create Account
+                    Get Started
                   </Link>
                 </div>
               </div>

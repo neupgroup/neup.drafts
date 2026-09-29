@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { getClientAuthStartUrl } from "@/inapp/lib/auth-redirect";
+
 interface HeaderV1S1Props {
   user: {
     displayImage?: string | null;
@@ -99,16 +101,10 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
           ) : (
             <div className="hidden items-center gap-3 md:flex">
               <Link
-                href="/login"
+                href={getClientAuthStartUrl("http://localhost:3723/")} //central Get started
                 className="bg-blue-600 px-4 py-1.5 text-[14px] font-medium text-white transition-all hover:bg-opacity-90 sm:text-[15px]"
               >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="border border-slate-300 px-4 py-1.5 text-[14px] font-medium text-slate-950 transition-all hover:bg-slate-100 sm:text-[15px]"
-              >
-                Sign Up
+                Get Started
               </Link>
             </div>
           )}
@@ -195,18 +191,11 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
               ) : (
                 <>
                   <Link
-                    href="/login"
+                    href={getClientAuthStartUrl("http://localhost:3723/")} //central get started
                     className="block rounded-2xl bg-blue-600 px-4 py-4 text-base font-medium text-white transition-all hover:bg-blue-700"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="block rounded-2xl border border-slate-300 bg-white px-4 py-4 text-base font-medium text-slate-950 transition-all hover:bg-slate-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign Up
+                    Get Started
                   </Link>
                 </>
               )}
