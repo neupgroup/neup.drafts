@@ -43,6 +43,16 @@ export type AuthzAccess = Prisma.AuthzAccessModel
  */
 export type AuthzRole = Prisma.AuthzRoleModel
 /**
+ * Model Role
+ * 
+ */
+export type Role = Prisma.RoleModel
+/**
+ * Model Access
+ * 
+ */
+export type Access = Prisma.AccessModel
+/**
  * Model Comment
  * 
  */

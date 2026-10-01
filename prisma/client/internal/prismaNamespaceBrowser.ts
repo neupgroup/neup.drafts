@@ -56,6 +56,8 @@ export const ModelName = {
   ArticleAuthor: 'ArticleAuthor',
   AuthzAccess: 'AuthzAccess',
   AuthzRole: 'AuthzRole',
+  Role: 'Role',
+  Access: 'Access',
   Comment: 'Comment',
   Reaction: 'Reaction'
 } as const
@@ -138,6 +140,37 @@ export const AuthzRoleScalarFieldEnum = {
 } as const
 
 export type AuthzRoleScalarFieldEnum = (typeof AuthzRoleScalarFieldEnum)[keyof typeof AuthzRoleScalarFieldEnum]
+
+
+export const RoleScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  accountId: 'accountId',
+  connectionId: 'connectionId',
+  assetId: 'assetId',
+  assetType: 'assetType',
+  assetIdDenorm: 'assetIdDenorm',
+  roleId: 'roleId',
+  roleName: 'roleName',
+  permissions: 'permissions',
+  status: 'status',
+  details: 'details'
+} as const
+
+export type RoleScalarFieldEnum = (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum]
+
+
+export const AccessScalarFieldEnum = {
+  id: 'id',
+  accessType: 'accessType',
+  memberAccountId: 'memberAccountId',
+  parentAccountId: 'parentAccountId',
+  isTemporary: 'isTemporary',
+  roleId: 'roleId',
+  status: 'status'
+} as const
+
+export type AccessScalarFieldEnum = (typeof AccessScalarFieldEnum)[keyof typeof AccessScalarFieldEnum]
 
 
 export const CommentScalarFieldEnum = {

@@ -29,6 +29,7 @@ model Account {
   comments  Comment[]
   reactions Reaction[]
   authzAccess AuthzAccess[]
+  roles         Role[]        // Added this opposite relation
 
   @@map("account")
 }
@@ -82,9 +83,56 @@ model AuthzRole {
   permissions Json?
   syncedOn    DateTime @default(now()) @map("synced_on")
 
+// Opposite relation fields required by Prisma
+  roles       Role[]
+  access      Access[]
+
   @@map("authz_role")
 }
 
+model Role {
+  id            String   @id @default(cuid()) @db.VarChar(255)
+  memberId      String   @map("member_id") @db.VarChar(255)
+  accountId     String?  @map("account_id") @db.VarChar(255)
+  connectionId  String?  @map("connection_id") @db.VarChar(255)
+  assetId       String?  @map("asset_id") @db.VarChar(255)
+  assetType     String?  @map("asset_type") @db.VarChar(255)
+  assetIdDenorm String?  @map("asset_id_denorm") @db.VarChar(255)
+  roleId        String   @map("role_id") @db.VarChar(255)
+  roleName      String?  @map("role_name") @db.VarChar(255)
+  permissions   Json?
+  status        String   @default("ACTIVE") @db.VarChar(255)
+  details       Json?
+
+  // Active relations based on your existing models
+  account Account?   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  role    AuthzRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([accountId])
+  @@index([connectionId])
+  @@index([assetId])
+  @@index([roleId])
+  @@map("role")
+}
+
+model Access {
+  id              String    @id @default(cuid()) @db.VarChar(255)
+  accessType      String    @map("access_type") @db.VarChar(255)
+  memberAccountId String?   @map("member_account_id") @db.VarChar(255)
+  parentAccountId String?   @map("parent_account_id") @db.VarChar(255)
+  isTemporary     DateTime? @map("is_temporary")
+  roleId          String    @map("role_id") @db.VarChar(255)
+  status          String    @default("ACTIVE") @db.VarChar(255)
+
+  // Relationship to AuthzRole
+  role AuthzRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([memberAccountId])
+  @@index([parentAccountId])
+  @@index([roleId])
+  @@map("access")
+}
 
 model Comment {
   id        String   @id @default(cuid())

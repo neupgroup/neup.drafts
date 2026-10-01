@@ -170,6 +170,8 @@ export type AuthzRoleWhereInput = {
   name?: Prisma.StringFilter<"AuthzRole"> | string
   permissions?: Prisma.JsonNullableFilter<"AuthzRole">
   syncedOn?: Prisma.DateTimeFilter<"AuthzRole"> | Date | string
+  roles?: Prisma.RoleListRelationFilter
+  access?: Prisma.AccessListRelationFilter
 }
 
 export type AuthzRoleOrderByWithRelationInput = {
@@ -177,6 +179,8 @@ export type AuthzRoleOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   permissions?: Prisma.SortOrderInput | Prisma.SortOrder
   syncedOn?: Prisma.SortOrder
+  roles?: Prisma.RoleOrderByRelationAggregateInput
+  access?: Prisma.AccessOrderByRelationAggregateInput
 }
 
 export type AuthzRoleWhereUniqueInput = Prisma.AtLeast<{
@@ -187,6 +191,8 @@ export type AuthzRoleWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"AuthzRole"> | string
   permissions?: Prisma.JsonNullableFilter<"AuthzRole">
   syncedOn?: Prisma.DateTimeFilter<"AuthzRole"> | Date | string
+  roles?: Prisma.RoleListRelationFilter
+  access?: Prisma.AccessListRelationFilter
 }, "id">
 
 export type AuthzRoleOrderByWithAggregationInput = {
@@ -214,6 +220,8 @@ export type AuthzRoleCreateInput = {
   name: string
   permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   syncedOn?: Date | string
+  roles?: Prisma.RoleCreateNestedManyWithoutRoleInput
+  access?: Prisma.AccessCreateNestedManyWithoutRoleInput
 }
 
 export type AuthzRoleUncheckedCreateInput = {
@@ -221,6 +229,8 @@ export type AuthzRoleUncheckedCreateInput = {
   name: string
   permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   syncedOn?: Date | string
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutRoleInput
+  access?: Prisma.AccessUncheckedCreateNestedManyWithoutRoleInput
 }
 
 export type AuthzRoleUpdateInput = {
@@ -228,6 +238,8 @@ export type AuthzRoleUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   syncedOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.RoleUpdateManyWithoutRoleNestedInput
+  access?: Prisma.AccessUpdateManyWithoutRoleNestedInput
 }
 
 export type AuthzRoleUncheckedUpdateInput = {
@@ -235,6 +247,8 @@ export type AuthzRoleUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   syncedOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutRoleNestedInput
+  access?: Prisma.AccessUncheckedUpdateManyWithoutRoleNestedInput
 }
 
 export type AuthzRoleCreateManyInput = {
@@ -277,6 +291,173 @@ export type AuthzRoleMinOrderByAggregateInput = {
   syncedOn?: Prisma.SortOrder
 }
 
+export type AuthzRoleScalarRelationFilter = {
+  is?: Prisma.AuthzRoleWhereInput
+  isNot?: Prisma.AuthzRoleWhereInput
+}
+
+export type AuthzRoleCreateNestedOneWithoutRolesInput = {
+  create?: Prisma.XOR<Prisma.AuthzRoleCreateWithoutRolesInput, Prisma.AuthzRoleUncheckedCreateWithoutRolesInput>
+  connectOrCreate?: Prisma.AuthzRoleCreateOrConnectWithoutRolesInput
+  connect?: Prisma.AuthzRoleWhereUniqueInput
+}
+
+export type AuthzRoleUpdateOneRequiredWithoutRolesNestedInput = {
+  create?: Prisma.XOR<Prisma.AuthzRoleCreateWithoutRolesInput, Prisma.AuthzRoleUncheckedCreateWithoutRolesInput>
+  connectOrCreate?: Prisma.AuthzRoleCreateOrConnectWithoutRolesInput
+  upsert?: Prisma.AuthzRoleUpsertWithoutRolesInput
+  connect?: Prisma.AuthzRoleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthzRoleUpdateToOneWithWhereWithoutRolesInput, Prisma.AuthzRoleUpdateWithoutRolesInput>, Prisma.AuthzRoleUncheckedUpdateWithoutRolesInput>
+}
+
+export type AuthzRoleCreateNestedOneWithoutAccessInput = {
+  create?: Prisma.XOR<Prisma.AuthzRoleCreateWithoutAccessInput, Prisma.AuthzRoleUncheckedCreateWithoutAccessInput>
+  connectOrCreate?: Prisma.AuthzRoleCreateOrConnectWithoutAccessInput
+  connect?: Prisma.AuthzRoleWhereUniqueInput
+}
+
+export type AuthzRoleUpdateOneRequiredWithoutAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.AuthzRoleCreateWithoutAccessInput, Prisma.AuthzRoleUncheckedCreateWithoutAccessInput>
+  connectOrCreate?: Prisma.AuthzRoleCreateOrConnectWithoutAccessInput
+  upsert?: Prisma.AuthzRoleUpsertWithoutAccessInput
+  connect?: Prisma.AuthzRoleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthzRoleUpdateToOneWithWhereWithoutAccessInput, Prisma.AuthzRoleUpdateWithoutAccessInput>, Prisma.AuthzRoleUncheckedUpdateWithoutAccessInput>
+}
+
+export type AuthzRoleCreateWithoutRolesInput = {
+  id?: string
+  name: string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Date | string
+  access?: Prisma.AccessCreateNestedManyWithoutRoleInput
+}
+
+export type AuthzRoleUncheckedCreateWithoutRolesInput = {
+  id?: string
+  name: string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Date | string
+  access?: Prisma.AccessUncheckedCreateNestedManyWithoutRoleInput
+}
+
+export type AuthzRoleCreateOrConnectWithoutRolesInput = {
+  where: Prisma.AuthzRoleWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuthzRoleCreateWithoutRolesInput, Prisma.AuthzRoleUncheckedCreateWithoutRolesInput>
+}
+
+export type AuthzRoleUpsertWithoutRolesInput = {
+  update: Prisma.XOR<Prisma.AuthzRoleUpdateWithoutRolesInput, Prisma.AuthzRoleUncheckedUpdateWithoutRolesInput>
+  create: Prisma.XOR<Prisma.AuthzRoleCreateWithoutRolesInput, Prisma.AuthzRoleUncheckedCreateWithoutRolesInput>
+  where?: Prisma.AuthzRoleWhereInput
+}
+
+export type AuthzRoleUpdateToOneWithWhereWithoutRolesInput = {
+  where?: Prisma.AuthzRoleWhereInput
+  data: Prisma.XOR<Prisma.AuthzRoleUpdateWithoutRolesInput, Prisma.AuthzRoleUncheckedUpdateWithoutRolesInput>
+}
+
+export type AuthzRoleUpdateWithoutRolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  access?: Prisma.AccessUpdateManyWithoutRoleNestedInput
+}
+
+export type AuthzRoleUncheckedUpdateWithoutRolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  access?: Prisma.AccessUncheckedUpdateManyWithoutRoleNestedInput
+}
+
+export type AuthzRoleCreateWithoutAccessInput = {
+  id?: string
+  name: string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Date | string
+  roles?: Prisma.RoleCreateNestedManyWithoutRoleInput
+}
+
+export type AuthzRoleUncheckedCreateWithoutAccessInput = {
+  id?: string
+  name: string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Date | string
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutRoleInput
+}
+
+export type AuthzRoleCreateOrConnectWithoutAccessInput = {
+  where: Prisma.AuthzRoleWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuthzRoleCreateWithoutAccessInput, Prisma.AuthzRoleUncheckedCreateWithoutAccessInput>
+}
+
+export type AuthzRoleUpsertWithoutAccessInput = {
+  update: Prisma.XOR<Prisma.AuthzRoleUpdateWithoutAccessInput, Prisma.AuthzRoleUncheckedUpdateWithoutAccessInput>
+  create: Prisma.XOR<Prisma.AuthzRoleCreateWithoutAccessInput, Prisma.AuthzRoleUncheckedCreateWithoutAccessInput>
+  where?: Prisma.AuthzRoleWhereInput
+}
+
+export type AuthzRoleUpdateToOneWithWhereWithoutAccessInput = {
+  where?: Prisma.AuthzRoleWhereInput
+  data: Prisma.XOR<Prisma.AuthzRoleUpdateWithoutAccessInput, Prisma.AuthzRoleUncheckedUpdateWithoutAccessInput>
+}
+
+export type AuthzRoleUpdateWithoutAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.RoleUpdateManyWithoutRoleNestedInput
+}
+
+export type AuthzRoleUncheckedUpdateWithoutAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  syncedOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutRoleNestedInput
+}
+
+
+/**
+ * Count Type AuthzRoleCountOutputType
+ */
+
+export type AuthzRoleCountOutputType = {
+  roles: number
+  access: number
+}
+
+export type AuthzRoleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  roles?: boolean | AuthzRoleCountOutputTypeCountRolesArgs
+  access?: boolean | AuthzRoleCountOutputTypeCountAccessArgs
+}
+
+/**
+ * AuthzRoleCountOutputType without action
+ */
+export type AuthzRoleCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthzRoleCountOutputType
+   */
+  select?: Prisma.AuthzRoleCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * AuthzRoleCountOutputType without action
+ */
+export type AuthzRoleCountOutputTypeCountRolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RoleWhereInput
+}
+
+/**
+ * AuthzRoleCountOutputType without action
+ */
+export type AuthzRoleCountOutputTypeCountAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccessWhereInput
+}
 
 
 export type AuthzRoleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -284,6 +465,9 @@ export type AuthzRoleSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   name?: boolean
   permissions?: boolean
   syncedOn?: boolean
+  roles?: boolean | Prisma.AuthzRole$rolesArgs<ExtArgs>
+  access?: boolean | Prisma.AuthzRole$accessArgs<ExtArgs>
+  _count?: boolean | Prisma.AuthzRoleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authzRole"]>
 
 export type AuthzRoleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -308,10 +492,20 @@ export type AuthzRoleSelectScalar = {
 }
 
 export type AuthzRoleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "permissions" | "syncedOn", ExtArgs["result"]["authzRole"]>
+export type AuthzRoleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  roles?: boolean | Prisma.AuthzRole$rolesArgs<ExtArgs>
+  access?: boolean | Prisma.AuthzRole$accessArgs<ExtArgs>
+  _count?: boolean | Prisma.AuthzRoleCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type AuthzRoleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AuthzRoleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AuthzRolePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AuthzRole"
-  objects: {}
+  objects: {
+    roles: Prisma.$RolePayload<ExtArgs>[]
+    access: Prisma.$AccessPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
@@ -711,6 +905,8 @@ readonly fields: AuthzRoleFieldRefs;
  */
 export interface Prisma__AuthzRoleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  roles<T extends Prisma.AuthzRole$rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthzRole$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  access<T extends Prisma.AuthzRole$accessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthzRole$accessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -761,6 +957,10 @@ export type AuthzRoleFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
+  /**
    * Filter, which AuthzRole to fetch.
    */
   where: Prisma.AuthzRoleWhereUniqueInput
@@ -779,6 +979,10 @@ export type AuthzRoleFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
+  /**
    * Filter, which AuthzRole to fetch.
    */
   where: Prisma.AuthzRoleWhereUniqueInput
@@ -796,6 +1000,10 @@ export type AuthzRoleFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the AuthzRole
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
   /**
    * Filter, which AuthzRole to fetch.
    */
@@ -845,6 +1053,10 @@ export type AuthzRoleFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
+  /**
    * Filter, which AuthzRole to fetch.
    */
   where?: Prisma.AuthzRoleWhereInput
@@ -892,6 +1104,10 @@ export type AuthzRoleFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the AuthzRole
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
   /**
    * Filter, which AuthzRoles to fetch.
    */
@@ -941,6 +1157,10 @@ export type AuthzRoleCreateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
+  /**
    * The data needed to create a AuthzRole.
    */
   data: Prisma.XOR<Prisma.AuthzRoleCreateInput, Prisma.AuthzRoleUncheckedCreateInput>
@@ -988,6 +1208,10 @@ export type AuthzRoleUpdateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the AuthzRole
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
   /**
    * The data needed to update a AuthzRole.
    */
@@ -1055,6 +1279,10 @@ export type AuthzRoleUpsertArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
+  /**
    * The filter to search for the AuthzRole to update in case it exists.
    */
   where: Prisma.AuthzRoleWhereUniqueInput
@@ -1081,6 +1309,10 @@ export type AuthzRoleDeleteArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
+  /**
    * Filter which AuthzRole to delete.
    */
   where: Prisma.AuthzRoleWhereUniqueInput
@@ -1101,6 +1333,54 @@ export type AuthzRoleDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * AuthzRole.roles
+ */
+export type AuthzRole$rolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Role
+   */
+  select?: Prisma.RoleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Role
+   */
+  omit?: Prisma.RoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RoleInclude<ExtArgs> | null
+  where?: Prisma.RoleWhereInput
+  orderBy?: Prisma.RoleOrderByWithRelationInput | Prisma.RoleOrderByWithRelationInput[]
+  cursor?: Prisma.RoleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RoleScalarFieldEnum | Prisma.RoleScalarFieldEnum[]
+}
+
+/**
+ * AuthzRole.access
+ */
+export type AuthzRole$accessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Access
+   */
+  select?: Prisma.AccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Access
+   */
+  omit?: Prisma.AccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccessInclude<ExtArgs> | null
+  where?: Prisma.AccessWhereInput
+  orderBy?: Prisma.AccessOrderByWithRelationInput | Prisma.AccessOrderByWithRelationInput[]
+  cursor?: Prisma.AccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccessScalarFieldEnum | Prisma.AccessScalarFieldEnum[]
+}
+
+/**
  * AuthzRole without action
  */
 export type AuthzRoleDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1112,4 +1392,8 @@ export type AuthzRoleDefaultArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the AuthzRole
    */
   omit?: Prisma.AuthzRoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthzRoleInclude<ExtArgs> | null
 }
