@@ -26,34 +26,46 @@ Runtime: Node.js
 
 ## Project Structure
 
-├── app/
-│ ├── api/ # API route handlers
-│ ├── article/ # Article pages
-│ ├── compose/ # Article creation
-│ ├── library/ # Content library
-│ ├── manage/ # Content management
-│ ├── profile/ # User profile
-│ ├── search/ # Search functionality
-│ ├── translation/ # Translation functionality
-│ ├── layout.tsx # Root application layout
-│ ├── page.tsx # Application homepage
-│ └── ... # Other application files
+```text
+.
+├── app/                    # Pages and API routes
+│   ├── api/                # Backend API routes
+│   ├── article/            # Public article pages
+│   ├── compose/            # Article creation
+│   ├── manage/             # Protected management UI
+│   ├── profile/            # User profile
+│   └── search/             # Article search
 │
-├── components/ # Reusable UI components
-├── inapp/ # Application-specific utilities and infrastructure
+├── components/             # Shared UI components
+│   ├── editor/             # Editor blocks/components
+│   ├── CommentSection.tsx
+│   ├── ReactionButton.tsx
+│   ├── TranslationWidget.tsx
+│   └── ...
+│
+├── inapp/
+│   └── lib/                # Application authentication layer
+│       ├── auth-guard.ts
+│       ├── auth-redirect.ts
+│       ├── bridge-auth.service.ts
+│       ├── permissions.ts
+│       └── prisma.ts
+│
+├── services/               # Application/business logic
+│   ├── articles/
+│   ├── comments/
+│   └── reactions/
+│
+├── core/                   # Shared/core infrastructure
+├── logica/                 # Shared NEUP/application logic
+│
 ├── prisma/
-│ ├── schema.prisma # Database schema
-│ └── client/ # Generated Prisma client
-├── public/ # Static assets
-├── services/
-│ ├── articles/ # Article-related services
-│ ├── comments/ # Comment-related services
-│ ├── reactions/ # Reaction-related services
-│ └── ... # Other services
+│   └── schema.prisma       # Database schema
 │
-├── package.json # Dependencies and project scripts
-├── tsconfig.json # TypeScript configuration
-└── ... # Other configuration files
+├── proxy.ts                # /manage route protection
+├── next.config.ts
+├── tsconfig.json
+└── package.json
 
 Generated dependencies and build output such as node_modules and .next are intentionally excluded from the project structure.
 
@@ -181,3 +193,4 @@ npx prisma studio - Opens Prisma Studio
 The project uses custom setup scripts that run during installation, development, and build processes. These scripts integrate the shared Neup ecosystem dependencies and project configuration.
 
 The application is intended to be developed using the project's configured environment and shared Neup packages.
+```
