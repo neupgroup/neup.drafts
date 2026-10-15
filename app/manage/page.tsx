@@ -14,9 +14,11 @@ Use `/manage` to review article volume, engagement totals, and shortcuts into ar
 */
 
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
+import { getAuthStartUrlForPath } from "@/inapp/lib/auth-redirect";
+import { ensureAccount } from "@neup/shared/account/self";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticlePosts } from "@/services/articles/articles";
 
@@ -58,16 +60,11 @@ export default async function ManageOverviewPage() {
 
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
-
-  if (!authResult.authenticated) {
-    redirect("/unauthorized");
-  }
-
-  const accountId = await bridgeAuth.getAccountId(authAccountToken);
+  const account = await ensureAccount(authAccountToken);
+  const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);
 
   if (!accountId) {
-    redirect("/unauthorized");
+    redirect(getAuthStartUrlForPath("/manage"));
   }
 
   const posts = await getManagedArticlePosts(accountId);
@@ -106,12 +103,12 @@ export default async function ManageOverviewPage() {
                   Latest updates across your published drafts.
                 </p>
               </div>
-              <Link
+              <LinkButton variant="text" size="sm"
                 href="/manage/articles"
                 className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-800"
               >
                 All articles
-              </Link>
+              </LinkButton>
             </div>
 
             {recentPosts.length === 0 ? (
@@ -124,12 +121,12 @@ export default async function ManageOverviewPage() {
                   <article key={post.id} className="px-5 py-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <Link
+                        <LinkButton variant="text" size="sm"
                           href={getManagedArticlePath(post)}
                           className="block truncate text-lg font-semibold text-slate-950 transition-colors hover:text-blue-600"
                         >
                           {post.title}
-                        </Link>
+                        </LinkButton>
                         <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">
                           {getPostExcerpt(post.content) || "No body content."}
                         </p>
@@ -142,12 +139,12 @@ export default async function ManageOverviewPage() {
                     <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
                       <span>{post.reactions.length} reactions</span>
                       <span>{post.comments.length} comments</span>
-                      <Link
+                      <LinkButton variant="text" size="sm"
                         href={getArticleEditPath(post)}
                         className="font-medium text-blue-600 transition-colors hover:text-blue-800"
                       >
                         Edit
-                      </Link>
+                      </LinkButton>
                     </div>
                   </article>
                 ))}
@@ -164,12 +161,12 @@ export default async function ManageOverviewPage() {
                 Inspect every article row with direct links into edit and public
                 view flows.
               </p>
-              <Link
+              <LinkButton variant="text" size="sm"
                 href="/manage/articles"
                 className="mt-4 inline-flex text-sm font-medium text-blue-600 transition-colors hover:text-blue-800"
               >
                 Open article inventory
-              </Link>
+              </LinkButton>
             </section>
 
             <section className="border border-slate-200 bg-slate-50 p-5">
@@ -178,12 +175,12 @@ export default async function ManageOverviewPage() {
                 Compare engagement concentration, top-performing posts, and
                 response averages.
               </p>
-              <Link
+              <LinkButton variant="text" size="sm"
                 href="/manage/stats"
                 className="mt-4 inline-flex text-sm font-medium text-blue-600 transition-colors hover:text-blue-800"
               >
                 Open stats
-              </Link>
+              </LinkButton>
             </section>
           </div>
         </div>

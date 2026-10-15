@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@neup/components/ui/button";
 import { useState } from "react";
 
 interface ShareButtonProps {
@@ -54,14 +55,14 @@ export function ShareButton({ title, url }: ShareButtonProps) {
 
   return (
     <div>
-      <button
+      <Button variant="text" size="sm"
         type="button"
         onClick={handleShare}
         className="inline-flex h-11 items-center justify-center border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
         aria-label="Share this article"
       >
         {copied ? "Link Copied! ✓" : "Share 🔗"}
-      </button>
+      </Button>
 
       {error && (
         <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>

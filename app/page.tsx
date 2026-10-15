@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { cookies } from "next/headers";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getArticleFeed } from "@/services/articles/articles";
@@ -74,12 +74,12 @@ export default async function HomePage() {
               <h2 className="text-xs uppercase font-medium tracking-widest text-blue-600">
                 Recent Publications
               </h2>
-              <Link
+              <LinkButton variant="text" size="sm"
                 href="/search"
                 className="text-xs font-medium text-slate-600 hover:text-slate-950 transition-colors"
               >
                 Search Articles &rarr;
-              </Link>
+              </LinkButton>
             </div>
 
             {posts.length === 0 ? (
@@ -113,14 +113,14 @@ export default async function HomePage() {
                         <span className="text-slate-500">ID #{post.id.slice(-6)}</span> */}
                       </div>
 
-                      <Link
+                      <LinkButton variant="text" size="sm"
                         href={getArticlePath(post)}
                         className="block group-hover:text-slate-700"
                       >
                         <h3 className="text-3xl font-medium tracking-tight text-slate-950 group-hover:text-blue-600 transition-colors duration-200">
                           {post.title}
                         </h3>
-                      </Link>
+                      </LinkButton>
 
                       <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
                         {stripHtml(post.content)}
@@ -134,12 +134,12 @@ export default async function HomePage() {
                           <span>{commentsCount} comments</span>
                         </div>
 
-                        <Link
+                        <LinkButton variant="text" size="sm"
                           href={getArticlePath(post)}
                           className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium"
                         >
                           Read full story
-                        </Link>
+                        </LinkButton>
                       </div>
 
                       <div className="border-b border-slate-200 pt-8" />
@@ -165,12 +165,12 @@ export default async function HomePage() {
                   </p>
                 </div>
                 <div className="space-y-2 pt-2">
-                  <Link
+                  <LinkButton variant="text" size="sm"
                     href={getClientAuthStartUrl("http://localhost:3723/")}
                     className="block w-full bg-blue-600 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-opacity-90 rounded"
                   >
                     Get Started
-                  </Link>
+                  </LinkButton>
                 </div>
               </div>
             ) : (
@@ -185,12 +185,13 @@ export default async function HomePage() {
                   </p>
                 </div>
                 <div className="pt-2">
-                  <Link
+                  <LinkButton variant="solid" size="sm"
                     href="/compose"
-                    className="block w-full bg-blue-600 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-opacity-90 rounded"
+                    alignment="center"
+                    className="w-full rounded text-sm font-medium transition-all"
                   >
                     Write a Story
-                  </Link>
+                  </LinkButton>
                 </div>
               </div>
             )}

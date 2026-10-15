@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 
 interface RelatedPost {
   id: string;
@@ -21,7 +21,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
       </h3>
       <div className="grid gap-6 md:grid-cols-3">
         {posts.map((post) => (
-          <Link
+          <LinkButton variant="text" size="sm"
             key={post.id}
             href={`/posts/${post.slug || post.id}`}
             className="group block space-y-2 border border-slate-200 p-4 rounded-lg hover:border-slate-400 transition-colors bg-white"
@@ -32,7 +32,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
             <p className="text-xs text-slate-500 font-mono">
               By {post.authorDisplayName || "Anonymous"}
             </p>
-          </Link>
+          </LinkButton>
         ))}
       </div>
     </section>

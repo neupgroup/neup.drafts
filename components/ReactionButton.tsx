@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@neup/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -55,7 +56,7 @@ export function ReactionButton({
 
   return (
     <div>
-      <button
+      <Button variant="text" size="sm"
         onClick={handleLike}
         className={`inline-flex h-11 items-center justify-center border px-4 text-sm font-medium transition-colors ${
           currentUser
@@ -64,7 +65,7 @@ export function ReactionButton({
         }`}
       >
         Like : {likes}
-      </button>
+      </Button>
       {error && (
         <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>
       )}

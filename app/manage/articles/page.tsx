@@ -14,9 +14,11 @@ Use `/manage/articles` to scan managed articles, inspect engagement counts, and 
 */
 
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
+import { getAuthStartUrlForPath } from "@/inapp/lib/auth-redirect";
+import { ensureAccount } from "@neup/shared/account/self";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticlePosts } from "@/services/articles/articles";
 
@@ -62,16 +64,11 @@ export default async function ManageArticlesPage() {
 
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
-
-  if (!authResult.authenticated) {
-    redirect("/unauthorized");
-  }
-
-  const accountId = await bridgeAuth.getAccountId(authAccountToken);
+  const account = await ensureAccount(authAccountToken);
+  const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);
 
   if (!accountId) {
-    redirect("/unauthorized");
+    redirect(getAuthStartUrlForPath("/manage/articles"));
   }
 
   const posts = await getManagedArticlePosts(accountId);
@@ -107,12 +104,12 @@ export default async function ManageArticlesPage() {
               Publish a draft first, then return here to review engagement and
               manage each story.
             </p>
-            <Link
+            <LinkButton variant="text" size="sm"
               href="/compose"
               className="mt-6 inline-flex h-10 items-center border border-slate-950 bg-slate-950 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
             >
               Write a post
-            </Link>
+            </LinkButton>
           </section>
         ) : (
           <section className="overflow-x-auto border border-slate-200">
@@ -131,12 +128,12 @@ export default async function ManageArticlesPage() {
                   className="grid grid-cols-[minmax(20rem,1.2fr)_7rem_7rem_10rem_16rem] items-center px-4 py-4 text-sm"
                 >
                   <div className="min-w-0 pr-6">
-                    <Link
+                    <LinkButton variant="text" size="sm"
                       href={getManagedArticlePath(post)}
                       className="block truncate font-semibold text-slate-950 transition-colors hover:text-blue-600"
                     >
                       {post.title}
-                    </Link>
+                    </LinkButton>
                     <p className="mt-1 line-clamp-1 text-slate-500">
                       {getPostExcerpt(post.content) || "No body content."}
                     </p>
@@ -151,24 +148,24 @@ export default async function ManageArticlesPage() {
                     {formatDate(post.updatedAt)}
                   </span>
                   <div className="flex justify-end gap-4 text-sm font-medium">
-                    <Link
+                    <LinkButton variant="text" size="sm"
                       href={getManagedArticlePath(post)}
                       className="text-slate-600 transition-colors hover:text-slate-950"
                     >
                       Manage
-                    </Link>
-                    <Link
+                    </LinkButton>
+                    <LinkButton variant="text" size="sm"
                       href={getPublicArticlePath(post)}
                       className="text-slate-600 transition-colors hover:text-slate-950"
                     >
                       View
-                    </Link>
-                    <Link
+                    </LinkButton>
+                    <LinkButton variant="text" size="sm"
                       href={getArticleEditPath(post)}
                       className="text-blue-600 transition-colors hover:text-blue-800"
                     >
                       Edit
-                    </Link>
+                    </LinkButton>
                   </div>
                 </article>
               ))}

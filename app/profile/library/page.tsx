@@ -14,7 +14,7 @@ Use `/profile/library` to review a user's saved placeholder state, their recent 
 */
 
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
 import { ensureAccount } from "@neup/shared/account/self";
 import { getCommentsByAuthor } from "@/services/comments/getbyauthor";
@@ -166,12 +166,12 @@ export default async function LibraryPage() {
                   <div className="divide-y divide-slate-200">
                     {commentedArticles.map((comment) => (
                       <article key={comment.article.id} className="px-5 py-5">
-                        <Link
+                        <LinkButton variant="text" size="sm"
                           href={getArticlePath(comment.article)}
                           className="text-lg font-semibold text-slate-950 transition-colors hover:text-blue-600"
                         >
                           {comment.article.title}
-                        </Link>
+                        </LinkButton>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {comment.content}
                         </p>
@@ -203,23 +203,23 @@ export default async function LibraryPage() {
                         className="flex items-center justify-between gap-4 px-5 py-5"
                       >
                         <div className="min-w-0">
-                          <Link
+                          <LinkButton variant="text" size="sm"
                             href={getArticlePath(reaction.article)}
                             className="block truncate text-lg font-semibold text-slate-950 transition-colors hover:text-blue-600"
                           >
                             {reaction.article.title}
-                          </Link>
+                          </LinkButton>
                           <p className="mt-2 text-xs uppercase tracking-[0.16em] text-slate-400">
                             {reaction.type} on{" "}
                             {formatLibraryDate(reaction.createdAt)}
                           </p>
                         </div>
-                        <Link
+                        <LinkButton variant="text" size="sm"
                           href={getArticlePath(reaction.article)}
                           className="shrink-0 text-sm font-medium text-slate-700 transition-colors hover:text-slate-950"
                         >
                           Open
-                        </Link>
+                        </LinkButton>
                       </article>
                     ))}
                   </div>

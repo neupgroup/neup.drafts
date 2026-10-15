@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from "@neup/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
@@ -300,7 +301,7 @@ function ComposeMediaBlockControls({
       className="absolute z-10"
     >
       <div className="flex items-center gap-2">
-        <button
+        <Button variant="text" size="icon"
           type="button"
           aria-label="Change image"
           onMouseDown={(event) => event.preventDefault()}
@@ -322,9 +323,9 @@ function ComposeMediaBlockControls({
             <path d="M7 18H5.2a1 1 0 0 0-1 1V21" />
             <path d="M17 6h1.8a1 1 0 0 0 1-1V3" />
           </svg>
-        </button>
+        </Button>
 
-        <button
+        <Button variant="text" size="icon"
           type="button"
           aria-label="Remove image block"
           onMouseDown={(event) => event.preventDefault()}
@@ -332,7 +333,7 @@ function ComposeMediaBlockControls({
           className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-xl leading-none text-slate-400 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
         >
           ×
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -354,7 +355,7 @@ function ComposeVideoBlockControls({
       className="absolute z-10"
     >
       <div className="flex items-center gap-2">
-        <button
+        <Button variant="text" size="icon"
           type="button"
           aria-label="Video settings"
           aria-expanded={isSettingsOpen}
@@ -375,9 +376,9 @@ function ComposeVideoBlockControls({
             <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.24.6.82 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.69 0-1.27.4-1.51 1Z" />
           </svg>
-        </button>
+        </Button>
 
-        <button
+        <Button variant="text" size="icon"
           type="button"
           aria-label="Remove video block"
           onMouseDown={(event) => event.preventDefault()}
@@ -385,7 +386,7 @@ function ComposeVideoBlockControls({
           className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-xl leading-none text-slate-400 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
         >
           ×
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -463,8 +464,7 @@ function ComposeMediaTextActions({
       className={overlayClassName}
     >
       <div className={actionClassName}>
-        <a
-          href="#"
+        <Button variant="text" size="sm"
           onMouseDown={(event) => event.preventDefault()}
           onClick={(event) => {
             event.preventDefault();
@@ -474,10 +474,9 @@ function ComposeMediaTextActions({
           data-active={activeMode === 'alt' ? 'true' : undefined}
         >
           {activeMode === 'alt' ? 'Save alt text' : hasAltText ? 'Edit alt text' : 'Add alt text'}
-        </a>
+        </Button>
 
-        <a
-          href="#"
+        <Button variant="text" size="sm"
           onMouseDown={(event) => event.preventDefault()}
           onClick={(event) => {
             event.preventDefault();
@@ -487,7 +486,7 @@ function ComposeMediaTextActions({
           data-active={activeMode === 'caption' ? 'true' : undefined}
         >
           {activeMode === 'caption' ? 'Save caption' : hasCaption ? 'Edit caption' : 'Add caption'}
-        </a>
+        </Button>
       </div>
     </div>
   );

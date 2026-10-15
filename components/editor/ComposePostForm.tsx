@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from "@neup/components/ui/button";
+import { LinkButton } from "@neup/components/ui/link-button";
 import {
   useEffect,
   useLayoutEffect,
@@ -2948,7 +2950,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             className="fixed z-40 w-56 border border-slate-200 bg-white p-1 shadow-lg"
           >
             {filteredSlashMenuOptions.map((option, index) => (
-              <button
+              <Button variant="text" size="sm"
                 key={option.id}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
@@ -2958,7 +2960,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
                 }`}
               >
                 {option.label}
-              </button>
+              </Button>
             ))}
 
             {filteredSlashMenuOptions.length === 0 && (
@@ -2979,7 +2981,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             className="fixed z-40 w-80 border border-slate-200 bg-white p-3 shadow-lg"
           >
             <div className="grid grid-cols-2 gap-2">
-              <button
+              <Button variant="text" size="sm"
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setVideoProvider('youtube')}
@@ -2990,9 +2992,9 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
                 }`}
               >
                 YouTube
-              </button>
+              </Button>
 
-              <button
+              <Button variant="text" size="sm"
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setVideoProvider('vimeo')}
@@ -3003,7 +3005,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
                 }`}
               >
                 Vimeo
-              </button>
+              </Button>
             </div>
 
             <div className="mt-3 flex gap-2">
@@ -3024,24 +3026,24 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
                 className="min-w-0 flex-1 border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-blue-300"
               />
 
-              <button
+              <Button variant="text" size="sm"
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleVideoEmbedSubmit}
                 className="h-9 rounded bg-blue-600 px-3 text-sm font-medium text-white"
               >
                 Add
-              </button>
+              </Button>
             </div>
 
-            <button
+            <Button variant="text" size="sm"
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => videoFileInputRef.current?.click()}
               className="mt-3 h-9 w-full rounded border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
             >
               Add local video
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -3055,22 +3057,21 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
       />
 
       <div className="flex items-center gap-3">
-        <button
+        <Button variant="solid" size="sm"
           type="submit"
           disabled={loading}
-          className="h-9 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="h-9 rounded-full px-5 text-sm font-medium disabled:opacity-50"
         >
           {loading ? (isEditing ? 'Saving...' : 'Publishing...') : (isEditing ? 'Save Changes' : 'Publish')}
-        </button>
+        </Button>
 
         {isEditing && article && (
-          <button
-            type="button"
-            onClick={() => router.push(getArticlePath(article))}
+          <LinkButton variant="text" size="sm"
+            href={getArticlePath(article)}
             className="h-9 rounded-full border border-slate-300 px-5 text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600"
           >
             Cancel
-          </button>
+          </LinkButton>
         )}
       </div>
     </form>

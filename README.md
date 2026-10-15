@@ -2,7 +2,7 @@
 
 A full-stack technical blog platform built with Next.js, TypeScript, React, Prisma, and PostgreSQL.
 
-The application provides article publishing, centralized authentication, comments, reactions, authorization, and translation functionality through a server-side architecture.
+The application provides article publishing, centralized authentication, comments, reactions, and authorization through a server-side architecture.
 
 ## Tech Stack
 
@@ -40,7 +40,6 @@ Runtime: Node.js
 │   ├── editor/             # Editor blocks/components
 │   ├── CommentSection.tsx
 │   ├── ReactionButton.tsx
-│   ├── TranslationWidget.tsx
 │   └── ...
 │
 ├── inapp/
@@ -75,7 +74,6 @@ Generated dependencies and build output such as node_modules and .next are inten
 - Article creation, publishing, and management
 - Search and content library
 - Comments and reactions
-- Translation support
 - Responsive user interface
 
 ## Authentication & Authorization

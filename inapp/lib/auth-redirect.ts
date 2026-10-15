@@ -7,6 +7,22 @@ export function getAuthStartUrl(authenticatesTo: string): string {
   return url.toString();
 }
 
+export function getAuthStartUrlForPath(path: string): string {
+  const target = new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3723",
+  );
+  const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(
+    /^\/+|\/+$/g,
+    "",
+  );
+  const routePath = path.replace(/^\/+/, "");
+
+  target.pathname = [basePath, routePath].filter(Boolean).join("/");
+  target.pathname = `/${target.pathname}`;
+
+  return getAuthStartUrl(target.toString());
+}
+
 // export function getClientAuthStartUrl(): string {
 //   // 1. If in browser, use the live window origin (captures 3000, 3723, etc. automatically)
 //   // 2. If on server, fall back to your .env variable

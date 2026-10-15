@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 
 export default function NotFound() {
   return (
@@ -16,18 +16,18 @@ export default function NotFound() {
             back to something worth reading.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
+            <LinkButton variant="text" size="sm"
               href="/"
               className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
             >
               Back to the feed
-            </Link>
-            <Link
+            </LinkButton>
+            <LinkButton variant="text" size="sm"
               href="/search"
               className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
               Search articles
-            </Link>
+            </LinkButton>
           </div>
         </section>
       </main>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@neup/components/ui/button";
 import { useState, SyntheticEvent } from "react";
 
 interface CommentAuthor {
@@ -117,12 +118,12 @@ export function CommentSection({
             className="h-11 min-w-0 border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 placeholder:text-slate-400 outline-none transition-colors focus:border-blue-400"
             required
           />
-          <button
+          <Button variant="text" size="sm"
             type="submit"
             className="h-11 border border-blue-300 px-5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
           >
             Post
-          </button>
+          </Button>
         </form>
       ) : (
         <p className="mb-8 text-sm italic text-slate-500">

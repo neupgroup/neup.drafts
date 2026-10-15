@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from "@neup/components/ui/button";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -107,21 +109,20 @@ export default function EditPostForm({ article }: EditPostFormProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        <button
+        <Button variant="text" size="sm"
           type="submit"
           disabled={loading}
           className="h-9 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save Changes'}
-        </button>
+        </Button>
 
-        <button
-          type="button"
-          onClick={() => router.push(getArticlePath(article))}
+        <LinkButton variant="text" size="sm"
+          href={getArticlePath(article)}
           className="h-9 rounded-full border border-slate-300 px-5 text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600"
         >
           Cancel
-        </button>
+        </LinkButton>
       </div>
     </form>
   );

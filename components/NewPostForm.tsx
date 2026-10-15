@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from "@neup/components/ui/button";
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -134,13 +135,13 @@ export default function NewPostForm() {
         />
       </div>
 
-      <button
+      <Button variant="solid" size="sm"
         type="submit"
         disabled={loading}
-        className="h-9 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="h-9 rounded-full px-5 text-sm font-medium disabled:opacity-50"
       >
         {loading ? 'Publishing...' : 'Publish'}
-      </button>
+      </Button>
     </form>
   );
 }

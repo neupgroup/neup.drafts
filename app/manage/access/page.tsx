@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { getAuthStartUrlForPath } from "@/inapp/lib/auth-redirect";
+import { ensureAccount } from "@neup/shared/account/self";
 
 import ManageShell from "@/components/ManageShell";
 
@@ -14,13 +16,14 @@ export default async function AccessPage() {
   const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 
   if (!authResult.authenticated) {
-    redirect("/account/auth/start");
+    redirect(getAuthStartUrlForPath("/manage/access"));
   }
 
-  const accountId = await bridgeAuth.getAccountId(authAccountToken);
+  const account = await ensureAccount(authAccountToken);
+  const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);
 
   if (!accountId) {
-    redirect("/account/auth/start");
+    redirect(getAuthStartUrlForPath("/manage/access"));
   }
 
   const authorized = await bridgeAuth.checkAuthorization(
@@ -29,28 +32,7 @@ export default async function AccessPage() {
   );
 
   if (!authorized) {
-    return (
-      <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
-        <ManageShell
-          activeSection="access"
-          ctaHref="/manage"
-          ctaLabel="Back to overview"
-          description="View the access and permissions associated with your account."
-          metrics={[{ label: "Status", value: "Restricted" }]}
-          title="Access"
-        >
-          <section className="border border-slate-200 bg-slate-50 p-5">
-            <h2 className="text-lg font-semibold text-slate-950">
-              Access denied
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Your account does not have permission to view access information.
-            </p>
-          </section>
-        </ManageShell>
-      </main>
-    );
+    redirect(getAuthStartUrlForPath("/manage/access"));
   }
 
   const result = await bridgeAuth.getAccountAccess(accountId);

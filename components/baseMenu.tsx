@@ -1,3 +1,4 @@
+import { Button } from "@neup/components/ui/button";
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 
 export interface BaseMenuPosition {
@@ -61,7 +62,7 @@ export function BaseMenuButton({
   ...props
 }: BaseMenuButtonProps) {
   return (
-    <button
+    <Button variant="text" size="sm"
       {...props}
       type={type}
       aria-pressed={active}
@@ -77,7 +78,7 @@ export function BaseMenuButton({
       } ${className}`}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -102,7 +103,7 @@ export function BaseMenuOption({
   ...props
 }: BaseMenuOptionProps) {
   return (
-    <button
+    <Button variant="text" size="sm"
       {...props}
       type={type}
       aria-pressed={active}
@@ -126,6 +127,6 @@ export function BaseMenuOption({
           {description}
         </span>
       </span>
-    </button>
+    </Button>
   );
 }

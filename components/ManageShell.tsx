@@ -13,9 +13,9 @@ Use `ManageShell` to keep navigation, title treatment, and optional summary card
 ::end
 */
 
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
+import { NavLink } from "@neup/components/ui/nav-link";
 import type { ReactNode } from "react";
-import SidebarNav, { getSharedSidebarSections } from "./SidebarNav";
 
 interface ManageMetric {
   label: string;
@@ -46,15 +46,27 @@ export default function ManageShell({
   return (
     <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
       <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
-        <SidebarNav
-          sections={getSharedSidebarSections(
-            activeSection === "overview"
-              ? "manage-overview"
-              : activeSection === "articles"
-                ? "manage-articles"
-                : "manage-stats",
-          )}
-        />
+        <nav aria-label="Manage navigation" className="flex gap-2 overflow-x-auto lg:block lg:space-y-2 lg:overflow-visible">
+          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Manage
+          </p>
+          {([
+            ["overview", "/manage", "Overview"],
+            ["articles", "/manage/articles", "Articles"],
+            ["stats", "/manage/stats", "Stats"],
+            ["access", "/manage/access", "Access"],
+          ] as const).map(([section, href, label]) => (
+            <NavLink
+              key={section}
+              href={href}
+              variant="plain"
+              active={activeSection === section}
+              className="w-full justify-start rounded-lg px-3 py-2.5 text-left text-slate-800 transition-colors hover:bg-sky-50 hover:text-sky-700"
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       </aside>
 
       <div className="min-w-0 px-6 py-10 sm:px-10 lg:px-0 lg:pb-16 lg:pl-20 lg:pr-20 lg:pt-16">
@@ -73,12 +85,12 @@ export default function ManageShell({
             </div>
 
             {ctaHref && ctaLabel ? (
-              <Link
+              <LinkButton variant="text" size="sm"
                 href={ctaHref}
                 className="inline-flex h-10 items-center justify-center border border-slate-950 bg-slate-950 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
               >
                 {ctaLabel}
-              </Link>
+              </LinkButton>
             ) : null}
           </div>
 

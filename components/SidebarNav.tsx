@@ -13,7 +13,8 @@ Use `SidebarNav` when a page needs the same rounded nav-item treatment, icon rai
 ::end
 */
 
-import Link from 'next/link';
+import { Button } from "@neup/components/ui/button";
+import { NavLink } from "@neup/components/ui/nav-link";
 
 type SidebarNavIcon =
   | 'articles'
@@ -45,6 +46,7 @@ interface SidebarNavProps {
 export type SidebarNavActiveKey =
   | 'library'
   | 'manage-articles'
+  | 'manage-access'
   | 'manage-overview'
   | 'manage-stats'
   | 'profile';
@@ -68,6 +70,7 @@ export function getSharedSidebarSections(
         { href: '/manage', icon: 'overview', label: 'Overview', active: activeKey === 'manage-overview' },
         { href: '/manage/articles', icon: 'articles', label: 'Articles', active: activeKey === 'manage-articles' },
         { href: '/manage/stats', icon: 'stats', label: 'Stats', active: activeKey === 'manage-stats' },
+        { href: '/manage/access', icon: 'profile', label: 'Access', active: activeKey === 'manage-access' },
       ],
     },
   ];
@@ -154,10 +157,13 @@ export default function SidebarNav({
 
             <div className="flex gap-1 overflow-x-auto lg:block lg:space-y-2.5 lg:overflow-visible">
               {section.items.map((item) => (
-                <Link
+                <NavLink
                   key={`${item.href}:${item.label}`}
                   href={item.href}
-                  className={`relative flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 transition-all duration-200 lg:px-3 ${
+                  variant="plain"
+                  size="default"
+                  active={item.active}
+                  className={`relative flex w-full shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-all duration-200 lg:px-3 ${
                     item.active
                       ? 'bg-sky-100 font-semibold text-sky-700 shadow-[inset_0_0_0_1px_rgba(125,168,201,0.18)] hover:bg-sky-200 hover:text-sky-800'
                       : 'text-slate-800 hover:bg-sky-50 hover:text-sky-700'
@@ -167,14 +173,14 @@ export default function SidebarNav({
                     <SidebarNavIconGlyph kind={item.icon} />
                   </span>
                   {item.label}
-                </Link>
+                </NavLink>
               ))}
             </div>
           </div>
         ))}
 
         <form action={`${basePath}/api/auth/signout`} method="POST" className="mt-6 border-t border-slate-100 pt-4">
-          <button
+          <Button variant="text" size="sm"
             type="submit"
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700 lg:px-3"
           >
@@ -182,7 +188,7 @@ export default function SidebarNav({
               <SidebarNavIconGlyph kind="signout" />
             </span>
             {signOutLabel}
-          </button>
+          </Button>
         </form>
       </nav>
     </>

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Button } from "@neup/components/ui/button";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { useState } from "react";
 
 import { getClientAuthStartUrl } from "@/inapp/lib/auth-redirect";
@@ -29,32 +30,29 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-md shadow-slate-200/80">
       <div className="relative mx-auto flex h-16 max-w-[1440px] items-center justify-between px-6">
-        <Link
+        <LinkButton variant="text" size="sm"
           href="/"
           className="text-lg font-bold tracking-tight text-slate-950 transition-colors hover:text-blue-600 sm:text-xl"
           onClick={() => setIsMenuOpen(false)}
         >
           Neup.Drafts
-        </Link>
+        </LinkButton>
 
         {user ? (
           <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 text-[15px] font-medium md:flex">
-            <Link href="/compose" className={navLinkClassName}>
+            <LinkButton variant="text" size="sm" href="/compose" className={navLinkClassName}>
               Create Post
-            </Link>
-            <Link href="/translation" className={navLinkClassName}>
-              Translate
-            </Link>
-            <Link href="/manage" className={navLinkClassName}>
+            </LinkButton>
+            <LinkButton variant="text" size="sm" href="/manage" className={navLinkClassName}>
               Manage
-            </Link>
+            </LinkButton>
           </div>
         ) : null}
 
         <div className="flex items-center gap-3 text-[15px] font-medium">
           {user ? (
             <>
-              <Link
+              <LinkButton variant="text" size="sm"
                 href="/profile"
                 className="hidden items-center gap-3 rounded-full pl-2 pr-1.5 py-1 text-slate-950 transition-all hover:bg-slate-100 md:flex"
               >
@@ -77,8 +75,8 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                     {userInitial}
                   </div>
                 )}
-              </Link>
-              <button
+              </LinkButton>
+              <Button variant="text" size="icon"
                 type="button"
                 aria-expanded={isMenuOpen}
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -96,20 +94,20 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                     className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
                   />
                 </span>
-              </button>
+              </Button>
             </>
           ) : (
             <div className="hidden items-center gap-3 md:flex">
-              <Link
+              <LinkButton variant="text" size="sm"
                 href={getClientAuthStartUrl("http://localhost:3723/")} //central Get started
                 className="bg-blue-600 px-4 py-1.5 text-[14px] font-medium text-white transition-all hover:bg-opacity-90 sm:text-[15px]"
               >
                 Get Started
-              </Link>
+              </LinkButton>
             </div>
           )}
           {!user ? (
-            <button
+            <Button variant="text" size="icon"
               type="button"
               aria-expanded={isMenuOpen}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -127,7 +125,7 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                   className={`block h-0.5 w-full bg-current transition-transform duration-200 ${isMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
                 />
               </span>
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>
@@ -136,7 +134,7 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
         <div className="border-t border-slate-200 bg-white px-6 py-6 md:hidden">
           <div className="flex min-h-[calc(100vh-4rem)] flex-col">
             {user ? (
-              <Link
+              <LinkButton variant="text" size="sm"
                 href="/profile"
                 className="flex items-center gap-4 border-b border-slate-200 pb-6"
                 onClick={() => setIsMenuOpen(false)}
@@ -160,43 +158,36 @@ export default function HeaderV1S1({ user }: HeaderV1S1Props) {
                     @{neupId}
                   </p>
                 </div>
-              </Link>
+              </LinkButton>
             ) : null}
 
             <div className="space-y-2 pt-6">
               {user ? (
                 <>
-                  <Link
+                  <LinkButton variant="text" size="sm"
                     href="/compose"
                     className={mobileNavLinkClassName}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Create Post
-                  </Link>
-                  <Link
-                    href="/translation"
-                    className={mobileNavLinkClassName}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Translate
-                  </Link>
-                  <Link
+                  </LinkButton>
+                  <LinkButton variant="text" size="sm"
                     href="/manage"
                     className={mobileNavLinkClassName}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Manage
-                  </Link>
+                  </LinkButton>
                 </>
               ) : (
                 <>
-                  <Link
+                  <LinkButton variant="text" size="sm"
                     href={getClientAuthStartUrl("http://localhost:3723/")} //central get started
                     className="block rounded-2xl bg-blue-600 px-4 py-4 text-base font-medium text-white transition-all hover:bg-blue-700"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Get Started
-                  </Link>
+                  </LinkButton>
                 </>
               )}
             </div>

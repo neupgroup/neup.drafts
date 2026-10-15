@@ -14,9 +14,11 @@ Use `/manage/articles/[slug]` to inspect an owned article, review recent comment
 */
 
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
+import { getAuthStartUrlForPath } from "@/inapp/lib/auth-redirect";
+import { ensureAccount } from "@neup/shared/account/self";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticleBySlug } from "@/services/articles/articles";
 
@@ -59,16 +61,11 @@ export default async function ManageArticleDetailPage(
 
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
-
-  if (!authResult.authenticated) {
-    redirect("/unauthorized");
-  }
-
-  const accountId = await bridgeAuth.getAccountId(authAccountToken);
+  const account = await ensureAccount(authAccountToken);
+  const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);
 
   if (!accountId) {
-    redirect("/unauthorized");
+    redirect(getAuthStartUrlForPath(`/manage/articles/${slug}`));
   }
 
   const post = await getManagedArticleBySlug(accountId, slug);
@@ -94,18 +91,18 @@ export default async function ManageArticleDetailPage(
         title={post.title}
       >
         <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-slate-500">
-          <Link
+          <LinkButton variant="text" size="sm"
             href="/manage/articles"
             className="font-medium text-slate-600 transition-colors hover:text-slate-950"
           >
             All articles
-          </Link>
-          <Link
+          </LinkButton>
+          <LinkButton variant="text" size="sm"
             href={getPublicArticlePath(post)}
             className="font-medium text-blue-600 transition-colors hover:text-blue-800"
           >
             Open public page
-          </Link>
+          </LinkButton>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.9fr)]">

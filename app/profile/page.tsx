@@ -1,5 +1,6 @@
+import { Button } from "@neup/components/ui/button";
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { Prisma } from "@neup/core/database/prisma";
 import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
@@ -140,22 +141,22 @@ export default async function AccountPage() {
                   method="POST"
                   className="lg:hidden"
                 >
-                  <button
+                  <Button variant="text" size="sm"
                     type="submit"
                     className="cursor-pointer border border-red-500/30 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
                   >
                     Sign Out
-                  </button>
+                  </Button>
                 </form>
               </div>
 
               <div className="mt-12 flex gap-9 overflow-x-auto border-b border-slate-200 text-sm text-slate-500">
-                <Link
+                <LinkButton variant="text" size="sm"
                   href="/profile"
                   className="border-b border-slate-950 pb-4 font-medium text-slate-950"
                 >
                   Home
-                </Link>
+                </LinkButton>
                 <span className="pb-4">Reposts</span>
                 <span className="pb-4">Activity</span>
                 <span className="pb-4">Lists</span>
@@ -173,12 +174,12 @@ export default async function AccountPage() {
                     Your published drafts will appear here in a clean reading
                     feed.
                   </p>
-                  <Link
+                  <LinkButton variant="text" size="sm"
                     href="/compose"
                     className="mt-6 inline-block border border-slate-950 bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800"
                   >
                     Write a story
-                  </Link>
+                  </LinkButton>
                 </div>
               </section>
             ) : (
@@ -199,31 +200,31 @@ export default async function AccountPage() {
                     <div className="mt-5 grid gap-8 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-start">
                       <div className="min-w-0">
                         <p className="break-words text-[28px] font-semibold leading-tight tracking-tight">
-                          <Link
+                          <LinkButton variant="text" size="sm"
                             href={getArticlePath(post)}
                             className="text-slate-950 transition-colors hover:text-slate-700"
                           >
                             {post.title}
-                          </Link>
-                          <Link
+                          </LinkButton>
+                          <LinkButton variant="text" size="sm"
                             href={getArticleEditPath(post)}
                             className="ml-4 font-medium text-slate-400 hover:underline"
                           >
                             Edit
-                          </Link>
+                          </LinkButton>
                         </p>
                         <p className="mt-3 line-clamp-2 text-xl leading-7 text-slate-500">
                           {getPostExcerpt(post.content)}
                         </p>
                       </div>
 
-                      <Link
+                      <LinkButton variant="text" size="sm"
                         href={getArticlePath(post)}
                         aria-label={`Read ${post.title}`}
                         className="hidden aspect-[1.45/1] items-center justify-center rounded-sm bg-slate-100 text-3xl font-semibold text-slate-400 transition-colors hover:bg-slate-200 sm:flex"
                       >
                         {getInitials(post.title)}
-                      </Link>
+                      </LinkButton>
                     </div>
 
                     <div className="mt-7 flex items-center justify-between text-sm text-slate-500">
@@ -231,12 +232,12 @@ export default async function AccountPage() {
                         <span>{post.reactions.length} reactions</span>
                         <span>{post.comments.length} comments</span>
                       </div>
-                      <Link
+                      <LinkButton variant="text" size="sm"
                         href={getArticlePath(post)}
                         className="font-medium text-slate-700 transition-colors hover:text-slate-950"
                       >
                         Read
-                      </Link>
+                      </LinkButton>
                     </div>
                   </article>
                 ))}

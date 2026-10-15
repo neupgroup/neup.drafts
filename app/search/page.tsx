@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Button } from "@neup/components/ui/button";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { prisma, Prisma } from "@neup/core/database/prisma";
 
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
@@ -102,7 +103,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               className="w-full pl-5 pr-14 py-4 bg-slate-50 border border-slate-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-950 focus:border-transparent text-base transition-all"
             />
             <input type="hidden" name="sort" value={sortParam} />
-            <button
+            <Button variant="text" size="icon"
               type="submit"
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-950 hover:bg-slate-800 text-white p-3 rounded-full transition-colors shadow-sm"
               aria-label="Search"
@@ -120,7 +121,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
                 />
               </svg>
-            </button>
+            </Button>
           </form>
         </div>
 
@@ -153,12 +154,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   <option value="latest">Latest First</option>
                   <option value="oldest">Oldest First</option>
                 </select>
-                <button
+                <Button variant="text" size="sm"
                   type="submit"
                   className="mt-3 w-full bg-slate-950 text-white py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition-colors"
                 >
                   Apply Filter
-                </button>
+                </Button>
               </div>
             </form>
           </aside>
@@ -229,25 +230,25 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-start">
                         <div className="min-w-0">
                           <h2 className="text-2xl font-semibold tracking-tight leading-tight mb-2">
-                            <Link
+                            <LinkButton variant="text" size="sm"
                               href={getArticlePath(post)}
                               className="text-slate-950 hover:text-slate-700 transition-colors"
                             >
                               {post.title}
-                            </Link>
+                            </LinkButton>
                           </h2>
                           <p className="line-clamp-2 text-base text-slate-600 leading-relaxed">
                             {getPostExcerpt(post.content)}
                           </p>
                         </div>
 
-                        <Link
+                        <LinkButton variant="text" size="sm"
                           href={getArticlePath(post)}
                           aria-label={`Read ${post.title}`}
                           className="hidden aspect-[1.45/1] items-center justify-center rounded bg-slate-100 text-2xl font-semibold text-slate-400 transition-colors hover:bg-slate-200 sm:flex"
                         >
                           {getInitials(post.title)}
-                        </Link>
+                        </LinkButton>
                       </div>
 
                       <div className="mt-5 flex items-center justify-between text-sm text-slate-500">
@@ -255,12 +256,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                           <span>{post.reactions.length} reactions</span>
                           <span>{post.comments.length} comments</span>
                         </div>
-                        <Link
+                        <LinkButton variant="text" size="sm"
                           href={getArticlePath(post)}
                           className="font-medium text-slate-700 hover:text-slate-950"
                         >
                           Read
-                        </Link>
+                        </LinkButton>
                       </div>
                     </article>
                   );

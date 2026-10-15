@@ -14,9 +14,11 @@ Use `/manage/stats` to review totals, averages, and top-performing articles acro
 */
 
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
+import { getAuthStartUrlForPath } from "@/inapp/lib/auth-redirect";
+import { ensureAccount } from "@neup/shared/account/self";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticlePosts } from "@/services/articles/articles";
 
@@ -37,16 +39,11 @@ export default async function ManageStatsPage() {
 
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
-
-  if (!authResult.authenticated) {
-    redirect("/unauthorized");
-  }
-
-  const accountId = await bridgeAuth.getAccountId(authAccountToken);
+  const account = await ensureAccount(authAccountToken);
+  const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);
 
   if (!accountId) {
-    redirect("/unauthorized");
+    redirect(getAuthStartUrlForPath("/manage/stats"));
   }
 
   const posts = await getManagedArticlePosts(accountId);
@@ -104,12 +101,12 @@ export default async function ManageStatsPage() {
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
                         Rank {index + 1}
                       </p>
-                      <Link
+                      <LinkButton variant="text" size="sm"
                         href={getManagedArticlePath(post)}
                         className="mt-1 block truncate font-semibold text-slate-950 transition-colors hover:text-blue-600"
                       >
                         {post.title}
-                      </Link>
+                      </LinkButton>
                     </div>
                     <span className="font-mono text-slate-700">
                       {post.reactions.length}
@@ -142,12 +139,12 @@ export default async function ManageStatsPage() {
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
                         Rank {index + 1}
                       </p>
-                      <Link
+                      <LinkButton variant="text" size="sm"
                         href={getManagedArticlePath(post)}
                         className="mt-1 block truncate font-semibold text-slate-950 transition-colors hover:text-blue-600"
                       >
                         {post.title}
-                      </Link>
+                      </LinkButton>
                     </div>
                     <span className="font-mono text-slate-700">
                       {post.comments.length}

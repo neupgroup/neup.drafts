@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import { getArticleBySlugOrId } from "@/services/articles/articles";
 import { ReactionButton } from "@/components/ReactionButton";
@@ -380,12 +380,12 @@ export default async function ArticlePage({
             The article you are looking for does not exist or is no longer
             available.
           </p>
-          <Link
+          <LinkButton variant="text" size="sm"
             href="/"
             className="mt-8 inline-flex h-10 items-center justify-center border border-blue-300 px-4 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
           >
             Back to publications
-          </Link>
+          </LinkButton>
         </section>
       </main>
     );
