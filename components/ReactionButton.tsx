@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface ReactionButtonProps {
-  postId: string;
+  postSlug: string;
   initialLikes: number;
   currentUser?: {
     id: string;
@@ -20,7 +20,7 @@ interface ReactionButtonProps {
 }
 
 export function ReactionButton({
-  postId,
+  postSlug,
   initialLikes,
   currentUser,
 }: ReactionButtonProps) {
@@ -39,10 +39,10 @@ export function ReactionButton({
 
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-    const res = await fetch(`${basePath}/api/posts/interact`, {
+    const res = await fetch(`${basePath}/bridge/api.v1/posts/${encodeURIComponent(postSlug)}/interact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ postId, action: "like" }),
+      body: JSON.stringify({ action: "like" }),
     });
 
     if (res.ok) {

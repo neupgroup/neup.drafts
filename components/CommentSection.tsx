@@ -18,7 +18,7 @@ interface Comment {
 }
 
 interface CommentSectionProps {
-  postId: string;
+  postSlug: string;
   comments: Comment[];
   currentUser?: {
     id: string;
@@ -33,7 +33,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({
-  postId,
+  postSlug,
   comments,
   currentUser,
 }: CommentSectionProps) {
@@ -54,7 +54,8 @@ export function CommentSection({
 
     try {
       // 1. Send the data to your API route
-      const response = await fetch(`/api/posts/${postId}/comments`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+      const response = await fetch(`${basePath}/bridge/api.v1/posts/${encodeURIComponent(postSlug)}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

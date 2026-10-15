@@ -68,8 +68,7 @@ export default function NewPostForm() {
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
     try {
-      // Hits your existing POST /api/posts endpoint
-      const res = await fetch(`${basePath}/api/posts`, {
+      const res = await fetch(`${basePath}/bridge/api.v1/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, slug: slugBase, content, articleId }),

@@ -2,32 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
 import { prisma } from "@neup/core/database/prisma";
 import { PERMISSIONS } from "@/inapp/lib/permissions";
+import { getArticleBySlugOrId } from "@/services/articles/articles";
 
-// POST /api/posts/interact -> Handles liking/unliking a post
+// POST /bridge/api.v1/posts/[slug]/interact -> Handles liking/unliking a post
 export const POST = withAuth(
   PERMISSIONS.ARTICLES_LIKE,
   async (req: NextRequest, context: AuthContext) => {
     try {
-      const { postId, action } = await req.json();
+      const { action } = await req.json();
+      const url = new URL(req.url);
+      const pathSegments = url.pathname.split("/");
+      const articleSlug = pathSegments[pathSegments.length - 2];
 
-      if (!postId || action !== "like") {
+      if (!articleSlug || action !== "like") {
         return NextResponse.json(
-          { error: "Missing postId or invalid action" },
+          { error: "Post slug or invalid action is missing" },
           { status: 400 },
         );
       }
 
-      const accountId = context.accountId;
+      const post = await getArticleBySlugOrId(articleSlug);
 
-      // 1. Verify the article exists in the database
-      const article = await prisma.article.findUnique({
-        where: { id: postId },
-      });
-
-      if (!article) {
+      if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
       }
 
+      const postId = post.id;
+
+      const accountId = context.accountId;
+
+      // 1. Verify the article exists in the database
       // 2. Check if this specific account already liked the post
       const existingReaction = await prisma.reaction.findFirst({
         where: {

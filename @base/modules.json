@@ -41,14 +41,5 @@
         "isRequired": true,
         "accountSystem": "neupId.remote",
         "projectId": "0a40228e-a331-4c83-8ef4-6a443a84a8db"
-    },
-    {
-        "name": "neup.estate",
-        "isRequired": true,
-        "permissions": [
-            "estate.listings.read",
-            "estate.listings.create"
-        ],
-        "projectId": "0a40228e-a331-4c83-8ef4-6a443a84a8db"
     }
 ]

@@ -2626,7 +2626,9 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
     setContent(nextContent);
 
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-    const apiPath = isEditing ? `/api/posts/${articleId}` : '/api/posts';
+    const apiPath = isEditing
+      ? `/bridge/api.v1/posts/${encodeURIComponent(articleId)}`
+      : '/bridge/api.v1/posts';
 
 
     try {

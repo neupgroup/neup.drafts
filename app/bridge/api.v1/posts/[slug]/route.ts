@@ -3,18 +3,14 @@ import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
 import { prisma } from "@neup/core/database/prisma";
 import {
   getArticleBySlugOrId,
-  getArticleLookupFromSlug,
   getArticleOwnershipBySlugOrId,
 } from "@/services/articles/articles";
 import { PERMISSIONS } from "@/inapp/lib/permissions";
 
-function getArticleLookupFromUrl(req: NextRequest): {
-  id: string;
-  slug: string;
-} {
+function getArticleSlugFromUrl(req: NextRequest): string {
   const url = new URL(req.url);
   const pathSegments = url.pathname.split("/");
-  return getArticleLookupFromSlug(pathSegments[pathSegments.length - 1] || "");
+  return pathSegments[pathSegments.length - 1] || "";
 }
 
 function normalizeArticleContent(content: string): string {
@@ -26,9 +22,8 @@ export const GET = withAuth(
   PERMISSIONS.ARTICLES_VIEW,
   async (req: NextRequest) => {
     try {
-      const articleLookup = getArticleLookupFromUrl(req);
-
-      const post = await getArticleBySlugOrId(articleLookup.slug);
+      const articleSlug = getArticleSlugFromUrl(req);
+      const post = await getArticleBySlugOrId(articleSlug);
 
       if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -47,7 +42,7 @@ export const PATCH = withAuth(
   PERMISSIONS.ARTICLES_EDIT_CONTENT,
   async (req: NextRequest) => {
     try {
-      const articleLookup = getArticleLookupFromUrl(req);
+      const articleSlug = getArticleSlugFromUrl(req);
       let body: unknown;
 
       try {
@@ -81,7 +76,7 @@ export const PATCH = withAuth(
         );
       }
 
-      const post = await getArticleOwnershipBySlugOrId(articleLookup.slug);
+      const post = await getArticleOwnershipBySlugOrId(articleSlug);
 
       if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -124,10 +119,10 @@ export const DELETE = withAuth(
   PERMISSIONS.ARTICLES_DELETE,
   async (req: NextRequest, context: AuthContext) => {
     try {
-      const articleLookup = getArticleLookupFromUrl(req);
+      const articleSlug = getArticleSlugFromUrl(req);
 
       // 1. Find the target article first to check ownership
-      const post = await getArticleOwnershipBySlugOrId(articleLookup.slug);
+      const post = await getArticleOwnershipBySlugOrId(articleSlug);
 
       if (!post) {
         return NextResponse.json({ error: "Post not found" }, { status: 404 });

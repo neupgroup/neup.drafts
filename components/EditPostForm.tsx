@@ -48,7 +48,8 @@ export default function EditPostForm({ article }: EditPostFormProps) {
     setError('');
 
     try {
-      const res = await fetch(`/api/posts/${article.id}`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const res = await fetch(`${basePath}/bridge/api.v1/posts/${encodeURIComponent(article.slug || article.id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content }),

@@ -5,6 +5,8 @@ import { ReactionButton } from "@/components/ReactionButton";
 import { ShareButton } from "@/components/ShareButton";
 import { CommentSection } from "@/components/CommentSection";
 import { RelatedPosts } from "@/components/RelatedPosts";
+import { cookies } from "next/headers";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 
 function getCanonicalArticleSlug(post: {
   id: string;
@@ -397,6 +399,10 @@ export default async function ArticlePage({
     redirect(`/article/${canonicalSlug}`);
   }
 
+  const cookieStore = await cookies();
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+
   const authorDisplayName =
     typeof post.author === "object" && post.author !== null
       ? post.author.neupId || post.author.displayName
@@ -451,7 +457,7 @@ export default async function ArticlePage({
           <div className="flex flex-col gap-8">
             <div className="flex flex-wrap gap-3">
               <ReactionButton
-                postId={post.id}
+                postSlug={post.slug || post.id}
                 initialLikes={likesCount}
                 currentUser={user}
               />
@@ -459,7 +465,7 @@ export default async function ArticlePage({
             </div>
 
             <CommentSection
-              postId={post.id}
+              postSlug={post.slug || post.id}
               comments={post.comments || []}
               currentUser={user}
             />

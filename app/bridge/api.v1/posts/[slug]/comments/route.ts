@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
 import { prisma } from "@neup/core/database/prisma";
 import { PERMISSIONS } from "@/inapp/lib/permissions";
+import { getArticleBySlugOrId } from "@/services/articles/articles";
 
 // PROTECTED: Only logged-in users can write a comment
 export const POST = withAuth(
@@ -18,10 +19,17 @@ export const POST = withAuth(
         );
       }
 
-      // 2. Extract the article ID (CUID string) directly from the request URL path
+      // 2. Resolve the slug (or id) from the request URL to the database id.
       const url = new URL(req.url);
       const pathSegments = url.pathname.split("/");
-      const articleId = pathSegments[pathSegments.length - 2];
+      const articleSlug = pathSegments[pathSegments.length - 2];
+      const article = await getArticleBySlugOrId(articleSlug);
+
+      if (!article) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+
+      const articleId = article.id;
 
       // 3. Save the new comment to PostgreSQL
       await prisma.comment.create({

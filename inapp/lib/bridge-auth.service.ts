@@ -34,7 +34,38 @@ export const bridgeAuth = {
     }
 
     try {
-      return await current.get(authAccountToken);
+      const [response, accountId] = await Promise.all([
+        current.get(authAccountToken),
+        current.id.get(authAccountToken),
+      ]);
+      if (!response.ok || !accountId || !response.body || typeof response.body !== "object") {
+        return null;
+      }
+
+      const body = response.body as {
+        profile?: {
+          displayName?: unknown;
+          displayImage?: unknown;
+          neupid?: unknown;
+          status?: unknown;
+          type?: unknown;
+          createdOn?: unknown;
+          moreDetails?: unknown;
+        };
+      };
+      const profile = body.profile ?? {};
+      const asString = (value: unknown) => typeof value === "string" ? value : "";
+
+      return {
+        id: accountId,
+        displayName: asString(profile.displayName),
+        displayImage: asString(profile.displayImage),
+        neupId: asString(profile.neupid) || null,
+        type: asString(profile.type),
+        createdOn: asString(profile.createdOn),
+        status: asString(profile.status),
+        moreDetails: profile.moreDetails ?? {},
+      };
     } catch {
       return null;
     }
