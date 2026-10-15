@@ -1,9 +1,5 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
-import { prisma } from "@/inapp/lib/prisma";
-import { Prisma } from "@/core/database/prisma";
-import HeaderV1S1 from "@/components/header.v1s1";
+import { prisma, Prisma } from "@neup/core/database/prisma";
 
 type ArticleWithRelations = Prisma.ArticleGetPayload<{
   include: { comments: true; reactions: true; author: true };
@@ -47,13 +43,6 @@ function getPostExcerpt(content: string): string {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const cookieStore = await cookies();
-
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
-
-  // Optional auth for the header (guests will have user = null)
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
-
   const queryParams = await searchParams;
   const queryParam = Array.isArray(queryParams.q)
     ? queryParams.q[0]
@@ -93,9 +82,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <section className="mx-auto max-w-[1200px] px-6 py-10 sm:px-10 lg:px-12">
         {/* Search Bar Section (Centered) */}
         <div className="flex flex-col items-center mb-16">

@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 
-import HeaderV1S1 from "@/components/header.v1s1";
 import ManageShell from "@/components/ManageShell";
 
 import { PERMISSIONS } from "@/inapp/lib/permissions";
@@ -24,12 +23,6 @@ export default async function AccessPage() {
     redirect("/account/auth/start");
   }
 
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
-
-  if (!user) {
-    redirect("/account/auth/start");
-  }
-
   const authorized = await bridgeAuth.checkAuthorization(
     accountId,
     PERMISSIONS.ACCESS_MANAGE,
@@ -37,9 +30,7 @@ export default async function AccessPage() {
 
   if (!authorized) {
     return (
-      <main className="min-h-screen bg-white text-slate-900">
-        <HeaderV1S1 user={null} />
-
+      <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
         <ManageShell
           activeSection="access"
           ctaHref="/manage"
@@ -66,9 +57,7 @@ export default async function AccessPage() {
 
   if (!result || !result.ok || !result.body.success) {
     return (
-      <main className="min-h-screen bg-white text-slate-900">
-        <HeaderV1S1 user={user} />
-
+      <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
         <ManageShell
           activeSection="access"
           ctaHref="/manage"
@@ -95,9 +84,7 @@ export default async function AccessPage() {
   const accessEntries = result.body.access;
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <ManageShell
         activeSection="access"
         ctaHref="/manage"

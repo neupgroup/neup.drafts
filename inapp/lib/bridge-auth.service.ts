@@ -1,6 +1,6 @@
-import { auth } from "@/logica/account/auth";
-import { current } from "@/logica/account/current";
-import { createAccountAccess } from "@/logica/account/access";
+import { auth } from "@neup/logica/account/auth";
+import { current } from "@neup/logica/account/current";
+import { createAccountAccess } from "@neup/logica/account/access";
 
 const appId = process.env.NEUP_APP_ID;
 const appSecret = process.env.NEUP_APP_SECRET;

@@ -20,12 +20,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "#/*": ["./*"],
-      "$/*": ["./*"],
-      "@neup/logica/*": ["./logica/*"],
-      "@neup/core/*": ["./core/*"],
-      "@/.neup/core/*": ["./core/*"],
-      "@base/*": ["./*"]
+      "@neup/*": ["./@neup/*"],
+      "@base/*": ["./@base/*"]
     }
   },
   "include": [
@@ -34,7 +30,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "./@neup/**/*.ts",
   ],
   "exclude": ["node_modules"]
 }

@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getArticleBySlugOrId } from "@/services/articles/articles";
 import { ReactionButton } from "@/components/ReactionButton";
 import { ShareButton } from "@/components/ShareButton";
 import { CommentSection } from "@/components/CommentSection";
-import HeaderV1S1 from "@/components/header.v1s1";
 import { RelatedPosts } from "@/components/RelatedPosts";
 
 function getCanonicalArticleSlug(post: {
@@ -366,21 +363,12 @@ export default async function ArticlePage({
 }) {
   const { id: slug } = await params;
 
-  // Native Server-side Auth verification via Cookie Token
-  const cookieStore = await cookies();
-
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
-
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
-
   const post = await getPost(slug);
 
   // Fallback if article is not found
   if (!post) {
     return (
-      <main className="min-h-screen bg-white text-slate-900">
-        <HeaderV1S1 user={user} />
-
+      <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
         <section className="mx-auto mt-16 max-w-2xl border border-slate-200 bg-slate-50 p-8 text-center">
           <p className="text-xs font-medium uppercase tracking-[0.24em] text-rose-600">
             Missing Article
@@ -421,9 +409,7 @@ export default async function ArticlePage({
   const articleHtml = hasHtmlContent ? sanitizeArticleHtml(post.content) : "";
 
   return (
-    <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
       <div className="mx-auto grid max-w-4xl gap-10 px-6 py-10 md:py-14">
         <article className="space-y-8">
           <header className="border-b border-slate-200 pb-8">

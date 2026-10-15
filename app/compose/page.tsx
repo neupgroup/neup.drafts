@@ -1,9 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import ComposePostForm from "@/components/editor/ComposePostForm";
-import HeaderV1S1 from "@/components/header.v1s1";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
-import { prisma } from "@/inapp/lib/prisma";
+import { prisma } from "@neup/core/database/prisma";
 
 interface ComposePageProps {
   searchParams: Promise<{
@@ -43,9 +42,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
 
   if (!articleParam) {
     return (
-      <main className="min-h-screen bg-white text-slate-900">
-        <HeaderV1S1 user={user} />
-
+      <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
         <section className="mx-auto max-w-4xl px-6 py-8">
           <ComposePostForm />
         </section>
@@ -78,9 +75,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <section className="mx-auto max-w-4xl px-6 py-8">
         <ComposePostForm article={article} />
       </section>

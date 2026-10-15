@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Geist_Mono, Outfit } from "next/font/google";
+import HeaderV1S1 from "@/components/header.v1s1";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -17,11 +20,15 @@ export const metadata: Metadata = {
   description: "Write and publish drafts with Neup.Drafts.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+
   return (
     <html
       lang="en"
@@ -30,6 +37,7 @@ export default function RootLayout({
       <body
         className={`${outfit.className} flex min-h-full flex-col bg-white text-slate-900`}
       >
+        <HeaderV1S1 user={user} />
         {children}
       </body>
     </html>

@@ -13,7 +13,7 @@ Use `getCommentsByArticle(articleId)` to fetch an article's comments with basic 
 ::end
 */
 
-import { prisma } from '@/inapp/lib/prisma';
+import { prisma } from '@neup/core/database/prisma';
 
 export async function getCommentsByArticle(articleId: string) {
   return prisma.comment.findMany({

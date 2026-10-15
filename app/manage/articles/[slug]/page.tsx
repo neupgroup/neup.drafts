@@ -16,7 +16,6 @@ Use `/manage/articles/[slug]` to inspect an owned article, review recent comment
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import HeaderV1S1 from "@/components/header.v1s1";
 import ManageShell from "@/components/ManageShell";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticleBySlug } from "@/services/articles/articles";
@@ -66,13 +65,13 @@ export default async function ManageArticleDetailPage(
     redirect("/unauthorized");
   }
 
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+  const accountId = await bridgeAuth.getAccountId(authAccountToken);
 
-  if (!user) {
+  if (!accountId) {
     redirect("/unauthorized");
   }
 
-  const post = await getManagedArticleBySlug(user.id, slug);
+  const post = await getManagedArticleBySlug(accountId, slug);
 
   if (!post) {
     redirect("/manage/articles");
@@ -81,9 +80,7 @@ export default async function ManageArticleDetailPage(
   const previewText = getPreviewText(post.content);
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <ManageShell
         activeSection="articles"
         ctaHref={getArticleEditPath(post)}

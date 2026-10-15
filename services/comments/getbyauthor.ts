@@ -13,7 +13,7 @@ Use `getCommentsByAuthor(authorId)` to fetch a user's comments with their relate
 ::end
 */
 
-import { prisma } from '@/inapp/lib/prisma';
+import { prisma } from '@neup/core/database/prisma';
 
 export async function getCommentsByAuthor(authorId: string) {
   return prisma.comment.findMany({

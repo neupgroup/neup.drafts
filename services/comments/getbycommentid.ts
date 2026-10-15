@@ -13,7 +13,7 @@ Use `getCommentByCommentId(commentId)` to fetch a single comment with its author
 ::end
 */
 
-import { prisma } from '@/inapp/lib/prisma';
+import { prisma } from '@neup/core/database/prisma';
 
 export async function getCommentByCommentId(commentId: string) {
   return prisma.comment.findUnique({

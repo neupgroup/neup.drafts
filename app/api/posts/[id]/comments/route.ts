@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
-import { prisma } from "@/inapp/lib/prisma";
+import { prisma } from "@neup/core/database/prisma";
 import { PERMISSIONS } from "@/inapp/lib/permissions";
 
 // PROTECTED: Only logged-in users can write a comment

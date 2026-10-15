@@ -1,4 +1,4 @@
-import { getBaseUrl } from "@/logica/baseurl";
+import { getBaseUrl } from "@neup/logica/baseurl";
 
 export function getAuthStartUrl(authenticatesTo: string): string {
   const url = new URL("/account/auth/start", getBaseUrl("neupid"));

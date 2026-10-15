@@ -13,7 +13,7 @@ Use `postArticleComment(articleId, authorId, content)` to persist a comment and 
 ::end
 */
 
-import { prisma } from '@/inapp/lib/prisma';
+import { prisma } from '@neup/core/database/prisma';
 
 export async function postArticleComment(articleId: string, authorId: string, content: string) {
   await prisma.comment.create({

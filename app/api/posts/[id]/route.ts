@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
-import { prisma } from "@/inapp/lib/prisma";
+import { prisma } from "@neup/core/database/prisma";
 import {
   getArticleBySlugOrId,
   getArticleLookupFromSlug,

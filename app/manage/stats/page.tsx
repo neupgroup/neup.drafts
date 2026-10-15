@@ -16,7 +16,6 @@ Use `/manage/stats` to review totals, averages, and top-performing articles acro
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import HeaderV1S1 from "@/components/header.v1s1";
 import ManageShell from "@/components/ManageShell";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticlePosts } from "@/services/articles/articles";
@@ -44,13 +43,13 @@ export default async function ManageStatsPage() {
     redirect("/unauthorized");
   }
 
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+  const accountId = await bridgeAuth.getAccountId(authAccountToken);
 
-  if (!user) {
+  if (!accountId) {
     redirect("/unauthorized");
   }
 
-  const posts = await getManagedArticlePosts(user.id);
+  const posts = await getManagedArticlePosts(accountId);
   const totalReactions = posts.reduce(
     (sum, post) => sum + post.reactions.length,
     0,
@@ -69,9 +68,7 @@ export default async function ManageStatsPage() {
     .slice(0, 5);
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <ManageShell
         activeSection="stats"
         ctaHref="/manage/articles"

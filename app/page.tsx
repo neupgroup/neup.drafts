@@ -2,7 +2,6 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getArticleFeed } from "@/services/articles/articles";
-import HeaderV1S1 from "@/components/header.v1s1";
 
 import { getClientAuthStartUrl } from "@/inapp/lib/auth-redirect";
 
@@ -59,15 +58,13 @@ export default async function HomePage() {
   const cookieStore = await cookies();
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 
   // Always fetch published articles for everyone (both guests and logged-in users)
   const posts = await getAllPosts();
 
   return (
-    <main className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900 antialiased selection:bg-blue-200 selection:text-slate-950">
       {/* Main Layout */}
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-12 items-start">
@@ -155,7 +152,7 @@ export default async function HomePage() {
 
           {/* Right Sidebar: Dynamic Card Based on Authentication Status */}
           <aside className="sticky top-24 space-y-6">
-            {!user ? (
+            {!authResult.authenticated ? (
               /* Get Started Card for Logged-Out Visitors */
               <div className="border border-slate-200 bg-slate-50 p-6 rounded-lg space-y-4">
                 <div>
@@ -181,7 +178,7 @@ export default async function HomePage() {
               <div className="border border-slate-200 bg-slate-50 p-6 rounded-lg space-y-4">
                 <div>
                   <h3 className="text-lg font-medium text-slate-950">
-                    Hello, {user.displayName || user.neupId || "Writer"}
+                    Welcome back
                   </h3>
                   <p className="text-xs text-slate-600 mt-1">
                     Ready to share your next idea with the community?

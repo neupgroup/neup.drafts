@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { withAuth, AuthContext } from "@/inapp/lib/auth-guard";
-import { prisma } from "@/inapp/lib/prisma";
+import { prisma } from "@neup/core/database/prisma";
 import { getArticleFeed } from "@/services/articles/articles";
 import { PERMISSIONS } from "@/inapp/lib/permissions";
 

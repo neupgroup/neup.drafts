@@ -13,7 +13,7 @@ Use these helpers when reading articles by id or canonical slug so pages do not 
 ::end
 */
 
-import { prisma } from "@/inapp/lib/prisma";
+import { prisma } from "@neup/core/database/prisma";
 
 export function getArticleLookupFromSlug(slug: string): {
   id: string;

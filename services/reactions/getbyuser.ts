@@ -13,7 +13,7 @@ Use `getReactionsByUser(accountId)` to fetch an account's article reactions with
 ::end
 */
 
-import { prisma } from '@/inapp/lib/prisma';
+import { prisma } from '@neup/core/database/prisma';
 
 export async function getReactionsByUser(accountId: string) {
   return prisma.reaction.findMany({

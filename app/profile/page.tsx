@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
-import { prisma } from "@/inapp/lib/prisma";
-import { Prisma } from "@/prisma/client/client";
-import HeaderV1S1 from "@/components/header.v1s1";
+import { Prisma } from "@neup/core/database/prisma";
 import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
 
 // Extract the exact return type for Article + included relations
@@ -87,8 +85,7 @@ export default async function AccountPage() {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-white text-slate-900">
-        <HeaderV1S1 user={null} />
+      <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-6 text-center">
           <section className="max-w-md border border-slate-200 bg-slate-50 p-8">
             <p className="font-medium text-red-600">Access Denied.</p>
@@ -117,9 +114,7 @@ export default async function AccountPage() {
   );
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 lg:grid-cols-[18.25rem_minmax(0,1fr)]">
         <aside className="border-b border-slate-200 px-6 py-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r lg:bg-white lg:px-6 lg:py-10">
           <SidebarNav sections={getSharedSidebarSections("profile")} />

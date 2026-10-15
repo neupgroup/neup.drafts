@@ -16,7 +16,6 @@ Use `/manage` to review article volume, engagement totals, and shortcuts into ar
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import HeaderV1S1 from "@/components/header.v1s1";
 import ManageShell from "@/components/ManageShell";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getManagedArticlePosts } from "@/services/articles/articles";
@@ -65,13 +64,13 @@ export default async function ManageOverviewPage() {
     redirect("/unauthorized");
   }
 
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+  const accountId = await bridgeAuth.getAccountId(authAccountToken);
 
-  if (!user) {
+  if (!accountId) {
     redirect("/unauthorized");
   }
 
-  const posts = await getManagedArticlePosts(user.id);
+  const posts = await getManagedArticlePosts(accountId);
   const totalReactions = posts.reduce(
     (sum, post) => sum + post.reactions.length,
     0,
@@ -80,18 +79,15 @@ export default async function ManageOverviewPage() {
     (sum, post) => sum + post.comments.length,
     0,
   );
-  const displayName = user.displayName || user.neupId;
   const recentPosts = posts.slice(0, 5);
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <HeaderV1S1 user={user} />
-
+    <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
       <ManageShell
         activeSection="overview"
         ctaHref="/compose"
         ctaLabel="New post"
-        description={`Track the article workspace for @${displayName}, jump into editing, and review current engagement at a glance.`}
+        description="Track your article workspace, jump into editing, and review current engagement at a glance."
         metrics={[
           { label: "Posts", value: posts.length },
           { label: "Reactions", value: totalReactions },
