@@ -16,7 +16,6 @@ datasource db {
 model Account {
   id            String    @id @default(cuid()) @db.VarChar(255)
   neupId        String?   @unique @db.VarChar(255)
-  connectionId  String    @unique @db.VarChar(255)
   type          String    @db.VarChar(255)
   displayName   String    @db.VarChar(255)
   displayImage  String?   @db.VarChar(255)

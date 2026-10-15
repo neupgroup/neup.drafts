@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Geist_Mono, Outfit } from "next/font/google";
 import HeaderV1S1 from "@/components/header.v1s1";
-import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { checkAuthSession } from "@neup/logica/account/auth";
+import { ensureAccount } from "@neup/shared/account/self";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -20,6 +21,11 @@ export const metadata: Metadata = {
   description: "Write and publish drafts with Neup.Drafts.",
 };
 
+type HeaderUser = Pick<
+  NonNullable<Awaited<ReturnType<typeof ensureAccount>>>,
+  "displayName" | "displayImage" | "neupId"
+>;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +33,25 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
+  let user: HeaderUser | null = null;
+
+  if (authAccountToken) {
+    try {
+      const authResult = await checkAuthSession({ authAccountToken });
+      if (authResult.authenticated) {
+        const account = await ensureAccount(authAccountToken);
+        user = account
+          ? {
+              displayName: account.displayName,
+              displayImage: account.displayImage,
+              neupId: account.neupId,
+            }
+          : null;
+      }
+    } catch {
+      user = null;
+    }
+  }
 
   return (
     <html

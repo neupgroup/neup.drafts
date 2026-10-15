@@ -6,7 +6,7 @@ Provides a protected library view for the authenticated user's saved, commented,
 
 ::public
 
-Use `/library` to review a user's saved placeholder state, their recent comments, and their recent reactions.
+Use `/profile/library` to review a user's saved placeholder state, their recent comments, and their recent reactions.
 
 ::public end
 
@@ -16,7 +16,7 @@ Use `/library` to review a user's saved placeholder state, their recent comments
 import { cookies } from "next/headers";
 import Link from "next/link";
 import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
-import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { ensureAccount } from "@neup/shared/account/self";
 import { getCommentsByAuthor } from "@/services/comments/getbyauthor";
 import { getReactionsByUser } from "@/services/reactions/getbyuser";
 
@@ -68,7 +68,8 @@ export default async function LibraryPage() {
 
   const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
 
-  const accountId = await bridgeAuth.getAccountId(authAccountToken);
+  const account = await ensureAccount(authAccountToken);
+  const accountId = account?.id;
 
   if (!accountId) {
     return (

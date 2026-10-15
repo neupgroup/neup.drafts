@@ -1,0 +1,89 @@
+Table: account, Model: Account
+Fields:
+> id: varchar(255), primary key, default: cuid();
+> neupId: varchar(255), optional, unique;
+> type: varchar(255);
+> displayName: varchar(255);
+> displayImage: varchar(255), optional;
+> createdOn: timestamp, default: now();
+> status: varchar(255), default: ACTIVE;
+> isVerified: boolean, default: false;
+> moreDetails: json, optional;
+
+Table: Article, Model: Article
+Fields:
+> id: string, primary key, default: cuid();
+> title: string;
+> slug: string, unique;
+> content: text;
+> likes: int, default: 0;
+> createdAt: timestamp, default: now();
+> updatedAt: timestamp, auto-updated;
+> authorId: string, references account.id;
+
+Table: article_authors, Model: ArticleAuthor
+Fields:
+> id: string, primary key, default: cuid();
+> article_id: string;
+> author_id: string;
+> role: string;
+> status: string;
+
+Table: authz_access, Model: AuthzAccess
+Fields:
+> id: string, primary key, default: cuid();
+> account_id: string, references account.id;
+> article_id: string, optional, references Article.id;
+> project_id: string, optional;
+> role_id: string;
+> created_on: timestamp, default: now();
+> status: string, default: ACTIVE;
+
+Table: authz_role, Model: AuthzRole
+Fields:
+> id: string, primary key, default: cuid();
+> name: string;
+> permissions: json, optional;
+> synced_on: timestamp, default: now();
+
+Table: role, Model: Role
+Fields:
+> id: varchar(255), primary key, default: cuid();
+> member_id: varchar(255);
+> account_id: varchar(255), optional, references account.id;
+> connection_id: varchar(255), optional;
+> asset_id: varchar(255), optional;
+> asset_type: varchar(255), optional;
+> asset_id_denorm: varchar(255), optional;
+> role_id: varchar(255), references authz_role.id;
+> role_name: varchar(255), optional;
+> permissions: json, optional;
+> status: varchar(255), default: ACTIVE;
+> details: json, optional;
+
+Table: access, Model: Access
+Fields:
+> id: varchar(255), primary key, default: cuid();
+> access_type: string;
+> member_account_id: varchar(255), optional;
+> parent_account_id: varchar(255), optional;
+> is_temporary: timestamp, optional;
+> role_id: string, references authz_role.id;
+> status: string, default: ACTIVE;
+
+Table: Comment, Model: Comment
+Fields:
+> id: string, primary key, default: cuid();
+> content: text;
+> createdAt: timestamp, default: now();
+> updatedAt: timestamp, auto-updated;
+> authorId: string, references account.id;
+> articleId: string, references Article.id;
+
+Table: Reaction, Model: Reaction
+Fields:
+> id: string, primary key, default: cuid();
+> type: string, default: LIKE;
+> createdAt: timestamp, default: now();
+> accountId: string, references account.id;
+> articleId: string, references Article.id;

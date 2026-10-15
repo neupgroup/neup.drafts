@@ -5,7 +5,6 @@ Create the following table.
 fields:
 id,
 type,
-connectionId,
 displayName,
 displayImage,
 neupId,

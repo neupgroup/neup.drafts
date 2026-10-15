@@ -57,7 +57,7 @@ export function getSharedSidebarSections(
       title: 'Profile',
       items: [
         { href: '/', icon: 'home', label: 'Home' },
-        { href: '/library', icon: 'library', label: 'Library', active: activeKey === 'library' },
+        { href: '/profile/library', icon: 'library', label: 'Library', active: activeKey === 'library' },
         { href: '/profile', icon: 'profile', label: 'Profile', active: activeKey === 'profile' },
         { href: '/compose', icon: 'compose', label: 'New Story' },
       ],
