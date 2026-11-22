@@ -22,9 +22,15 @@ import {
   createBusinessBlock,
   type BusinessBlockType,
 } from './businessBlocks';
-import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
-import { EditorMenu, type EditorMenuAction } from './editorMenu';
-import { snapSelectionRange } from './SmartSelectionBehavior';
+import {
+  ComposeMediaBlocks,
+  EditorSurface,
+  createImageBlock,
+  EditorMenu,
+  snapSelectionRange,
+  type EditorMenuAction,
+  type EditorMenuOption,
+} from '@neup/components/editor';
 import styles from './ComposePostForm.module.css';
 
 interface ComposeArticle {
@@ -51,6 +57,20 @@ type SlashMenuOption =
 type CalloutType = CalloutBlockType;
 type SemanticBlockType = 'h2' | 'h3' | 'p' | 'callout' | 'ol' | 'ul';
 type ListBlockType = 'ol' | 'ul';
+
+const editorMenuOptions: EditorMenuOption[] = [
+  { action: 'h2', label: 'Heading 2', icon: 'H2', className: 'text-sm font-bold' },
+  { action: 'h3', label: 'Heading 3', icon: 'H3', className: 'text-sm font-bold' },
+  { action: 'paragraph', label: 'Paragraph', icon: 'P', separatorBefore: true, className: 'text-sm font-bold' },
+  { action: 'numbered-list', label: 'Numbered list', icon: '1.', className: 'text-sm font-bold' },
+  { action: 'unnumbered-list', label: 'Unnumbered list', icon: '•', className: 'text-sm font-bold' },
+  { action: 'bold', label: 'Bold', icon: 'B', separatorBefore: true, className: 'text-lg font-bold' },
+  { action: 'italic', label: 'Italic', icon: 'i', className: 'font-serif text-xl font-bold italic' },
+  { action: 'underline', label: 'Underline', icon: 'U', className: 'text-lg font-bold underline underline-offset-4' },
+  { action: 'highlight', label: 'Highlight', icon: 'H', className: 'text-lg font-bold' },
+  { action: 'link', label: 'Add link', icon: '↗', className: 'text-lg font-bold' },
+  { action: 'callout', label: 'Callout', icon: 'C', separatorBefore: true, className: 'text-sm font-bold' },
+];
 
 interface SlashMenuPosition {
   top: number;
@@ -2706,14 +2726,11 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
         />
 
         <div ref={editorFrameRef} className="relative">
-          <div
-            ref={contentRef}
-            role="textbox"
-            aria-label="Article content"
-            contentEditable
-            suppressContentEditableWarning
-            data-placeholder="Tell your story..."
-            data-empty={!content.trim()}
+          <EditorSurface
+            editorRef={contentRef}
+            ariaLabel="Article content"
+            placeholder="Tell your story..."
+            empty={!content.trim()}
             onFocus={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
             }}
@@ -2944,8 +2961,15 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
           <EditorMenu
             activeActions={activeSelectionMenuActions}
             activeCalloutType={activeCalloutType}
+            options={editorMenuOptions}
+            calloutOptions={calloutBlockTypes.map((type) => ({
+              value: type,
+              label: calloutBlockMetadata[type].label,
+              icon: calloutBlockMetadata[type].icon,
+            }))}
             mode={selectionMenuMode}
             position={selectionMenuPosition}
+            showHeadingActions={showSelectionHeadingActions}
             showHeadingActions={showSelectionHeadingActions}
             onAction={applySelectionFormat}
             onBack={showDefaultSelectionMenu}
