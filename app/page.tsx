@@ -56,7 +56,7 @@ async function getAllPosts(): Promise<Post[]> {
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const authAccountToken = cookieStore.get("auth")?.value ?? null;
 
   const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 

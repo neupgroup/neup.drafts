@@ -7,11 +7,11 @@ function redirectToAuth(req: NextRequest) {
 }
 
 export async function proxy(req: NextRequest) {
-  const authAccountToken = req.cookies.get("auth_account")?.value ?? null;
+  const authToken = req.cookies.get("auth")?.value ?? null;
   let authenticated = false;
 
   try {
-    const authResult = await checkAuthSession({ authAccountToken });
+    const authResult = await checkAuthSession({ authAccountToken: authToken });
     authenticated = authResult.authenticated;
   } catch {
     // Treat auth service failures as unauthenticated so protected routes stay protected.

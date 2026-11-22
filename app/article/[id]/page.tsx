@@ -400,7 +400,7 @@ export default async function ArticlePage({
   }
 
   const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const authAccountToken = cookieStore.get("auth")?.value ?? null;
   const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   const authorDisplayName =

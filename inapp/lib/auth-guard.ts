@@ -10,7 +10,7 @@ export const withAuth = (
   handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>,
 ) => {
   return async (req: NextRequest) => {
-    const authAccountToken = req.cookies.get("auth_account")?.value ?? null;
+    const authAccountToken = req.cookies.get("auth")?.value ?? null;
 
     // 1. Authentication
     const authResult = await bridgeAuth.checkAuthentication(authAccountToken);

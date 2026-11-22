@@ -32,7 +32,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const authAccountToken = cookieStore.get("auth")?.value ?? null;
   let user: HeaderUser | null = null;
 
   if (authAccountToken) {

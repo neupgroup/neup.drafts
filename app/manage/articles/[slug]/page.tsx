@@ -59,7 +59,7 @@ export default async function ManageArticleDetailPage(
 
   const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const authAccountToken = cookieStore.get("auth")?.value ?? null;
 
   const account = await ensureAccount(authAccountToken);
   const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);

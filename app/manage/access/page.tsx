@@ -11,7 +11,7 @@ import { PERMISSIONS } from "@/inapp/lib/permissions";
 
 export default async function AccessPage() {
   const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth_account")?.value ?? null;
+  const authAccountToken = cookieStore.get("auth")?.value ?? null;
 
   const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 
