@@ -1,7 +1,7 @@
 import { Button } from "@neup/components/ui/button";
-import { cookies } from "next/headers";
 import { LinkButton } from "@neup/components/ui/link-button";
-import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { getAuthorizedAccount } from "@/inapp/lib/account-authorization";
+import { ensureAccount } from "@neup/shared/account/self";
 import { Prisma } from "@neup/core/database/prisma";
 import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
 
@@ -78,13 +78,11 @@ async function getAccountPosts(
 }
 
 export default async function AccountPage() {
-  const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authorizedAccount = await getAuthorizedAccount();
+  const accountId = authorizedAccount?.accountId;
 
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
-
-  if (!user) {
+  if (!accountId) {
     return (
       <main className="min-h-[calc(100vh-4rem)] bg-white text-slate-900">
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-6 text-center">
@@ -99,11 +97,13 @@ export default async function AccountPage() {
     );
   }
 
+  const account = await ensureAccount(authorizedAccount.authAccountToken);
+
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-  const myPosts = await getAccountPosts(user.id);
+  const myPosts = await getAccountPosts(accountId);
 
-  const displayName = user.displayName || user.neupId || "User";
+  const displayName = account?.displayName || account?.neupId || "User";
 
   const totalReactions = myPosts.reduce(
     (sum, post) => sum + post.reactions.length,

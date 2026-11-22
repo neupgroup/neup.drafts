@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { redirect } from "next/navigation";
 
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
@@ -10,8 +10,7 @@ import ManageShell from "@/components/ManageShell";
 import { PERMISSIONS } from "@/inapp/lib/permissions";
 
 export default async function AccessPage() {
-  const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
 
   const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 

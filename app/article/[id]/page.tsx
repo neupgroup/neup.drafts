@@ -5,7 +5,7 @@ import { ReactionButton } from "@/components/ReactionButton";
 import { ShareButton } from "@/components/ShareButton";
 import { CommentSection } from "@/components/CommentSection";
 import { RelatedPosts } from "@/components/RelatedPosts";
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 
 function getCanonicalArticleSlug(post: {
@@ -399,8 +399,7 @@ export default async function ArticlePage({
     redirect(`/article/${canonicalSlug}`);
   }
 
-  const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
   const user = await bridgeAuth.getCurrentAccount(authAccountToken);
 
   const authorDisplayName =

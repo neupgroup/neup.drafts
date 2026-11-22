@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { Geist_Mono, Outfit } from "next/font/google";
 import HeaderV1S1 from "@/components/header.v1s1";
 import { checkAuthSession } from "@neup/logica/account/auth";
@@ -31,8 +31,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
   let user: HeaderUser | null = null;
 
   if (authAccountToken) {

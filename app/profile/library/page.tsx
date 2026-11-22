@@ -13,7 +13,7 @@ Use `/profile/library` to review a user's saved placeholder state, their recent 
 ::end
 */
 
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { LinkButton } from "@neup/components/ui/link-button";
 import SidebarNav, { getSharedSidebarSections } from "@/components/SidebarNav";
 import { ensureAccount } from "@neup/shared/account/self";
@@ -64,9 +64,8 @@ function getUniqueReactedArticles(reactions: UserReactions) {
 }
 
 export default async function LibraryPage() {
-  const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
 
   const account = await ensureAccount(authAccountToken);
   const accountId = account?.id;

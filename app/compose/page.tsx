@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import ComposePostForm from "@/components/editor/ComposePostForm";
-import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { getAuthorizedAccount } from "@/inapp/lib/account-authorization";
 import { prisma } from "@neup/core/database/prisma";
 
 interface ComposePageProps {
@@ -24,21 +23,9 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
     ? query.article[0]
     : query.article;
 
-  const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
-
-  const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
-
-  if (!authResult.authenticated) {
-    redirect("/unauthorized");
-  }
-
-  const user = await bridgeAuth.getCurrentAccount(authAccountToken);
-
-  if (!user) {
-    redirect("/unauthorized");
-  }
+  const user = await getAuthorizedAccount();
+  if (!user) redirect("/unauthorized");
 
   if (!articleParam) {
     return (
@@ -68,7 +55,7 @@ export default async function ComposePage({ searchParams }: ComposePageProps) {
     redirect("/compose");
   }
 
-  const canEdit = article.authorId === user.id || user.status === "ADMIN";
+  const canEdit = article.authorId === user.accountId || user.isAdmin;
 
   if (!canEdit) {
     redirect("/unauthorized");

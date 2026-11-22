@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { AUTH_ACCOUNT_COOKIE_NAME } from "@/inapp/lib/auth-cookie";
 
 export interface AuthContext {
   accountId: string;
@@ -10,7 +11,7 @@ export const withAuth = (
   handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>,
 ) => {
   return async (req: NextRequest) => {
-    const authAccountToken = req.cookies.get("auth")?.value ?? null;
+    const authAccountToken = req.cookies.get(AUTH_ACCOUNT_COOKIE_NAME)?.value ?? null;
 
     // 1. Authentication
     const authResult = await bridgeAuth.checkAuthentication(authAccountToken);

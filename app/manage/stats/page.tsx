@@ -13,7 +13,7 @@ Use `/manage/stats` to review totals, averages, and top-performing articles acro
 ::end
 */
 
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
@@ -35,9 +35,8 @@ function formatRatio(value: number): string {
 }
 
 export default async function ManageStatsPage() {
-  const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
 
   const account = await ensureAccount(authAccountToken);
   const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);

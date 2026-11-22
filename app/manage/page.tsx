@@ -13,7 +13,7 @@ Use `/manage` to review article volume, engagement totals, and shortcuts into ar
 ::end
 */
 
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
@@ -56,9 +56,8 @@ function getPostExcerpt(content: string): string {
 }
 
 export default async function ManageOverviewPage() {
-  const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
 
   const account = await ensureAccount(authAccountToken);
   const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);

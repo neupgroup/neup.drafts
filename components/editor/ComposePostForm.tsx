@@ -25,6 +25,7 @@ import {
 import { ComposeMediaBlocks, createImageBlock } from './ComposeImageBlocks';
 import { EditorMenu, type EditorMenuAction } from './editorMenu';
 import { snapSelectionRange } from './SmartSelectionBehavior';
+import styles from './ComposePostForm.module.css';
 
 interface ComposeArticle {
   id: string;
@@ -2712,9 +2713,9 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             contentEditable
             suppressContentEditableWarning
             data-placeholder="Tell your story..."
+            data-empty={!content.trim()}
             onFocus={(e) => {
               document.execCommand('defaultParagraphSeparator', false, 'p');
-              ensureEditorParagraph(e.currentTarget);
             }}
           onInput={(e) => syncContentAfterInput(e.currentTarget)}
             onMouseDown={rememberSelectedCalloutPointerDown}
@@ -2810,6 +2811,14 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               return;
             }
 
+            if (
+              (e.key === 'ArrowRight' || e.key === 'ArrowDown') &&
+              !getEditorText(e.currentTarget).trim()
+            ) {
+              e.preventDefault();
+              return;
+            }
+
             const currentBlock = getContentBlockFromSelection(e.currentTarget);
 
             if (
@@ -2850,6 +2859,8 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
               if (nextBlock instanceof HTMLElement) {
                 e.preventDefault();
                 setCaretPosition(nextBlock, 'start');
+              } else {
+                e.preventDefault();
               }
             }
           }}
@@ -2912,7 +2923,7 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             insertFragmentAtSelection(editor, createEditorFragmentFromPlainText(text));
             syncContentAfterEditorChange(editor);
           }}
-            className="compose-content-editor min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]"
+            className={`${styles.editor} min-h-[55vh] w-full border-0 bg-transparent px-0 font-serif text-[20px] font-medium leading-8 text-slate-600 outline-none empty:before:text-slate-300 empty:before:content-[attr(data-placeholder)]`}
           />
 
           <ComposeMediaBlocks

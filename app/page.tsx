@@ -1,5 +1,5 @@
 import { LinkButton } from "@neup/components/ui/link-button";
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
 import { getArticleFeed } from "@/services/articles/articles";
 
@@ -55,8 +55,7 @@ async function getAllPosts(): Promise<Post[]> {
 }
 
 export default async function HomePage() {
-  const cookieStore = await cookies();
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
 
   const authResult = await bridgeAuth.checkAuthentication(authAccountToken);
 

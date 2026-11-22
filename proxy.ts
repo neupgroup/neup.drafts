@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAuthSession } from "@neup/logica/account/auth";
 import { getAuthStartUrl } from "@/inapp/lib/auth-redirect";
+import { bridgeAuth } from "@/inapp/lib/bridge-auth.service";
+import { AUTH_ACCOUNT_COOKIE_NAME } from "@/inapp/lib/auth-cookie";
 
 function redirectToAuth(req: NextRequest) {
   return NextResponse.redirect(getAuthStartUrl(req.url));
 }
 
 export async function proxy(req: NextRequest) {
-  const authToken = req.cookies.get("auth")?.value ?? null;
+  const authToken = req.cookies.get(AUTH_ACCOUNT_COOKIE_NAME)?.value ?? null;
   let authenticated = false;
 
   try {
-    const authResult = await checkAuthSession({ authAccountToken: authToken });
+    const authResult = await bridgeAuth.checkAuthentication(authToken);
     authenticated = authResult.authenticated;
   } catch {
     // Treat auth service failures as unauthenticated so protected routes stay protected.

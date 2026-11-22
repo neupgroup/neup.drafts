@@ -3,6 +3,7 @@
 import { Button } from "@neup/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
+import styles from './ComposePostForm.module.css';
 
 interface ComposeMediaBlocksProps {
   contentRef: RefObject<HTMLDivElement | null>;
@@ -219,7 +220,7 @@ export function createImageBlock(src?: string): HTMLElement {
   button.dataset.imagePicker = 'true';
   button.innerHTML = src
     ? '<span>Change image</span>'
-    : '<span class="compose-image-picker-icon">+</span><span class="compose-image-picker-title">Add image</span><span class="compose-image-picker-help">Click to choose a file from your device</span>';
+    : `<span class="${styles.imagePickerIcon}">+</span><span class="${styles.imagePickerTitle}">Add image</span><span class="${styles.imagePickerHelp}">Click to choose a file from your device</span>`;
   figure.append(button);
 
   if (src) {
@@ -470,7 +471,7 @@ function ComposeMediaTextActions({
             event.preventDefault();
             onStartEditing('alt');
           }}
-          className="compose-media-action-link"
+          className={styles.mediaActionLink}
           data-active={activeMode === 'alt' ? 'true' : undefined}
         >
           {activeMode === 'alt' ? 'Save alt text' : hasAltText ? 'Edit alt text' : 'Add alt text'}
@@ -482,7 +483,7 @@ function ComposeMediaTextActions({
             event.preventDefault();
             onStartEditing('caption');
           }}
-          className="compose-media-action-link"
+          className={styles.mediaActionLink}
           data-active={activeMode === 'caption' ? 'true' : undefined}
         >
           {activeMode === 'caption' ? 'Save caption' : hasCaption ? 'Edit caption' : 'Add caption'}
@@ -679,7 +680,7 @@ function ComposeMediaTextEditor({
       document.execCommand('insertText', false, event.clipboardData?.getData('text/plain') ?? '');
     };
 
-    editor.className = 'compose-media-text-editor';
+    editor.className = styles.mediaTextEditor;
     editor.contentEditable = 'plaintext-only';
     editor.dataset.placeholder = placeholder;
     editor.dataset.mediaTextEditor = 'true';

@@ -13,7 +13,7 @@ Use `/manage/articles/[slug]` to inspect an owned article, review recent comment
 ::end
 */
 
-import { cookies } from "next/headers";
+import { getAuthAccountToken } from "@/inapp/lib/auth-cookie";
 import { LinkButton } from "@neup/components/ui/link-button";
 import { redirect } from "next/navigation";
 import ManageShell from "@/components/ManageShell";
@@ -57,9 +57,8 @@ export default async function ManageArticleDetailPage(
 ) {
   const { slug } = await props.params;
 
-  const cookieStore = await cookies();
 
-  const authAccountToken = cookieStore.get("auth")?.value ?? null;
+  const authAccountToken = await getAuthAccountToken();
 
   const account = await ensureAccount(authAccountToken);
   const accountId = account?.id ?? await bridgeAuth.getAccountId(authAccountToken);
