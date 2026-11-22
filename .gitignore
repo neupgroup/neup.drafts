@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/certificates
 
 # next.js
 /.next/
@@ -40,8 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# neup standards
+# Neup.Standards Files
 @neup
-/app/generated/prisma
-
-certificates
+@neup/*
