@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BaseMenu, type BaseMenuPosition } from '@neup/components/editor';
+import { BaseMenu, type BaseMenuPosition } from '@neup/components/elements/richTextEditor';
 
 interface ReviewerMenuProps {
   children?: ReactNode;

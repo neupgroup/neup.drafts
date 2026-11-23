@@ -13,6 +13,8 @@ import {
 import { useRouter } from 'next/navigation';
 import {
   createCalloutBlock,
+  calloutBlockTypes,
+  calloutBlockMetadata,
   isCalloutBlockType,
   setCalloutBlockType,
   type CalloutBlockType,
@@ -30,7 +32,7 @@ import {
   snapSelectionRange,
   type EditorMenuAction,
   type EditorMenuOption,
-} from '@neup/components/editor';
+} from '@neup/components/elements/richTextEditor';
 import styles from './ComposePostForm.module.css';
 
 interface ComposeArticle {
@@ -2969,7 +2971,6 @@ export default function ComposePostForm({ article }: ComposePostFormProps) {
             }))}
             mode={selectionMenuMode}
             position={selectionMenuPosition}
-            showHeadingActions={showSelectionHeadingActions}
             showHeadingActions={showSelectionHeadingActions}
             onAction={applySelectionFormat}
             onBack={showDefaultSelectionMenu}
